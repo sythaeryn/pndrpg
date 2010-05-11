@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="zviewer"
-	ProjectGUID="{B798D9FF-AA33-4918-8B51-1B4FA9C5160A}"
+	Name="nel_launcher_ext2"
+	ProjectGUID="{FA36BCFD-BC9D-4C5C-A026-5D6B20CC85DA}"
 	>
 	<Platforms>
 		<Platform
@@ -18,9 +18,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\obj\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="..\obj\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="..\..\obj\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="..\..\obj\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
+			UseOfMFC="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -41,11 +42,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="std_afx.h"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -60,10 +63,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libcurl.lib"
 				OutputFile="..\bin\$(ProjectName)_d.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -90,10 +94,10 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\obj64\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="..\obj64\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="..\..\obj64\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="..\..\obj64\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
-			UseOfMFC="0"
+			UseOfMFC="2"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
@@ -115,11 +119,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="std_afx.h"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -134,11 +140,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libcurl.lib"
 				OutputFile="..\bin64\$(ProjectName)_d.exe"
 				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="msvcrt.lib"
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -165,10 +171,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\obj\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="..\obj\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="..\..\obj\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="..\..\obj\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
-			UseOfMFC="0"
+			UseOfMFC="2"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
@@ -195,9 +201,11 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
-				PreprocessorDefinitions="NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="2"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="std_afx.h"
 				WarningLevel="3"
 			/>
 			<Tool
@@ -211,9 +219,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libcurl.lib"
 				OutputFile="..\bin\$(ProjectName)_r.exe"
 				LinkIncremental="1"
-				SubSystem="1"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -242,9 +251,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\obj64\$(ConfigurationName)\$(ProjectName)"
-			IntermediateDirectory="..\obj64\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="..\..\obj64\$(ConfigurationName)\$(ProjectName)"
+			IntermediateDirectory="..\..\obj64\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
+			UseOfMFC="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -270,9 +280,11 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
-				PreprocessorDefinitions="NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="2"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="std_afx.h"
 				WarningLevel="3"
 			/>
 			<Tool
@@ -286,9 +298,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libcurl.lib"
 				OutputFile="..\bin64\$(ProjectName)_r.exe"
 				LinkIncremental="1"
-				SubSystem="1"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="17"
@@ -319,34 +332,113 @@
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath="move_listener.cpp"
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
-		</File>
-		<File
-			RelativePath="move_listener.h"
+			<File
+				RelativePath="connection.cpp"
+				>
+			</File>
+			<File
+				RelativePath="nel_launcher.cpp"
+				>
+			</File>
+			<File
+				RelativePath="nel_launcher.rc"
+				>
+			</File>
+			<File
+				RelativePath="nel_launcher_dlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath="patch.cpp"
+				>
+			</File>
+			<File
+				RelativePath="std_afx.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl"
 			>
-		</File>
-		<File
-			RelativePath="nevraxpill.ico"
+			<File
+				RelativePath="connection.h"
+				>
+			</File>
+			<File
+				RelativePath="nel_launcher.h"
+				>
+			</File>
+			<File
+				RelativePath="nel_launcher_dlg.h"
+				>
+			</File>
+			<File
+				RelativePath="patch.h"
+				>
+			</File>
+			<File
+				RelativePath="resource.h"
+				>
+			</File>
+			<File
+				RelativePath="std_afx.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
-		</File>
-		<File
-			RelativePath="resource.h"
-			>
-		</File>
-		<File
-			RelativePath="zviewer.cfg"
-			>
-		</File>
-		<File
-			RelativePath="zviewer.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\zviewer.rc"
-			>
-		</File>
+			<File
+				RelativePath="res\nel_launcher.ico"
+				>
+			</File>
+			<File
+				RelativePath="res\nel_launcher.rc2"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
