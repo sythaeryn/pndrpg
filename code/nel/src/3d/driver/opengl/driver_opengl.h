@@ -287,6 +287,7 @@ public:
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 
+	virtual void			setWindowSize(uint32 width, uint32 height);
 	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
 	virtual bool			setMode(const GfxMode& mode);
 	virtual bool			getModes(std::vector<GfxMode> &modes);
@@ -298,7 +299,7 @@ public:
 	virtual void			setWindowTitle(const ucstring &title);
 
 	/// Set the position of the NeL window
-	virtual void			setWindowPos(uint32 x, uint32 y);
+	virtual void			setWindowPos(sint32 x, sint32 y);
 
 	/// Show or hide the NeL window
 	virtual void			showWindow(bool show);
@@ -502,7 +503,7 @@ public:
 
 	virtual void			getWindowSize (uint32 &width, uint32 &height);
 
-	virtual void			getWindowPos (uint32 &x, uint32 &y);
+	virtual void			getWindowPos (sint32 &x, sint32 &y);
 
 	virtual void			getBuffer (CBitmap &bitmap);
 
