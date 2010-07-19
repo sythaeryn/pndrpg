@@ -294,10 +294,13 @@ public:
 	virtual void			beginDialogMode();
 	virtual void			endDialogMode();
 
-	/// Set the title of the NeL window
+	/// Set title of the NeL window
 	virtual void			setWindowTitle(const ucstring &title);
 
-	/// Set the position of the NeL window
+	/// Set icon(s) of the NeL window
+	virtual void			setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps);
+
+	/// Set position of the NeL window
 	virtual void			setWindowPos(sint32 x, sint32 y);
 
 	/// Show or hide the NeL window
@@ -686,11 +689,17 @@ private:
 	Cursor						_cursor;
 	NLMISC::CUnixEventEmitter	_EventEmitter;
 	XVisualInfo*				_visual_info;
+	uint32						_xrandr_version;
+	uint32						_xvidmode_version;
+
+#ifdef XRANDR
+	sint						_OldSizeID;
+#endif // XRANDR
 
 #ifdef XF86VIDMODE
-	int							_OldDotClock;   // old dotclock
+	sint						_OldDotClock;   // old dotclock
 	XF86VidModeModeLine			_OldScreenMode;	// old modeline
-	int							_OldX, _OldY;   //Viewport settings
+	sint						_OldX, _OldY;   //Viewport settings
 #endif //XF86VIDMODE
 
 #endif // NL_OS_UNIX
@@ -1252,10 +1261,8 @@ private:
 
 
 	// Monitor color parameters backup
-#ifdef WIN32
 	bool							_NeedToRestaureGammaRamp;
 	uint16							_GammaRampBackuped[3*256];
-#endif
 
 
 	/// \fragment shaders

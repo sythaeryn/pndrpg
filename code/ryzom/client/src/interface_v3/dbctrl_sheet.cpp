@@ -26,7 +26,6 @@
 #include "../client_sheets/pact_sheet.h"
 #include "../client_sheets/mission_icon_sheet.h"
 #include "../client_sheets/faction_sheet.h"
-#include "nel/misc/algo.h"
 #include "game_share/skills.h"
 #include "game_share/inventories.h"
 #include "list_sheet_base.h"
@@ -379,9 +378,8 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 
 		// The string may have multiple brick type separated by |
 		string	brickTypeArray= (const char*)prop;
-		strupr(brickTypeArray);
 		vector<string>	strList;
-		NLMISC::splitString(brickTypeArray, "|", strList);
+		NLMISC::splitString(NLMISC::toUpper(brickTypeArray), "|", strList);
 
 		// Test All words
 		for(uint i=0;i<strList.size();i++)
@@ -407,8 +405,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	if(prop)
 	{
 		string str= prop;
-		strupr(str);
-		_ItemSlot= SLOTTYPE::stringToSlotType(str);
+		_ItemSlot= SLOTTYPE::stringToSlotType(NLMISC::toUpper(str));
 	}
 
 	// _AutoGrayed

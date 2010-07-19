@@ -25,7 +25,6 @@
 #include "action_handler.h"
 #include "../client_cfg.h"
 #include "ctrl_base_button.h"
-#include "nel/misc/algo.h"
 #include "group_container.h"
 #include "../string_manager_client.h"
 #include "../net_manager.h"
@@ -106,8 +105,7 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	_FaberPlanBrickFamilies.clear();
 	if(rootBrick->Properties.size()>0)
 	{
-		string prop= rootBrick->Properties[0].Text;
-		strupr(prop);
+		string prop= NLMISC::toUpper(rootBrick->Properties[0].Text);
 		vector<string>	strList;
 		splitString(prop, " ", strList);
 		// The prop Id should be 'FPLAN:'
