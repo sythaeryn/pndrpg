@@ -345,6 +345,16 @@ int main(int argc, char **argv)
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
+	// if client_default.cfg is not in current directory, use application default directory
+	if (!CFile::isExists("client_default.cfg"))
+	{
+		std::string currentPath = CFile::getApplicationDirectory("Ryzom");
+
+		if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
+
+		CPath::setCurrentPath(currentPath);
+	}
+
 	// temporary buffer to store Ryzom full path
 	char filename[1024];
 
@@ -437,31 +447,6 @@ int main(int argc, char **argv)
 
 	GetModuleFileName(GetModuleHandle(NULL), filename, 1024);
 
-#else
-
-	// TODO for Linux : splashscreen
-
-	if (argc >= 3)
-	{
-		LoginLogin = argv[1];
-		LoginPassword = argv[2];
-		if (!fromString(argv[3], LoginShardId)) LoginShardId = -1;
-	}
-	else if (argc >= 2)
-	{
-		LoginLogin = argv[1];
-		LoginPassword = argv[2];
-		LoginShardId = -1;
-	}
-
-	strcpy(filename, argv[0]);
-
-#endif
-
-	// initialize patch manager and set the ryzom full path, before it's used
-	CPatchManager *pPM = CPatchManager::getInstance();
-	pPM->setRyzomFilename(NLMISC::CFile::getFilename(filename));
-
 	// Delete the .bat file because it s not useful anymore
 	if (NLMISC::CFile::fileExists("updt_nl.bat"))
 		NLMISC::CFile::deleteFile("updt_nl.bat");
@@ -487,6 +472,31 @@ int main(int argc, char **argv)
 				CFile::deleteFile (files[i]);
 		}
 	}
+
+#else
+
+	// TODO for Linux : splashscreen
+
+	if (argc >= 3)
+	{
+		LoginLogin = argv[1];
+		LoginPassword = argv[2];
+		if (!fromString(argv[3], LoginShardId)) LoginShardId = -1;
+	}
+	else if (argc >= 2)
+	{
+		LoginLogin = argv[1];
+		LoginPassword = argv[2];
+		LoginShardId = -1;
+	}
+
+	strcpy(filename, argv[0]);
+
+#endif
+
+	// initialize patch manager and set the ryzom full path, before it's used
+	CPatchManager *pPM = CPatchManager::getInstance();
+	pPM->setRyzomFilename(NLMISC::CFile::getFilename(filename));
 
 	/////////////////////////////////
 	// Initialize the application. //
