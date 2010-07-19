@@ -168,7 +168,7 @@ uint					TipsOfTheDayIndex;
 
 
 // XML allocator functions
-// Due to Bug #906, we disable the stl xml allocation 
+// Due to Bug #906, we disable the stl xml allocation
 /*
 static volatile bool XmlAllocUsesSTL = true;
 
@@ -324,7 +324,7 @@ void ExitClientError (const char *format, ...)
 		MessageBoxW (NULL, (WCHAR*)ucstr.c_str(), (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str (), MB_OK|MB_ICONERROR);
 	*/
 #else
-	fprintf (stderr, str);
+	fprintf (stderr, "%s\n", str);
 #endif
 	// Exit
 	extern void quitCrashReport ();
@@ -691,7 +691,7 @@ void prelogInit()
 	//	_CrtSetDbgFlag( _CRTDBG_CHECK_CRT_DF  );
 
 		// Init XML Lib allocator
-		// Due to Bug #906, we disable the stl xml allocation 
+		// Due to Bug #906, we disable the stl xml allocation
 		// nlverify (xmlMemSetup (XmlFree4NeL, XmlMalloc4NeL, XmlRealloc4NeL, XmlStrdup4NeL) == 0);
 
 		// Init the debug memory
@@ -727,8 +727,14 @@ void prelogInit()
 		setReportEmailFunction ((void*)sendEmail);
 		setDefaultEmailParams ("smtp.nevrax.com", "", "ryzombug@nevrax.com");
 
+		// create the data dir.
+		if (!CFile::isExists("data")) CFile::createDirectory("data");
+
 		// create the save dir.
-		CFile::createDirectory("save");
+		if (!CFile::isExists("save")) CFile::createDirectory("save");
+
+		// create the user dir.
+		if (!CFile::isExists("user")) CFile::createDirectory("user");
 
 #if !FINAL_VERSION
 		// if we're not in final version then start the file access logger to keep track of the files that we read as we play
@@ -907,6 +913,23 @@ void prelogInit()
 
 		// Set the title
 		Driver->setWindowTitle(CI18N::get("TheSagaOfRyzom"));
+
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+		vector<CBitmap> bitmaps;
+
+		string fileName = "/usr/share/pixmaps/ryzom.png";
+
+		CIFile file;
+
+		if (file.open(fileName))
+		{
+			CBitmap bitmap;
+			if (bitmap.load(file))
+				bitmaps.push_back(bitmap);
+		}
+
+		Driver->setWindowIcon(bitmaps);
+#endif
 
 		sint32 posX = 0, posY = 0;
 
