@@ -286,7 +286,12 @@ struct CModeSorter
 {
 	bool operator()(const UDriver::CMode &mode1, const UDriver::CMode &mode2) const
 	{
-		if (mode1.Width == mode2.Width) return mode1.Height < mode2.Height;
+		if (mode1.Width == mode2.Width)
+		{
+			if (mode1.Height == mode2.Height) return mode1.Frequency < mode2.Frequency;
+
+			return mode1.Height < mode2.Height;
+		}
 
 		return mode1.Width < mode2.Width;
 	}
@@ -325,6 +330,13 @@ void CDriverUser::setWindowTitle(const ucstring &title)
 {
 	NL3D_HAUTO_UI_DRIVER;
 	_Driver->setWindowTitle(title);
+}
+
+// ***************************************************************************
+void CDriverUser::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
+{
+	NL3D_HAUTO_UI_DRIVER;
+	_Driver->setWindowIcon(bitmaps);
 }
 
 // ***************************************************************************

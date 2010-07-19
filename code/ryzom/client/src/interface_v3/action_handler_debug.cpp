@@ -20,11 +20,6 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
-#include "nel/3d/landscapeig_manager.h"
-#include "nel/3d/u_landscape.h"
-#include "nel/misc/progress_callback.h"
-#include "nel/misc/command.h"
-
 #include "action_handler.h"
 #include "../misc.h"
 #include "../prim_file.h"
@@ -76,7 +71,9 @@ class CAHDisplayInfos : public IActionHandler
 	{
 		// can only be used by devs and CSR or in local mode
 #if FINAL_VERSION
+#	ifdef NL_OS_WINDOWS
 		if( ClientCfg.Local || hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeVG() )
+#	endif
 #endif
 		{
 			ShowInfos = (ShowInfos+1)%6;
