@@ -1,0 +1,10 @@
+FILE(GLOB SRC *.cpp *.h)
+
+ADD_EXECUTABLE(georges2csv ${SRC})
+
+INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
+TARGET_LINK_LIBRARIES(georges2csv ${PLATFORM_LINKFLAGS} nelmisc nelgeorges)
+NL_DEFAULT_PROPS(georges2csv "Tools, Georges: georges2csv")
+NL_ADD_RUNTIME_FLAGS(georges2csv)
+
+INSTALL(TARGETS georges2csv RUNTIME DESTINATION bin COMPONENT toolsgeorges)
