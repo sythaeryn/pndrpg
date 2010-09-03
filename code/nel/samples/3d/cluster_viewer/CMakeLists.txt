@@ -6,7 +6,7 @@ ADD_DEFINITIONS(-DCV_DIR="\\"${NL_SHARE_PREFIX}/nl_sample_clusterview/\\"")
 
 TARGET_LINK_LIBRARIES(nl_sample_clusterview ${PLATFORM_LINKFLAGS} nelmisc nel3d)
 NL_ADD_RUNTIME_FLAGS(nl_sample_clusterview)
-NL_DEFAULT_PROPS(nl_sample_clusterview "Samples, 3D: Cluster Viewer")
+NL_DEFAULT_PROPS(nl_sample_clusterview "NeL, Samples, 3D: Cluster Viewer")
 
 INSTALL(TARGETS nl_sample_clusterview RUNTIME DESTINATION bin COMPONENT samples3d)
 INSTALL(FILES main.cvs readme.txt DESTINATION share/nel/nl_sample_clusterview COMPONENT samples3d)

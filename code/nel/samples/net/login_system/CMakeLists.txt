@@ -5,11 +5,11 @@ ADD_EXECUTABLE(nl_sample_ls_fes WIN32 frontend_service.cpp)
 ADD_DEFINITIONS(-DNL_LS_CFG="\\"${NL_SHARE_PREFIX}/nl_sample_login_system/\\"")
 
 TARGET_LINK_LIBRARIES(nl_sample_ls_client ${PLATFORM_LINKFLAGS} nelmisc nelnet)
-NL_DEFAULT_PROPS(nl_sample_ls_client "Samples, Net, Login Service: LS Client")
+NL_DEFAULT_PROPS(nl_sample_ls_client "NeL, Samples, Net, Login Service: LS Client")
 NL_ADD_RUNTIME_FLAGS(nl_sample_ls_client)
 
 TARGET_LINK_LIBRARIES(nl_sample_ls_fes ${PLATFORM_LINKFLAGS} nelmisc nelnet)
-NL_DEFAULT_PROPS(nl_sample_ls_fes "Samples, Net, Login Service: LS Frontend")
+NL_DEFAULT_PROPS(nl_sample_ls_fes "NeL, Samples, Net, Login Service: LS Frontend")
 NL_ADD_RUNTIME_FLAGS(nl_sample_ls_fes)
 
 INSTALL(TARGETS nl_sample_ls_client nl_sample_ls_fes RUNTIME DESTINATION bin COMPONENT samplesnet)

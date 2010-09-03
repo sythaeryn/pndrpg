@@ -49,6 +49,7 @@ MACRO(NL_DEFAULT_PROPS name label)
   ENDIF(${type} STREQUAL SHARED_LIBRARY)
 ENDMACRO(NL_DEFAULT_PROPS)
 
+
 ###
 # Adds the target suffix on Windows.
 # Argument: name - the library's target name.
@@ -167,6 +168,21 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ENDIF(WIN32)
   OPTION(WITH_STATIC_DRIVERS      "With static drivers."                          OFF)
 
+
+  ###
+  # Optional support
+  ###
+  OPTION(WITH_GTK         "With GTK Support"                                      OFF)
+  OPTION(WITH_QT          "With QT Support"                                       OFF)
+  OPTION(WITH_STLPORT     "With STLport support."                                 OFF)
+  OPTION(BUILD_DASHBOARD  "Build to the CDash dashboard"                          OFF)
+
+  OPTION(WITH_NEL	  "Build NeL (nearly always required)."						  ON )
+  OPTION(WITH_NELNS	  "Build NeL Network Services."								  ON )
+  OPTION(WITH_RYZOM	  "Build Ryzom Core."										  ON )
+ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
+
+MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   ###
   # Core libraries
   ###
@@ -191,17 +207,25 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ###
   # Optional support
   ###
-  OPTION(WITH_CEGUI       "Build CEGUI Renderer"                                  OFF)
-  OPTION(WITH_TOOLS       "Build NeL Tools"                                       ON )
-  OPTION(WITH_MAXPLUGIN   "Build NeL 3dsMax Plugin"                               OFF)
-  OPTION(WITH_SAMPLES     "Build NeL Samples"                                     ON )
-  OPTION(WITH_TESTS       "Build NeL Unit Tests"                                  ON )
+  OPTION(WITH_NEL_CEGUI       "Build CEGUI Renderer"                                  OFF)
+  OPTION(WITH_NEL_TOOLS       "Build NeL Tools"                                       ON )
+  OPTION(WITH_NEL_MAXPLUGIN   "Build NeL 3dsMax Plugin"                               OFF)
+  OPTION(WITH_NEL_SAMPLES     "Build NeL Samples"                                     ON )
+  OPTION(WITH_NEL_TESTS       "Build NeL Unit Tests"                                  ON )
   OPTION(WITH_MFC         "With MFC Support"                                      ON )
-  OPTION(WITH_GTK         "With GTK Support"                                      OFF)
-  OPTION(WITH_QT          "With QT Support"                                       OFF)
-  OPTION(WITH_STLPORT     "With STLport support."                                 OFF)
-  OPTION(BUILD_DASHBOARD  "Build to the CDash dashboard"                          OFF)
-ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
+ENDMACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
+
+MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
+  ###
+  # Core libraries
+  ###
+  OPTION(WITH_RYZOM_CLIENT           "Build Ryzom Core Client"                       ON )
+  OPTION(WITH_RYZOM_TOOLS            "Build Ryzom Core Tools"                        ON )
+  OPTION(WITH_RYZOM_SERVER           "Build Ryzom Core Services"                     ON )
+  OPTION(WITH_RYZOM_SOUND            "Enable Ryzom Core Sound"                       ON )
+
+  OPTION(WITH_LUA51                  "Build Ryzom Core using Lua51"                  ON )
+ENDMACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_BUILD)
 
