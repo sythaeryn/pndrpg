@@ -3,7 +3,7 @@ FILE(GLOB SRC *.cpp *.h)
 ADD_EXECUTABLE(logic_editor WIN32 ${SRC})
 
 TARGET_LINK_LIBRARIES(logic_editor ${PLATFORM_LINKFLAGS} nelmisc logic_editor_dll)
-NL_DEFAULT_PROPS(logic_editor "Tools, Logic: Logic Editor")
+NL_DEFAULT_PROPS(logic_editor "NeL, Tools, Logic: Logic Editor")
 NL_ADD_RUNTIME_FLAGS(logic_editor)
 
 IF(WITH_PCH)

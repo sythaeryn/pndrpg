@@ -5,7 +5,7 @@ ADD_EXECUTABLE(panoply_maker ${SRC})
 INCLUDE_DIRECTORIES(${SQUISH_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(panoply_maker ${PLATFORM_LINKFLAGS} ${SQUISH_LIBRARY} nelmisc nel3d)
-NL_DEFAULT_PROPS(panoply_maker "Tools, 3D: panoply_maker")
+NL_DEFAULT_PROPS(panoply_maker "NeL, Tools, 3D: panoply_maker")
 NL_ADD_RUNTIME_FLAGS(panoply_maker)
 
 INSTALL(TARGETS panoply_maker RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT tools3d)

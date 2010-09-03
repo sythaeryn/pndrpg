@@ -13,7 +13,7 @@ TARGET_LINK_LIBRARIES(	object_viewer
 						nelsnd_lowlevel
 						object_viewer_dll)
 
-NL_DEFAULT_PROPS(object_viewer "Tools, 3D: Object Viewer")
+NL_DEFAULT_PROPS(object_viewer "NeL, Tools, 3D: Object Viewer")
 NL_ADD_RUNTIME_FLAGS(object_viewer)
 
 IF(WITH_PCH)

@@ -7,7 +7,7 @@ SET(CMAKE_MFC_FLAG 2)
 ADD_LIBRARY(logic_editor_dll SHARED ${SRC})
 
 TARGET_LINK_LIBRARIES(logic_editor_dll ${PLATFORM_LINKFLAGS} nelmisc nellogic nelnet)
-NL_DEFAULT_PROPS(logic_editor_dll "Tools, Logic: Logic Editor DLL")
+NL_DEFAULT_PROPS(logic_editor_dll "NeL, Tools, Logic: Logic Editor DLL")
 NL_ADD_RUNTIME_FLAGS(logic_editor_dll)
 NL_ADD_LIB_SUFFIX(logic_editor_dll)
 
