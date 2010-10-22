@@ -1132,14 +1132,20 @@ void CPatchManager::readDescFile(sint32 nVersion)
 		}
 	}
 
+	CBNPFileSet &bnpFS = const_cast<CBNPFileSet &>(DescFile.getFiles());
+
 	for(cat = 0; cat < DescFile.getCategories().categoryCount();)
 	{
+		const CBNPCategory &bnpCat = DescFile.getCategories().getCategory(cat);
+
 		if (std::find(ForceRemovePatchCategories.begin(), ForceRemovePatchCategories.end(),
-			DescFile.getCategories().getCategory(cat).getName()) != ForceRemovePatchCategories.end())
+			bnpCat.getName()) != ForceRemovePatchCategories.end())
 		{
-			std::string fileName = DescFile.getCategories().getFile(cat);
-			CBNPFileSet &bnpFS = const_cast<CBNPFileSet &>(DescFile.getFiles());
-			bnpFS.removeFile(fileName);
+			for(uint file = 0; file < bnpCat.fileCount(); ++file)
+			{
+				std::string fileName = bnpCat.getFile(file);
+				bnpFS.removeFile(fileName);
+			}
 			const_cast<CBNPCategorySet &>(DescFile.getCategories()).deleteCategory(cat);
 		}
 		else
@@ -2872,7 +2878,6 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 					}
 				}
 
-
 				// following lines added by Sadge to ensure that the correct file gets patched
 				//			string SourceNameXDFull;
 				//			if (NLMISC::CFile::fileExists(pPM->ClientDataPath + SourceNameXD))	SourceNameXDFull = pPM->ClientDataPath + SourceNameXD;
@@ -2897,9 +2902,6 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			if (rFTP.LocalFileExists)
 				pPM->deleteFile(SourceName);
 			pPM->deleteFile(PatchName);
-
-
-
 
 			if (j > 0)
 			{
@@ -3210,9 +3212,11 @@ bool CPatchManager::download(const std::string& patchFullname, const std::string
 	NLMISC::CFile::createDirectoryTree( NLMISC::CFile::getPath(sourceFullname) );
 
 	// try to download
-	try {
+	try
+	{
 		pPM->getServerFile(patchFullname, false, patchName);
-	} catch ( const std::exception& e)
+	}
+	catch ( const std::exception& e)
 	{
 		nlwarning("%s", e.what());
 		pPM->setState(true, ucstring(e.what()) );
@@ -3468,12 +3472,14 @@ void CDownloadThread::run()
 				// create directory tree
 				NLMISC::CFile::createDirectoryTree(path);
 				// Try to download, rename, applyDate and send error msg to gui in case of error
-				try {
+				try
+				{
 					pPM->getServerFile(patchName, false, tmpFile);
 					NLMISC::CFile::moveFile(finalFile.c_str(), tmpFile.c_str());
 
 					pPM->applyDate(finalFile, _Entries[first].Timestamp);
-				} catch ( const std::exception& e)
+				}
+				catch ( const std::exception& e)
 				{
 					nlwarning("%s", e.what());
 					pPM->setState(true, ucstring(e.what()) );
