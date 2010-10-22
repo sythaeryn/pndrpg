@@ -28,8 +28,16 @@
 
 // to get rid of you_must_not_use_assert___use_nl_assert___read_debug_h_file messages
 #include <cassert>
-#undef assert
-#define assert nlassert
+#ifdef assert
+	#undef assert
+#endif
+
+#ifdef NL_DEBUG
+	#define assert(x) nlassert(x)
+#else
+	#define assert(x)
+#endif
+
 #include <luabind/luabind.hpp>
 // in luabind > 0.6, LUABIND_MAX_ARITY is set to 10
 #if LUABIND_MAX_ARITY == 10
@@ -4287,7 +4295,14 @@ void CLuaIHM::tell(const ucstring &player, const ucstring &msg)
 	{
 		if (!msg.empty())
 		{
-			ChatMngr.tell(player.toUtf8(), msg);
+			// Parse any tokens in the message.
+			ucstring msg_modified = msg;
+			// Parse any tokens in the text
+			if ( ! CInterfaceManager::parseTokens(msg_modified))
+			{
+				return;
+			}
+			ChatMngr.tell(player.toUtf8(), msg_modified);
 		}
 		else
 		{
