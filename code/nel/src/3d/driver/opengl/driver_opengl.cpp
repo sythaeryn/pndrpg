@@ -183,11 +183,10 @@ CDriverGL::CDriverGL()
 
 #elif defined(NL_OS_MAC)
 
-	_ctx	= nil;
-	_glView = nil;
-
-	_backBufferHeight = 0;
-	_backBufferWidth  = 0;
+	_ctx                = nil;
+	_glView             = nil;
+	_backBufferHeight   = 0;
+	_backBufferWidth    = 0;
 
 	// autorelease pool for memory management
 	_autoreleasePool = [[NSAutoreleasePool alloc] init];
@@ -873,8 +872,11 @@ bool CDriverGL::swapBuffers()
 #elif defined(NL_OS_MAC)
 
 	// TODO: maybe do this somewhere else?
-	[_autoreleasePool release];
-	_autoreleasePool = [[NSAutoreleasePool alloc] init];
+	if(_DestroyWindow) 
+	{
+		[_autoreleasePool release];
+		_autoreleasePool = [[NSAutoreleasePool alloc] init];
+	}
 
 	[_ctx flushBuffer];
 	[containerView() display];
