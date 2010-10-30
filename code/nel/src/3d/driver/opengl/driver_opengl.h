@@ -116,8 +116,7 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
 #elif defined (NL_OS_MAC)
 
-// TODO: change that
-bool GlWndProc(CDriverGL *driver);
+bool GlWndProc(CDriverGL *driver, NSEvent* e);
 
 #elif defined (NL_OS_UNIX)
 
@@ -706,9 +705,13 @@ private:
 
 #elif defined(NL_OS_MAC)
 
+	friend bool GlWndProc(CDriverGL*, NSEvent*);
+	friend void windowDidMove(NSWindow*, CDriverGL*);
+	friend void viewDidResize(NSView*, CDriverGL*);
+
 	NLMISC::CCocoaEventEmitter _EventEmitter;
 	NSOpenGLContext*           _ctx;
-	NSOpenGLView*              _glView;
+	CocoaOpenGLView*           _glView;
 	NSAutoreleasePool*         _autoreleasePool;
 	uint16                     _backBufferHeight;
 	uint16                     _backBufferWidth;
