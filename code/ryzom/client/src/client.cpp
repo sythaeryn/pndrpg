@@ -33,6 +33,8 @@
 #ifdef NL_OS_MAC
 #include <stdio.h>
 #include <sys/resource.h>
+#include "nel/misc/dynloadlib.h"
+#include "app_bundle_utils.h"
 #endif
 
 #include "nel/misc/debug.h"
@@ -383,6 +385,9 @@ int main(int argc, char **argv)
 	getrlimit(RLIMIT_NOFILE, &rlp3);
 	nlinfo("rlimit before %d %d\n", rlp.rlim_cur, rlp.rlim_max);
 	nlinfo("rlimit after %d %d\n", rlp3.rlim_cur, rlp3.rlim_max);
+
+	// add the bundle's plugins path as library search path (for nel drivers)
+	CLibrary::addLibPath(getAppBundlePath() + "/Contents/PlugIns/nel/");
 #endif
 
 #if defined(NL_OS_WINDOWS)
