@@ -1,0 +1,6 @@
+ADD_SUBDIRECTORY(core)
+ADD_SUBDIRECTORY(example)
+ADD_SUBDIRECTORY(ovqt_sheet_builder)
+ADD_SUBDIRECTORY(log)
+ADD_SUBDIRECTORY(disp_sheet_id)
+ADD_SUBDIRECTORY(object_viewer)
