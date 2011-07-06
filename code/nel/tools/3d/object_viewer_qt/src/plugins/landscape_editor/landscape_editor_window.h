@@ -23,9 +23,13 @@
 
 // Qt includes
 #include <QtGui/QUndoStack>
+#include <QtOpenGL/QGLWidget>
 
 namespace LandscapeEditor
 {
+
+class LandscapeScene;
+class ZoneBuilder;
 
 class LandscapeEditorWindow: public QMainWindow
 {
@@ -40,14 +44,36 @@ public:
 Q_SIGNALS:
 public Q_SLOTS:
 	void open();
+	void save();
 
 private Q_SLOTS:
+	void openProjectSettings();
+	void openSnapshotDialog();
+	void customContextMenu();
+	void newLand();
+	void setActiveLand();
+	void saveSelectedLand();
+	void saveAsSelectedLand();
+	void deleteSelectedLand();
+
+protected:
+	virtual void showEvent(QShowEvent *showEvent);
+
 private:
 	void createMenus();
+	void createToolBars();
 	void readSettings();
 	void writeSettings();
 
+	void setActiveLandscape(int row);
+	void saveLandscape(int row, bool force);
+	int createLandscape(const QString &fileName);
+
+	int m_currentRow;
+	LandscapeScene *m_landscapeScene;
+	ZoneBuilder *m_zoneBuilder;
 	QUndoStack *m_undoStack;
+	QGLWidget *m_oglWidget;
 	Ui::LandscapeEditorWindow m_ui;
 }; /* class LandscapeEditorWindow */
 

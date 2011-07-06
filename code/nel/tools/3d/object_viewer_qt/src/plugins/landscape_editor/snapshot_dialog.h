@@ -15,25 +15,39 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LANDSCAPE_EDITOR_CONSTANTS_H
-#define LANDSCAPE_EDITOR_CONSTANTS_H
+#ifndef SNAPSHOT_DIALOG_H
+#define SNAPSHOT_DIALOG_H
+
+// Project includes
+#include "ui_shapshot_dialog.h"
+
+// Qt includes
 
 namespace LandscapeEditor
 {
-namespace Constants
+
+class SnapshotDialog: public QDialog
 {
-const char * const LANDSCAPE_EDITOR_PLUGIN	= "LandscapeEditor";
+	Q_OBJECT
 
-//settings
-const char * const LANDSCAPE_EDITOR_SECTION = "LandscapeEditor";
-const char * const LANDSCAPE_WINDOW_STATE = "LandscapeWindowState";
-const char * const LANDSCAPE_WINDOW_GEOMETRY = "LandscapeWindowGeometry";
+public:
+	SnapshotDialog(QWidget *parent = 0);
+	~SnapshotDialog();
 
-//resources
-const char * const ICON_LANDSCAPE_ITEM = ":/icons/ic_nel_landscape_item.png";
+	bool isCustomSize() const;
+	bool isKeepRatio() const;
+	int resolutionZone() const;
+	int widthSnapshot() const;
+	int heightSnapshot() const;
+
+private Q_SLOTS:
 
 
-} // namespace Constants
-} // namespace LandscapeEditor
+private:
 
-#endif // LANDSCAPE_EDITOR_CONSTANTS_H
+	Ui::SnapshotDialog m_ui;
+}; /* class SnapshotDialog */
+
+} /* namespace LandscapeEditor */
+
+#endif // SNAPSHOT_DIALOG_H

@@ -15,25 +15,35 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LANDSCAPE_EDITOR_CONSTANTS_H
-#define LANDSCAPE_EDITOR_CONSTANTS_H
+#ifndef PROJECT_SETTINGS_DIALOG_H
+#define PROJECT_SETTINGS_DIALOG_H
+
+// Project includes
+#include "ui_project_settings_dialog.h"
+
+// Qt includes
 
 namespace LandscapeEditor
 {
-namespace Constants
+
+class ProjectSettingsDialog: public QDialog
 {
-const char * const LANDSCAPE_EDITOR_PLUGIN	= "LandscapeEditor";
+	Q_OBJECT
 
-//settings
-const char * const LANDSCAPE_EDITOR_SECTION = "LandscapeEditor";
-const char * const LANDSCAPE_WINDOW_STATE = "LandscapeWindowState";
-const char * const LANDSCAPE_WINDOW_GEOMETRY = "LandscapeWindowGeometry";
+public:
+	ProjectSettingsDialog(const QString &dataPath, QWidget *parent = 0);
+	~ProjectSettingsDialog();
 
-//resources
-const char * const ICON_LANDSCAPE_ITEM = ":/icons/ic_nel_landscape_item.png";
+	QString dataPath() const;
 
+private Q_SLOTS:
+	void selectPath();
 
-} // namespace Constants
-} // namespace LandscapeEditor
+private:
 
-#endif // LANDSCAPE_EDITOR_CONSTANTS_H
+	Ui::ProjectSettingsDialog m_ui;
+}; /* class ProjectSettingsDialog */
+
+} /* namespace LandscapeEditor */
+
+#endif // PROJECT_SETTINGS_DIALOG_H
