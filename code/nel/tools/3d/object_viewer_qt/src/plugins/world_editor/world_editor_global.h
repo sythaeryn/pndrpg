@@ -1,6 +1,7 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
+// Parts by Nokia Corporation (qt-info@nokia.com) Copyright (C) 2009.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,29 +16,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LANDSCAPE_EDITOR_CONSTANTS_H
-#define LANDSCAPE_EDITOR_CONSTANTS_H
+#ifndef WORLD_EDITOR_GLOBAL_H
+#define WORLD_EDITOR_GLOBAL_H
 
-namespace LandscapeEditor
-{
-namespace Constants
-{
-const char *const LANDSCAPE_EDITOR_PLUGIN	= "LandscapeEditor";
+#include <QtCore/qglobal.h>
 
-//settings
-const char *const LANDSCAPE_EDITOR_SECTION = "LandscapeEditor";
-const char *const LANDSCAPE_WINDOW_STATE = "LandscapeWindowState";
-const char *const LANDSCAPE_WINDOW_GEOMETRY = "LandscapeWindowGeometry";
-const char *const LANDSCAPE_DATA_DIRECTORY = "LandscapeDataDirectory";
-const char *const LANDSCAPE_USE_OPENGL = "LandscapeUseOpenGL";
+#if defined(WORLD_EDITOR_LIBRARY)
+#  define WORLD_EDITOR_EXPORT Q_DECL_EXPORT
+#else
+#  define WORLD_EDITOR_EXPORT Q_DECL_IMPORT
+#endif
 
-//resources
-const char *const ICON_LANDSCAPE_ITEM = ":/icons/ic_nel_landscape_item.png";
-const char *const ICON_ZONE_ITEM = ":/icons/ic_nel_zone.png";
-const char *const ICON_LANDSCAPE_ZONES = ":/icons/ic_nel_zones.png";
-
-
-} // namespace Constants
-} // namespace LandscapeEditor
-
-#endif // LANDSCAPE_EDITOR_CONSTANTS_H
+#endif // WORLD_EDITOR_GLOBAL_H

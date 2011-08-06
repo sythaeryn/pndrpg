@@ -15,29 +15,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LANDSCAPE_EDITOR_CONSTANTS_H
-#define LANDSCAPE_EDITOR_CONSTANTS_H
+#ifndef WORLD_EDITOR_CONSTANTS_H
+#define WORLD_EDITOR_CONSTANTS_H
 
-namespace LandscapeEditor
+namespace WorldEditor
 {
 namespace Constants
 {
-const char *const LANDSCAPE_EDITOR_PLUGIN	= "LandscapeEditor";
+const char *const WORLD_EDITOR_PLUGIN	= "WorldEditor";
 
 //settings
-const char *const LANDSCAPE_EDITOR_SECTION = "LandscapeEditor";
-const char *const LANDSCAPE_WINDOW_STATE = "LandscapeWindowState";
-const char *const LANDSCAPE_WINDOW_GEOMETRY = "LandscapeWindowGeometry";
-const char *const LANDSCAPE_DATA_DIRECTORY = "LandscapeDataDirectory";
-const char *const LANDSCAPE_USE_OPENGL = "LandscapeUseOpenGL";
+const char *const WORLD_EDITOR_SECTION = "WorldEditor";
+const char *const WORLD_WINDOW_STATE = "WorldWindowState";
+const char *const WORLD_WINDOW_GEOMETRY = "WorldWindowGeometry";
+const char *const WORLD_EDITOR_CELL_SIZE = "WorldEditorCellSize";
+const char *const WORLD_EDITOR_SNAP = "WorldEditorSnap";
+const char *const ZONE_SNAPSHOT_RES = "WorldEditorZoneSnapshotRes";
+const char *const PRIMITIVE_CLASS_FILENAME = "WorldEditorPrimitiveClassFilename";
 
 //resources
-const char *const ICON_LANDSCAPE_ITEM = ":/icons/ic_nel_landscape_item.png";
-const char *const ICON_ZONE_ITEM = ":/icons/ic_nel_zone.png";
-const char *const ICON_LANDSCAPE_ZONES = ":/icons/ic_nel_zones.png";
+const char *const ICON_WORLD_EDITOR = ":/icons/ic_nel_world_editor.png";
 
 
 } // namespace Constants
-} // namespace LandscapeEditor
+} // namespace WorldEditor
 
-#endif // LANDSCAPE_EDITOR_CONSTANTS_H
+#endif // WORLD_EDITOR_CONSTANTS_H

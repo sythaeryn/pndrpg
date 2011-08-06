@@ -8,6 +8,7 @@ ADD_SUBDIRECTORY(object_viewer)
 ADD_SUBDIRECTORY(zone_painter)
 ADD_SUBDIRECTORY(georges_editor)
 
+ADD_SUBDIRECTORY(world_editor)
 # Ryzom Specific Plugins
 IF(WITH_RYZOM AND WITH_RYZOM_TOOLS)
   ADD_SUBDIRECTORY(mission_compiler)
