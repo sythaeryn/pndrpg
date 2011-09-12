@@ -6,6 +6,7 @@ ADD_SUBDIRECTORY(log)
 ADD_SUBDIRECTORY(disp_sheet_id)
 ADD_SUBDIRECTORY(object_viewer)
 ADD_SUBDIRECTORY(georges_editor)
+ADD_SUBDIRECTORY(build_gamedata)
 
 # Note: Temporarily disabled until development continues.
 #ADD_SUBDIRECTORY(zone_painter)
