@@ -23,6 +23,8 @@
 #include "nel/misc/sheet_id.h"
 
 #include <QtGui/QDialog>
+#include <QProcess>
+#include <QSignalMapper>
 
 class BuildGamedataView : public QDockWidget
 {
@@ -32,8 +34,19 @@ public:
 	explicit BuildGamedataView(QWidget *parent = 0);
 	~BuildGamedataView();
 
+public Q_SLOTS:
+	void readFromStdOut();
+	void execute(int id);
+	void receiveProcessError(QProcess::ProcessError error);
+	void receiveProcessComplete(int exitCode, QProcess::ExitStatus exitStatus);
+
+
 private:
+	void toggleButtons(bool active);
+
 	Ui::BuildGamedataView m_ui;
+	QProcess *m_process;
+	QSignalMapper *m_buttonMapper;
 };
 
 #endif // BUILD_GAMEDATA_VIEW_H
