@@ -66,7 +66,7 @@ void BuildGamedataPlugin::extensionsInitialized()
 	QMainWindow *wnd = Core::ICore::instance()->mainWindow();
 
 	
-	m_buildGamedataView = new BuildGamedataView();
+	m_buildGamedataView = new BuildGamedataView(wnd);
 	wnd->addDockWidget(Qt::RightDockWidgetArea, m_buildGamedataView);
 	m_buildGamedataView->hide();
 
