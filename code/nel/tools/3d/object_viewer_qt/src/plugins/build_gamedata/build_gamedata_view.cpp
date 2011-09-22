@@ -33,7 +33,7 @@ BuildGamedataView::BuildGamedataView(QWidget *parent) : QDockWidget(parent)
 	
 	connect(m_process, SIGNAL(error(QProcess::ProcessError)), this, SLOT(receiveProcessError(QProcess::ProcessError)));
 	connect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(receiveProcessComplete(int, QProcess::ExitStatus)));
-	connect(m_buttonMapper, SIGNAL(mapped(int)), this, SIGNAL(execute(int)));
+	connect(m_buttonMapper, SIGNAL(mapped(int)), this, SLOT(execute(int)));
 
 	connect(m_ui.stepExportPushButton, SIGNAL(clicked()), m_buttonMapper, SLOT(map()));
 	m_buttonMapper->setMapping(m_ui.stepExportPushButton, 1);
