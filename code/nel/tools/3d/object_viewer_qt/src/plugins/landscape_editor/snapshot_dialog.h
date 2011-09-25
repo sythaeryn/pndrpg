@@ -14,29 +14,36 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LANDSCAPE_EDITOR_CONSTANTS_H
-#define LANDSCAPE_EDITOR_CONSTANTS_H
+#ifndef SNAPSHOT_DIALOG_H
+#define SNAPSHOT_DIALOG_H
+
+// Project includes
+#include "ui_shapshot_dialog.h"
+
+// Qt includes
 
 namespace LandscapeEditor
 {
-namespace Constants
+
+class SnapshotDialog: public QDialog
 {
-const char *const LANDSCAPE_EDITOR_PLUGIN	= "LandscapeEditor";
+	Q_OBJECT
 
-//settings
-const char *const LANDSCAPE_EDITOR_SECTION = "LandscapeEditor";
-const char *const LANDSCAPE_WINDOW_STATE = "LandscapeWindowState";
-const char *const LANDSCAPE_WINDOW_GEOMETRY = "LandscapeWindowGeometry";
-const char *const LANDSCAPE_DATA_DIRECTORY = "LandscapeDataDirectory";
-const char *const LANDSCAPE_USE_OPENGL = "LandscapeUseOpenGL";
+public:
+	SnapshotDialog(QWidget *parent = 0);
+	~SnapshotDialog();
 
-//resources
-const char *const ICON_LANDSCAPE_ITEM = ":/icons/ic_nel_landscape_item.png";
-const char *const ICON_ZONE_ITEM = ":/icons/ic_nel_zone.png";
-const char *const ICON_LANDSCAPE_ZONES = ":/icons/ic_nel_zones.png";
+	bool isCustomSize() const;
+	bool isKeepRatio() const;
+	int resolutionZone() const;
+	int widthSnapshot() const;
+	int heightSnapshot() const;
 
+private:
 
-} // namespace Constants
-} // namespace LandscapeEditor
+	Ui::SnapshotDialog m_ui;
+}; /* class SnapshotDialog */
 
-#endif // LANDSCAPE_EDITOR_CONSTANTS_H
+} /* namespace LandscapeEditor */
+
+#endif // SNAPSHOT_DIALOG_H

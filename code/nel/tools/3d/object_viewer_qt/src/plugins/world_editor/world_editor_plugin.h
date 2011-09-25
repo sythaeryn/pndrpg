@@ -1,4 +1,5 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -14,16 +15,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LANDSCAPE_EDITOR_PLUGIN_H
-#define LANDSCAPE_EDITOR_PLUGIN_H
+#ifndef WORLD_EDITOR_PLUGIN_H
+#define WORLD_EDITOR_PLUGIN_H
 
 // Project includes
-#include "landscape_editor_constants.h"
+#include "world_editor_constants.h"
 #include "../../extension_system/iplugin.h"
 #include "../core/icontext.h"
 
 // NeL includes
 #include "nel/misc/app_context.h"
+#include <nel/ligo/ligo_config.h>
 
 // Qt includes
 #include <QtCore/QObject>
@@ -39,17 +41,17 @@ namespace ExtensionSystem
 class IPluginSpec;
 }
 
-namespace LandscapeEditor
+namespace WorldEditor
 {
-class LandscapeEditorWindow;
+class WorldEditorWindow;
 
-class LandscapeEditorPlugin : public QObject, public ExtensionSystem::IPlugin
+class WorldEditorPlugin : public QObject, public ExtensionSystem::IPlugin
 {
 	Q_OBJECT
 	Q_INTERFACES(ExtensionSystem::IPlugin)
 public:
 
-	virtual ~LandscapeEditorPlugin();
+	virtual ~WorldEditorPlugin();
 
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
@@ -69,28 +71,29 @@ protected:
 	NLMISC::CLibraryContext *m_libContext;
 
 private:
+	NLLIGO::CLigoConfig m_ligoConfig;
 	ExtensionSystem::IPluginManager *m_plugMan;
 	QList<QObject *> m_autoReleaseObjects;
 };
 
-class LandscapeEditorContext: public Core::IContext
+class WorldEditorContext: public Core::IContext
 {
 	Q_OBJECT
 public:
-	LandscapeEditorContext(QObject *parent = 0);
-	virtual ~LandscapeEditorContext() {}
+	WorldEditorContext(QObject *parent = 0);
+	virtual ~WorldEditorContext() {}
 
 	virtual QString id() const
 	{
-		return QLatin1String("LandscapeEditorContext");
+		return QLatin1String("WorldEditorContext");
 	}
 	virtual QString trName() const
 	{
-		return tr("Landscape Editor");
+		return tr("World Editor");
 	}
 	virtual QIcon icon() const
 	{
-		return QIcon(Constants::ICON_LANDSCAPE_ITEM);
+		return QIcon(Constants::ICON_WORLD_EDITOR);
 	}
 
 	virtual void open();
@@ -99,9 +102,9 @@ public:
 
 	virtual QWidget *widget();
 
-	LandscapeEditorWindow *m_landEditorWindow;
+	WorldEditorWindow *m_worldEditorWindow;
 };
 
-} // namespace LandscapeEditor
+} // namespace WorldEditor
 
-#endif // LANDSCAPE_EDITOR_PLUGIN_H
+#endif // WORLD_EDITOR_PLUGIN_H

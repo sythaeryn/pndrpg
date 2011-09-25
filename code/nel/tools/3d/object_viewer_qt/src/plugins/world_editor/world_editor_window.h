@@ -14,49 +14,54 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef LANDSCAPE_EDITOR_WINDOW_H
-#define LANDSCAPE_EDITOR_WINDOW_H
+#ifndef WORLD_EDITOR_WINDOW_H
+#define WORLD_EDITOR_WINDOW_H
 
 // Project includes
-#include "ui_landscape_editor_window.h"
+#include "ui_world_editor_window.h"
 
 // Qt includes
 #include <QtGui/QUndoStack>
-#include <QtOpenGL/QGLWidget>
 #include <QtGui/QLabel>
 #include <QtCore/QTimer>
+#include <QtCore/QSignalMapper>
+#include <QtOpenGL/QGLWidget>
 
 namespace LandscapeEditor
 {
+class ZoneBuilderBase;
+}
 
-class LandscapeScene;
-class ZoneBuilder;
+namespace WorldEditor
+{
+class PrimitivesTreeModel;
+class WorldEditorScene;
 
-class LandscapeEditorWindow: public QMainWindow
+class WorldEditorWindow: public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	LandscapeEditorWindow(QWidget *parent = 0);
-	~LandscapeEditorWindow();
+	WorldEditorWindow(QWidget *parent = 0);
+	~WorldEditorWindow();
 
 	QUndoStack *undoStack() const;
+	void maybeSave();
 
 Q_SIGNALS:
 public Q_SLOTS:
 	void open();
-	void save();
 
 private Q_SLOTS:
+	void newWorldEditFile();
+	void saveWorldEditFile();
 	void openProjectSettings();
-	void openSnapshotDialog();
-	void customContextMenu();
+
+	void setMode(int value);
 	void updateStatusBar();
-	void newLand();
-	void setActiveLand();
-	void saveSelectedLand();
-	void saveAsSelectedLand();
-	void deleteSelectedLand();
+
+	void updateSelection(const QItemSelection &selected, const QItemSelection &deselected);
+	void selectedItemsInScene(const QList<QGraphicsItem *> &selected);
 
 protected:
 	virtual void showEvent(QShowEvent *showEvent);
@@ -68,21 +73,23 @@ private:
 	void readSettings();
 	void writeSettings();
 
-	void setActiveLandscape(int row);
-	void saveLandscape(int row, bool force);
-	int createLandscape(const QString &fileName);
+	void loadWorldEditFile(const QString &fileName);
+	void checkCurrentWorld();
+
+	QString m_lastDir;
 
 	QLabel *m_statusInfo;
 	QTimer *m_statusBarTimer;
 
-	QListWidgetItem *m_currentItem;
-	LandscapeScene *m_landscapeScene;
-	ZoneBuilder *m_zoneBuilder;
+	PrimitivesTreeModel *m_primitivesModel;
 	QUndoStack *m_undoStack;
+	WorldEditorScene *m_worldEditorScene;
+	LandscapeEditor::ZoneBuilderBase *m_zoneBuilderBase;
+	QSignalMapper m_modeMapper;
 	QGLWidget *m_oglWidget;
-	Ui::LandscapeEditorWindow m_ui;
-}; /* class LandscapeEditorWindow */
+	Ui::WorldEditorWindow m_ui;
+}; /* class WorldEditorWindow */
 
-} /* namespace LandscapeEditor */
+} /* namespace WorldEditor */
 
-#endif // LANDSCAPE_EDITOR_WINDOW_H
+#endif // WORLD_EDITOR_WINDOW_H
