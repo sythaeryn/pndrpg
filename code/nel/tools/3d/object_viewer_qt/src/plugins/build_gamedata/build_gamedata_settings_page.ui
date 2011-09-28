@@ -21,98 +21,77 @@
     <number>3</number>
    </property>
    <item row="0" column="0" colspan="2">
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="buildGamedataSettingsTW">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
        <string>General</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="2" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Build Quality</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QComboBox" name="comboBox">
-         <item>
-          <property name="text">
-           <string>Draft</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Full</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_3">
+       <item row="6" column="0">
+        <widget class="QLabel" name="toolSuffixLbl">
          <property name="text">
           <string>Tool Suffix</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="2">
-        <widget class="QLineEdit" name="lineEdit_2"/>
+       <item row="6" column="2">
+        <widget class="QLineEdit" name="toolSuffixLE"/>
        </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_2">
+       <item row="7" column="0">
+        <widget class="QLabel" name="scriptDirectoryLbl">
          <property name="text">
           <string>Script Directory</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="2">
-        <widget class="QLineEdit" name="lineEdit_4"/>
-       </item>
-       <item row="5" column="3">
-        <widget class="QToolButton" name="toolButton_5">
-         <property name="text">
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Workspace Directory</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="2">
-        <widget class="QLineEdit" name="lineEdit_5"/>
-       </item>
-       <item row="6" column="3">
-        <widget class="QToolButton" name="toolButton_6">
-         <property name="text">
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Database Directory</string>
-         </property>
-        </widget>
-       </item>
        <item row="7" column="2">
-        <widget class="QLineEdit" name="lineEdit_6"/>
+        <widget class="QLineEdit" name="scriptDirectoryLE"/>
        </item>
        <item row="7" column="3">
-        <widget class="QToolButton" name="toolButton_7">
+        <widget class="QToolButton" name="scriptDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="8" column="0">
+        <widget class="QLabel" name="workspaceDirectoryLbl">
+         <property name="text">
+          <string>Workspace Directory</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="2">
+        <widget class="QLineEdit" name="workspaceDirectoryLE"/>
+       </item>
+       <item row="8" column="3">
+        <widget class="QToolButton" name="workspaceDirectoryTB">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QLabel" name="databaseDirectoryLbl">
+         <property name="text">
+          <string>Database Directory</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="2">
+        <widget class="QLineEdit" name="databaseDirectoryLE"/>
+       </item>
+       <item row="9" column="3">
+        <widget class="QToolButton" name="databaseDirectoryTB">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -125,6 +104,44 @@
          </property>
         </spacer>
        </item>
+       <item row="3" column="2">
+        <widget class="QLineEdit" name="pythonExeLE"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="pythonExeLbl">
+         <property name="text">
+          <string>Python Executable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QToolButton" name="pythonExeTB">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="buildQualityLbl">
+         <property name="text">
+          <string>Build Quality</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QComboBox" name="buildQualityCB">
+         <item>
+          <property name="text">
+           <string>Draft</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Full</string>
+          </property>
+         </item>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tab_2">
@@ -133,40 +150,40 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_7">
        <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEdit"/>
+        <widget class="QLineEdit" name="primaryToolsLE"/>
        </item>
        <item row="0" column="0">
-        <widget class="QLabel" name="label_18">
+        <widget class="QLabel" name="primaryToolsLbl">
          <property name="text">
           <string>Primary Tools</string>
          </property>
         </widget>
        </item>
        <item row="0" column="2">
-        <widget class="QToolButton" name="toolButton">
+        <widget class="QToolButton" name="primaryToolsTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit_3"/>
+        <widget class="QLineEdit" name="secondaryToolsLE"/>
        </item>
        <item row="1" column="2">
-        <widget class="QToolButton" name="toolButton_3">
+        <widget class="QToolButton" name="secondaryToolsTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_19">
+        <widget class="QLabel" name="secondaryToolsLbl">
          <property name="text">
           <string>Secondary Tools</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
+       <item row="3" column="0">
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -179,6 +196,134 @@
          </property>
         </spacer>
        </item>
+       <item row="2" column="0" colspan="3">
+        <widget class="QGroupBox" name="windowsExeDllCfgDirGB">
+         <property name="title">
+          <string>Windows EXE/DLL/CFG Directories</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEdit"/>
+          </item>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="toolButton">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEdit_2"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lineEdit_3"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="lineEdit_4"/>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="lineEdit_5"/>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="lineEdit_6"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>1</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>2</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>3</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>4</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>5</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>6</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QLineEdit" name="lineEdit_7"/>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>7</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QToolButton" name="toolButton_2">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QToolButton" name="toolButton_3">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QToolButton" name="toolButton_4">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QToolButton" name="toolButton_5">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QToolButton" name="toolButton_6">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="2">
+           <widget class="QToolButton" name="toolButton_7">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tab_3">
@@ -187,102 +332,102 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_6">
        <item row="0" column="0">
-        <widget class="QLabel" name="label_12">
+        <widget class="QLabel" name="levelDesignDirectoryLbl">
          <property name="text">
           <string>Level Design Directory</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEdit_13"/>
+        <widget class="QLineEdit" name="levelDesignDirectoryLE"/>
        </item>
        <item row="0" column="2">
-        <widget class="QToolButton" name="toolButton_14">
+        <widget class="QToolButton" name="levelDesignDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_13">
+        <widget class="QLabel" name="levelDesignDfnDirectoryLbl">
          <property name="text">
           <string>Level Design Dfn Directory</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit_14"/>
+        <widget class="QLineEdit" name="levelDesignDfnDirectoryLE"/>
        </item>
        <item row="1" column="2">
-        <widget class="QToolButton" name="toolButton_15">
+        <widget class="QToolButton" name="levelDesignDfnDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_14">
+        <widget class="QLabel" name="levelDesignWorldDirectoryLbl">
          <property name="text">
           <string>Level Design World Directory</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="lineEdit_15"/>
+        <widget class="QLineEdit" name="levelDesignWorldDirectoryLE"/>
        </item>
        <item row="2" column="2">
-        <widget class="QToolButton" name="toolButton_16">
+        <widget class="QToolButton" name="levelDesignWorldDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_15">
+        <widget class="QLabel" name="primitivesDirectoryLbl">
          <property name="text">
           <string>Primitives Directory</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QLineEdit" name="lineEdit_16"/>
+        <widget class="QLineEdit" name="primitivesDirectoryLE"/>
        </item>
        <item row="3" column="2">
-        <widget class="QToolButton" name="toolButton_17">
+        <widget class="QToolButton" name="primitivesDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="label_16">
+        <widget class="QLabel" name="gamedevDirectoryLbl">
          <property name="text">
           <string>Gamedev Directory</string>
          </property>
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QLineEdit" name="lineEdit_17"/>
+        <widget class="QLineEdit" name="gamedevDirectoryLE"/>
        </item>
        <item row="4" column="2">
-        <widget class="QToolButton" name="toolButton_18">
+        <widget class="QToolButton" name="gamedevDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="5" column="0">
-        <widget class="QLabel" name="label_17">
+        <widget class="QLabel" name="dataCommonDirectoryLbl">
          <property name="text">
           <string>Data Common Directory</string>
          </property>
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QLineEdit" name="lineEdit_18"/>
+        <widget class="QLineEdit" name="dataCommonDirectoryLE"/>
        </item>
        <item row="5" column="2">
-        <widget class="QToolButton" name="toolButton_19">
+        <widget class="QToolButton" name="dataCommonDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
@@ -309,102 +454,102 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
        <item row="2" column="1">
-        <widget class="QLineEdit" name="lineEdit_7"/>
+        <widget class="QLineEdit" name="exportBuildDirectoryLE"/>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="exportBuildDirectoryLbl">
          <property name="text">
           <string>Export Build Directory</string>
          </property>
         </widget>
        </item>
        <item row="2" column="2">
-        <widget class="QToolButton" name="toolButton_8">
+        <widget class="QToolButton" name="exportBuildDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_7">
+        <widget class="QLabel" name="installDirectoryLbl">
          <property name="text">
           <string>Install Directory</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QLineEdit" name="lineEdit_8"/>
+        <widget class="QLineEdit" name="installDirectoryLE"/>
        </item>
        <item row="3" column="2">
-        <widget class="QToolButton" name="toolButton_9">
+        <widget class="QToolButton" name="installDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="label_8">
+        <widget class="QLabel" name="dataShardDirectoryLbl">
          <property name="text">
           <string>Data Shard Directory</string>
          </property>
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QLineEdit" name="lineEdit_9"/>
+        <widget class="QLineEdit" name="dataShardDirectoryLE"/>
        </item>
        <item row="4" column="2">
-        <widget class="QToolButton" name="toolButton_10">
+        <widget class="QToolButton" name="dataShardDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="5" column="0">
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="clientDevDirectoryLbl">
          <property name="text">
           <string>Client Dev Directory</string>
          </property>
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QLineEdit" name="lineEdit_10"/>
+        <widget class="QLineEdit" name="clientDevDirectoryLE"/>
        </item>
        <item row="5" column="2">
-        <widget class="QToolButton" name="toolButton_11">
+        <widget class="QToolButton" name="clientDevDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="6" column="0">
-        <widget class="QLabel" name="label_10">
+        <widget class="QLabel" name="clientPatchDirectoryLbl">
          <property name="text">
           <string>Client Patch Directory</string>
          </property>
         </widget>
        </item>
        <item row="6" column="1">
-        <widget class="QLineEdit" name="lineEdit_11"/>
+        <widget class="QLineEdit" name="clientPatchDirectoryLE"/>
        </item>
        <item row="6" column="2">
-        <widget class="QToolButton" name="toolButton_12">
+        <widget class="QToolButton" name="clientPatchDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
         </widget>
        </item>
        <item row="7" column="0">
-        <widget class="QLabel" name="label_11">
+        <widget class="QLabel" name="clientInstallDirectorybl">
          <property name="text">
           <string>Client Install Directory</string>
          </property>
         </widget>
        </item>
        <item row="7" column="1">
-        <widget class="QLineEdit" name="lineEdit_12"/>
+        <widget class="QLineEdit" name="clientInstallDirectoryLE"/>
        </item>
        <item row="7" column="2">
-        <widget class="QToolButton" name="toolButton_13">
+        <widget class="QToolButton" name="clientInstallDirectoryTB">
          <property name="text">
           <string>...</string>
          </property>
@@ -441,7 +586,7 @@
     </spacer>
    </item>
    <item row="1" column="1">
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="toolCheckPB">
      <property name="toolTip">
       <string>Check for the availability of tools used by the build gamedata process.</string>
      </property>
