@@ -30,12 +30,39 @@ sys.path.append("configuration")
 parser = argparse.ArgumentParser(description='Ryzom Core - Build Gamedata - Setup')
 parser.add_argument('--noconf', '-nc', action='store_true')
 parser.add_argument('--noverify', '-nv', action='store_true')
+parser.add_argument('--quiet', '-q', action='store_true')
 # parser.add_argument('--haltonerror', '-eh', action='store_true')
 parser.add_argument('--includeproject', '-ipj', nargs='+')
 parser.add_argument('--excludeproject', '-epj', nargs='+')
 parser.add_argument('--includeprocess', '-ipc', nargs='+')
 parser.add_argument('--excludeprocess', '-epc', nargs='+')
+# configuration overrides
+parser.add_argument('--set-buildquality', type=int, choices=range(0,2))
+parser.add_argument('--set-tooldirectories', nargs='2')
+parser.add_argument('--set-toolsuffix')
+parser.add_argument('--set-scriptdirectory')
+parser.add_argument('--set-workspacedirectory')
+parser.add_argument('--set-databasedirectory')
+parser.add_argument('--set-exportbuilddirectory')
+parser.add_argument('--set-installdirectory')
+parser.add_argument('--set-datasharddirectory')
+parser.add_argument('--set-clientdevdirectory')
+parser.add_argument('--set-clientpatchdirectory')
+parser.add_argument('--set-clientinstalldirectory')
+parser.add_argument('--set-leveldesigndirectory')
+parser.add_argument('--set-leveldesigndfndirectory')
+parser.add_argument('--set-leveldesignworlddirectory')
+parser.add_argument('--set-primitivesdirectory')
+parser.add_argument('--set-gamedevdirectory')
+parser.add_argument('--set-datacommondirectory')
+parser.add_argument('--set-windowsexedllcfgdirectories', nargs='+')
+parser.add_argument('--set-maxavailable', type=int)
+parser.add_argument('--set-maxdirectory')
+parser.add_argument('--set-maxuserdirectory')
+parser.add_argument('--set-maxexecutable')
 args = parser.parse_args()
+
+print args
 
 if not args.includeproject == None and not args.excludeproject == None:
 	print "ERROR --includeproject cannot be combined with --excludeproject, exit."
@@ -59,140 +86,233 @@ except ImportError:
 from tools import *
 
 if not args.noconf:
+	# BuildQuality
+	if args.set_buildquality is not None:
+		BuildQuality = args.set_buildquality
 	try:
 		BuildQuality
 	except NameError:
 		BuildQuality = 1
+	
+	# ToolDirectories
+	if args.set_tooldirectories is not None:
+		ToolDirectories = ars.set_tooldirectories
 	try:
 		ToolDirectories
 	except NameError:
 		ToolDirectories = [ 'R:/build/dev/bin/Release', 'D:/libraries/external/bin' ]
+	
+	# ToolSuffix
+	if args.set_toolsuffix is not None:
+		ToolSuffix = args.set_toolsuffix
 	try:
 		ToolSuffix
 	except NameError:
 		ToolSuffix = ".exe"
+	
+	# ScriptDirectory
+	if args.set_scriptdirectory is not None:
+		ScriptDirectory = args.set_scriptdirectory
 	try:
 		ScriptDirectory
 	except NameError:
 		ScriptDirectory = "R:/code/nel/tools/build_gamedata"
+	
+	# WorkspaceDirectory
+	if args.set_workspacedirectory is not None:
+		WorkspaceDirectory = args.set_workspacedirectory
 	try:
 		WorkspaceDirectory
 	except NameError:
 		WorkspaceDirectory = "R:/code/ryzom/tools/build_gamedata/workspace"
+	
+	# DatabaseDirectory
+	if args.set_databasedirectory is not None:
+		DatabaseDirectory = args.set_databasedirectory
 	try:
 		DatabaseDirectory
 	except NameError:
 		DatabaseDirectory = "W:/database"
+	
+	# ExportBuildDirectory
+	if args.set_exportbuilddirectory is not None:
+		ExportBuildDirectory = args.set_exportbuilddirectory
 	try:
 		ExportBuildDirectory
 	except NameError:
 		ExportBuildDirectory = "W:/export"
+	
+	# InstallDirectory
+	if args.set_installdirectory is not None:
+		InstallDirectory = args.set_installdirectory
 	try:
 		InstallDirectory
 	except NameError:
 		InstallDirectory = "W:/install"
+	
+	# DataShardDirectory
+	if args.set_datasharddirectory is not None:
+		DataShardDirectory = args.set_datasharddirectory
 	try:
 		DataShardDirectory
 	except NameError:
 		DataShardDirectory = "R:/code/ryzom/server/data_shard"
+	
+	# ClientDevDirectory
+	if args.set_clientdevdirectory is not None:
+		ClientDevDirectory = args.set_clientdevdirectory
 	try:
 		ClientDevDirectory
 	except NameError:
 		ClientDevDirectory = "W:/client_dev"
+	
+	# ClientPatchDirectory
+	if args.set_clientpatchdirectory is not None:
+		ClientPatchDirectory = args.set_clientpatchdirectory
 	try:
 		ClientPatchDirectory
 	except NameError:
 		ClientPatchDirectory = "W:/client_patch"
+	
+	# ClientInstallDirectory
+	if args.set_clientinstalldirectory is not None:
+		ClientInstallDirectory = args.set_clientinstalldirectory
 	try:
 		ClientInstallDirectory
 	except NameError:
 		ClientInstallDirectory = "W:/client_install"
+	
+	# LeveldesignDirectory
+	if args.set_leveldesigndirectory is not None:
+		LeveldesignDirectory = args.set_leveldesigndirectory
 	try:
 		LeveldesignDirectory
 	except NameError:
 		LeveldesignDirectory = "L:/leveldesign"
+	
+	# LeveldesignDfnDirectory
+	if args.set_leveldesigndfndirectory is not None:
+		LeveldesignDfnDirectory = args.set_leveldesigndfndirectory
 	try:
 		LeveldesignDfnDirectory
 	except NameError:
 		LeveldesignDfnDirectory = "L:/leveldesign/dfn"
+	
+	# LeveldesignWorldDirectory
+	if args.set_leveldesignworlddirectory is not None:
+		LeveldesignWorldDirectory = args.set_leveldesignworlddirectory
 	try:
 		LeveldesignWorldDirectory
 	except NameError:
 		LeveldesignWorldDirectory = "L:/leveldesign/world"
+	
+	# PrimitivesDirectory
+	if args.set_primitivesdirectory is not None:
+		PrimitivesDirectory = args.set_primitivesdirectory
 	try:
 		PrimitivesDirectory
 	except NameError:
 		PrimitivesDirectory = "L:/primitives"
+	
+	# GamedevDirectory
+	if args.set_gamedevdirectory is not None:
+		GamedevDirectory = args.set_gamedevdirectory
 	try:
 		GamedevDirectory
 	except NameError:
 		GamedevDirectory = "R:/code/ryzom/client/data/gamedev"
+	
+	# DataCommonDirectory
+	if args.set_datacommondirectory is not None:
+		DataCommonDirectory = args.set_datacommondirectory
 	try:
 		DataCommonDirectory
 	except NameError:
 		DataCommonDirectory = "R:/code/ryzom/common/data_common"
+	
+	# WindowsExeDllCfgDirectories
+	if args.set_windowsexedllcfgdirectories is not None:
+		WindowsExeDllCfgDirectories = args.set_windowsexedllcfgdirectories
 	try:
 		WindowsExeDllCfgDirectories
 	except NameError:
 		WindowsExeDllCfgDirectories = [ 'C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86', 'D:/libraries/external/bin', 'R:/build/dev/bin/Release', 'R:/code/ryzom/client', 'R:/code/nel/lib', 'R:/code/ryzom/bin', 'R:/code/ryzom/tools/client/client_config/bin' ]
+	
+	# MaxAvailable
+	if args.set_maxavailable is not None:
+		MaxAvailable = args.set_maxavailable
 	try:
 		MaxAvailable
 	except NameError:
 		MaxAvailable = 1
+	
+	# MaxDirectory
+	if args.set_maxdirectory is not None:
+		MaxDirectory = args.set_maxdirectory
 	try:
 		MaxDirectory
 	except NameError:
 		MaxDirectory = "C:/Program Files (x86)/Autodesk/3ds Max 2010"
+	
+	# MaxUserDirectory
+	if args.set_maxuserdirectory is not None:
+		MaxUserDirectory = args.set_maxuserdirectory
 	try:
 		MaxUserDirectory
 	except NameError:
 		MaxUserDirectory = "C:/Users/Kaetemi/AppData/Local/Autodesk/3dsMax/2010 - 32bit/enu"
+	
+	# MaxExecutable
+	if args.set_maxexecutable is not None:
+		MaxExecutable = args.set_maxexecutable
 	try:
 		MaxExecutable
 	except NameError:
 		MaxExecutable = "3dsmax.exe"
 
-	printLog(log, "")
-	printLog(log, "-------")
-	printLog(log, "--- Setup build site")
-	printLog(log, "-------")
-	printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
-	printLog(log, "")
-	printLog(log, "This script will set up the buildsite configuration, and create needed directories.")
-	printLog(log, "To use the defaults, simply hit ENTER, else type in the new value.")
-	printLog(log, "Use -- if you need to insert an empty value.")
-	printLog(log, "")
-	BuildQuality = int(askVar(log, "Build Quality", str(BuildQuality)))
-	ToolDirectories[0] = askVar(log, "Primary Tool Directory", ToolDirectories[0]).replace("\\", "/")
-	ToolDirectories[1] = askVar(log, "Secondary Tool Directory", ToolDirectories[1]).replace("\\", "/")
-	ToolSuffix = askVar(log, "Tool Suffix", ToolSuffix)
-	ScriptDirectory = askVar(log, "Script Directory", os.getcwd().replace("\\", "/")).replace("\\", "/")
-	WorkspaceDirectory = askVar(log, "Workspace Directory", WorkspaceDirectory).replace("\\", "/")
-	DatabaseDirectory = askVar(log, "Database Directory", DatabaseDirectory).replace("\\", "/")
-	ExportBuildDirectory = askVar(log, "Export Build Directory", ExportBuildDirectory).replace("\\", "/")
-	InstallDirectory = askVar(log, "Install Directory", InstallDirectory).replace("\\", "/")
-	DataShardDirectory = askVar(log, "Data Shard Directory", DataShardDirectory).replace("\\", "/")
-	ClientDevDirectory = askVar(log, "Client Dev Directory", ClientDevDirectory).replace("\\", "/")
-	ClientPatchDirectory = askVar(log, "Client Patch Directory", ClientPatchDirectory).replace("\\", "/")
-	ClientInstallDirectory = askVar(log, "Client Install Directory", ClientInstallDirectory).replace("\\", "/")
-	LeveldesignDirectory = askVar(log, "Leveldesign Directory", LeveldesignDirectory).replace("\\", "/")
-	LeveldesignDfnDirectory = askVar(log, "Leveldesign DFN Directory", LeveldesignDfnDirectory).replace("\\", "/")
-	LeveldesignWorldDirectory = askVar(log, "Leveldesign World Directory", LeveldesignWorldDirectory).replace("\\", "/")
-	PrimitivesDirectory = askVar(log, "Primitives Directory", PrimitivesDirectory).replace("\\", "/")
-	GamedevDirectory = askVar(log, "Gamedev Directory", GamedevDirectory).replace("\\", "/")
-	DataCommonDirectory = askVar(log, "Data Common Directory", DataCommonDirectory).replace("\\", "/")
-	WindowsExeDllCfgDirectories[0] = askVar(log, "Primary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[0]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[1] = askVar(log, "Secondary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[1]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[2] = askVar(log, "Tertiary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[2]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[3] = askVar(log, "Quaternary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[3]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[4] = askVar(log, "Quinary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[4]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[5] = askVar(log, "Senary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[5]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[6] = askVar(log, "Septenary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[6]).replace("\\", "/")
-	MaxAvailable = int(askVar(log, "3dsMax Available", str(MaxAvailable)))
-	if MaxAvailable:
-		MaxDirectory = askVar(log, "3dsMax Directory", MaxDirectory).replace("\\", "/")
-		MaxUserDirectory = askVar(log, "3dsMax User Directory", MaxUserDirectory).replace("\\", "/")
-		MaxExecutable = askVar(log, "3dsMax Executable", MaxExecutable)
+	if not args.quiet:
+		printLog(log, "")
+		printLog(log, "-------")
+		printLog(log, "--- Setup build site")
+		printLog(log, "-------")
+		printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
+		printLog(log, "")
+		printLog(log, "This script will set up the buildsite configuration, and create needed directories.")
+		printLog(log, "To use the defaults, simply hit ENTER, else type in the new value.")
+		printLog(log, "Use -- if you need to insert an empty value.")
+		printLog(log, "")
+		BuildQuality = int(askVar(log, "Build Quality", str(BuildQuality)))
+		ToolDirectories[0] = askVar(log, "Primary Tool Directory", ToolDirectories[0]).replace("\\", "/")
+		ToolDirectories[1] = askVar(log, "Secondary Tool Directory", ToolDirectories[1]).replace("\\", "/")
+		ToolSuffix = askVar(log, "Tool Suffix", ToolSuffix)
+		ScriptDirectory = askVar(log, "Script Directory", os.getcwd().replace("\\", "/")).replace("\\", "/")
+		WorkspaceDirectory = askVar(log, "Workspace Directory", WorkspaceDirectory).replace("\\", "/")
+		DatabaseDirectory = askVar(log, "Database Directory", DatabaseDirectory).replace("\\", "/")
+		ExportBuildDirectory = askVar(log, "Export Build Directory", ExportBuildDirectory).replace("\\", "/")
+		InstallDirectory = askVar(log, "Install Directory", InstallDirectory).replace("\\", "/")
+		DataShardDirectory = askVar(log, "Data Shard Directory", DataShardDirectory).replace("\\", "/")
+		ClientDevDirectory = askVar(log, "Client Dev Directory", ClientDevDirectory).replace("\\", "/")
+		ClientPatchDirectory = askVar(log, "Client Patch Directory", ClientPatchDirectory).replace("\\", "/")
+		ClientInstallDirectory = askVar(log, "Client Install Directory", ClientInstallDirectory).replace("\\", "/")
+		LeveldesignDirectory = askVar(log, "Leveldesign Directory", LeveldesignDirectory).replace("\\", "/")
+		LeveldesignDfnDirectory = askVar(log, "Leveldesign DFN Directory", LeveldesignDfnDirectory).replace("\\", "/")
+		LeveldesignWorldDirectory = askVar(log, "Leveldesign World Directory", LeveldesignWorldDirectory).replace("\\", "/")
+		PrimitivesDirectory = askVar(log, "Primitives Directory", PrimitivesDirectory).replace("\\", "/")
+		GamedevDirectory = askVar(log, "Gamedev Directory", GamedevDirectory).replace("\\", "/")
+		DataCommonDirectory = askVar(log, "Data Common Directory", DataCommonDirectory).replace("\\", "/")
+		WindowsExeDllCfgDirectories[0] = askVar(log, "Primary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[0]).replace("\\", "/")
+		WindowsExeDllCfgDirectories[1] = askVar(log, "Secondary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[1]).replace("\\", "/")
+		WindowsExeDllCfgDirectories[2] = askVar(log, "Tertiary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[2]).replace("\\", "/")
+		WindowsExeDllCfgDirectories[3] = askVar(log, "Quaternary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[3]).replace("\\", "/")
+		WindowsExeDllCfgDirectories[4] = askVar(log, "Quinary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[4]).replace("\\", "/")
+		WindowsExeDllCfgDirectories[5] = askVar(log, "Senary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[5]).replace("\\", "/")
+		WindowsExeDllCfgDirectories[6] = askVar(log, "Septenary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[6]).replace("\\", "/")
+		MaxAvailable = int(askVar(log, "3dsMax Available", str(MaxAvailable)))
+		if MaxAvailable:
+			MaxDirectory = askVar(log, "3dsMax Directory", MaxDirectory).replace("\\", "/")
+			MaxUserDirectory = askVar(log, "3dsMax User Directory", MaxUserDirectory).replace("\\", "/")
+			MaxExecutable = askVar(log, "3dsMax Executable", MaxExecutable)
+
 	if os.path.isfile("configuration/buildsite.py"):
 		os.remove("configuration/buildsite.py")
 	sf = open("configuration/buildsite.py", "w")
