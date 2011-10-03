@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="toolButtons">
+    <file>icons/ic_nel_add_item.png</file>
+    <file>icons/ic_nel_delete_item.png</file>
+    <file>icons/ic_nel_down_item.png</file>
+    <file>icons/ic_nel_up_item.png</file>
+  </qresource>
+</RCC>

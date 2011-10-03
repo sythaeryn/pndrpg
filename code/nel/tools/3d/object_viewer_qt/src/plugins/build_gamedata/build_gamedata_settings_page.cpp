@@ -19,6 +19,7 @@
 
 // Qt includes
 #include <QtGui/QWidget>
+#include <QFileDialog>
 
 // NeL includes
 
@@ -32,6 +33,7 @@ CBuildGamedataSettingsPage::CBuildGamedataSettingsPage(BuildGamedataPlugin *plug
 	  m_currentPage(NULL),
 	  m_buildGamedataPlugin(plugin)
 {
+//	connect(m_ui.toolDirectoryAddTB, SIGNAL(clicked()), this, SLOT(addToolDirectory());
 }
 
 QString CBuildGamedataSettingsPage::id() const
@@ -68,6 +70,13 @@ QWidget *CBuildGamedataSettingsPage::createPage(QWidget *parent)
 
 void CBuildGamedataSettingsPage::apply()
 {
+}
+
+void CBuildGamedataSettingsPage::addToolDirectory()
+{
+	//QString curPath = m_ui->serverTextPathEdit->text();
+	QString path = QFileDialog::getExistingDirectory(NULL, "", QString());
+	
 }
 
 } /* namespace BuildGamedata */
