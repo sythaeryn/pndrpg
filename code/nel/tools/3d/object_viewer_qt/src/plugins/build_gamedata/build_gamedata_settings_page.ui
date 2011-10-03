@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>521</width>
-    <height>390</height>
+    <height>473</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,6 +20,29 @@
    <property name="spacing">
     <number>3</number>
    </property>
+   <item row="1" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>428</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="toolCheckPB">
+     <property name="toolTip">
+      <string>Check for the availability of tools used by the build gamedata process.</string>
+     </property>
+     <property name="text">
+      <string>Tool Check</string>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0" colspan="2">
     <widget class="QTabWidget" name="buildGamedataSettingsTW">
      <property name="currentIndex">
@@ -149,177 +172,148 @@
        <string>Tool Paths</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_7">
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="primaryToolsLE"/>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="primaryToolsLbl">
-         <property name="text">
-          <string>Primary Tools</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QToolButton" name="primaryToolsTB">
-         <property name="text">
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="secondaryToolsLE"/>
-       </item>
-       <item row="1" column="2">
-        <widget class="QToolButton" name="secondaryToolsTB">
-         <property name="text">
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="secondaryToolsLbl">
-         <property name="text">
-          <string>Secondary Tools</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="2" column="0" colspan="3">
-        <widget class="QGroupBox" name="windowsExeDllCfgDirGB">
+       <item row="0" column="0" colspan="2">
+        <widget class="QGroupBox" name="toolDirectoriesGB">
          <property name="title">
-          <string>Windows EXE/DLL/CFG Directories</string>
+          <string>Tools Directories</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2">
+         <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEdit"/>
-          </item>
-          <item row="0" column="2">
-           <widget class="QToolButton" name="toolButton">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEdit_2"/>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEdit_3"/>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="lineEdit_4"/>
-          </item>
-          <item row="4" column="1">
-           <widget class="QLineEdit" name="lineEdit_5"/>
-          </item>
-          <item row="5" column="1">
-           <widget class="QLineEdit" name="lineEdit_6"/>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QToolButton" name="toolDirectoryUpTB">
+              <property name="text">
+               <string>Up</string>
+              </property>
+              <property name="icon">
+               <iconset resource="build_gamedata.qrc">
+                <normaloff>:/toolButtons/icons/ic_nel_up_item.png</normaloff>:/toolButtons/icons/ic_nel_up_item.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="toolDirectoryAddTB">
+              <property name="text">
+               <string>Add</string>
+              </property>
+              <property name="icon">
+               <iconset resource="build_gamedata.qrc">
+                <normaloff>:/toolButtons/icons/ic_nel_add_item.png</normaloff>:/toolButtons/icons/ic_nel_add_item.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="toolDirectoryRemoveTB">
+              <property name="text">
+               <string>Remove</string>
+              </property>
+              <property name="icon">
+               <iconset resource="build_gamedata.qrc">
+                <normaloff>:/toolButtons/icons/ic_nel_delete_item.png</normaloff>:/toolButtons/icons/ic_nel_delete_item.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="toolDirectoryDownTB">
+              <property name="text">
+               <string>Down</string>
+              </property>
+              <property name="icon">
+               <iconset resource="build_gamedata.qrc">
+                <normaloff>:/toolButtons/icons/ic_nel_down_item.png</normaloff>:/toolButtons/icons/ic_nel_down_item.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>1</string>
-            </property>
-           </widget>
+           <widget class="QListWidget" name="toolDirectoriesLW"/>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>2</string>
-            </property>
-           </widget>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QGroupBox" name="windowsExeDllCfgDirGB">
+         <property name="title">
+          <string>External BIN/LIB/CFG Directories</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0" rowspan="2">
+           <widget class="QListView" name="windowsExeDllCfgDirectoriesLV"/>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>3</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>4</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>5</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>6</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QLineEdit" name="lineEdit_7"/>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>7</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QToolButton" name="toolButton_2">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QToolButton" name="toolButton_3">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QToolButton" name="toolButton_4">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
-           <widget class="QToolButton" name="toolButton_5">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2">
-           <widget class="QToolButton" name="toolButton_6">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="2">
-           <widget class="QToolButton" name="toolButton_7">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
+          <item row="0" column="1" rowspan="2">
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QToolButton" name="exeDllCfgDirUpTB">
+              <property name="text">
+               <string>Up</string>
+              </property>
+              <property name="icon">
+               <iconset resource="build_gamedata.qrc">
+                <normaloff>:/toolButtons/icons/ic_nel_up_item.png</normaloff>:/toolButtons/icons/ic_nel_up_item.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="toolBexeDllCfgDirAddTButton_3">
+              <property name="text">
+               <string>Add</string>
+              </property>
+              <property name="icon">
+               <iconset resource="build_gamedata.qrc">
+                <normaloff>:/toolButtons/icons/ic_nel_add_item.png</normaloff>:/toolButtons/icons/ic_nel_add_item.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="exeDllCfgDirRemoveTB">
+              <property name="text">
+               <string>Remove</string>
+              </property>
+              <property name="icon">
+               <iconset resource="build_gamedata.qrc">
+                <normaloff>:/toolButtons/icons/ic_nel_delete_item.png</normaloff>:/toolButtons/icons/ic_nel_delete_item.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="exeDllCfgDirDownTB">
+              <property name="text">
+               <string>Down</string>
+              </property>
+              <property name="icon">
+               <iconset resource="build_gamedata.qrc">
+                <normaloff>:/toolButtons/icons/ic_nel_down_item.png</normaloff>:/toolButtons/icons/ic_nel_down_item.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -572,33 +566,11 @@
      </widget>
     </widget>
    </item>
-   <item row="1" column="0">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>428</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="toolCheckPB">
-     <property name="toolTip">
-      <string>Check for the availability of tools used by the build gamedata process.</string>
-     </property>
-     <property name="text">
-      <string>Tool Check</string>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <resources>
   <include location="../../object_viewer_qt.qrc"/>
+  <include location="build_gamedata.qrc"/>
  </resources>
  <connections/>
 </ui>

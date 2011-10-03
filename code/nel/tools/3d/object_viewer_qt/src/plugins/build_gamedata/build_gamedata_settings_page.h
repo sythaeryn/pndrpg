@@ -20,6 +20,7 @@
 #define BUILD_GAMEDATA_SETTINGS_PAGE_H
 
 #include <QtCore/QObject>
+#include <QStringListModel>
 
 #include "../core/ioptions_page.h"
 
@@ -52,10 +53,14 @@ public:
 	virtual void apply();
 	virtual void finish() {}
 
+private Q_SLOTS:
+	void addToolDirectory();
+
 private:
 	QWidget *m_currentPage;
 	Ui::BuildGamedataSettingsPage m_ui;
 	BuildGamedataPlugin *m_buildGamedataPlugin;
+	QStringListModel *m_toolsDirListViewModel;
 };
 
 } // namespace BuildGamedata
