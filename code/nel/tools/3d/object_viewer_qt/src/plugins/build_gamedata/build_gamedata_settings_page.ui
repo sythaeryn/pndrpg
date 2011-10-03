@@ -268,7 +268,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="toolBexeDllCfgDirAddTButton_3">
+             <widget class="QToolButton" name="exeDllCfgDirAddTB">
               <property name="text">
                <string>Add</string>
               </property>
