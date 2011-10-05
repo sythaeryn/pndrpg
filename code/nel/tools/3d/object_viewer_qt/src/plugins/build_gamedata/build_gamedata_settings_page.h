@@ -27,6 +27,9 @@
 #include "ui_build_gamedata_settings_page.h"
 
 class QWidget;
+class QSignalMapper;
+class QListWidget;
+class QLineEdit;
 
 namespace BuildGamedata
 {
@@ -53,14 +56,56 @@ public:
 	virtual void apply();
 	virtual void finish() {}
 
+	enum DirButtonType
+	{
+		// Tool List Widget Tool Buttons
+		TOOL_ADD,
+		TOOL_DEL,
+		TOOL_UP,
+		TOOL_DWN,
+		
+		// Exe/Dll/Cfg List Widget Tool Buttons
+		EXE_ADD,
+		EXE_DEL,
+		EXE_UP,
+		EXE_DWN,
+
+		// General Page Tool Buttons
+		PYTHON_TB,
+		SCRIPT_TB,
+		WORKSPC_TB,
+		DATABASE_TB,
+
+		LVLDSN_TB,
+		LVLDSN_DFN_TB,
+		LVLDSN_WRLD_TB,
+		PRIMS_TB,
+		GAMEDEV_TB,
+		DATACOMMON_TB,
+
+		OUTPUT_EXPORT_TB,
+		OUTPUT_INSTALL_TB,
+		OUTPUT_DATASHARD_TB,
+		OUTPUT_CLIENTDEV_TB,
+		OUTPUT_CLIENTPATCH_TB,
+		OUTPUT_CLIENTINSTALL_TB
+	};
+
 private Q_SLOTS:
-	void addToolDirectory();
+	void buttonClicked(int buttonId);
 
 private:
+	void readSettings();
+	void writeSettings();
+
+	void pathDialogForListWidget(QListWidget *listWidget);
+	void pathDialogForLineEdit(QLineEdit *lineEditWidget);
+	void fileDialogForLineEdit(QLineEdit *lineEditWidget);
+
 	QWidget *m_currentPage;
 	Ui::BuildGamedataSettingsPage m_ui;
 	BuildGamedataPlugin *m_buildGamedataPlugin;
-	QStringListModel *m_toolsDirListViewModel;
+	QSignalMapper *m_directoryButtonMapper;
 };
 
 } // namespace BuildGamedata

@@ -33,7 +33,7 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="1">
+   <item row="1" column="2">
     <widget class="QPushButton" name="toolCheckPB">
      <property name="toolTip">
       <string>Check for the availability of tools used by the build gamedata process.</string>
@@ -43,10 +43,10 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="2">
+   <item row="0" column="0" colspan="3">
     <widget class="QTabWidget" name="buildGamedataSettingsTW">
      <property name="currentIndex">
-      <number>1</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -251,9 +251,6 @@
           <string>External BIN/LIB/CFG Directories</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0" rowspan="2">
-           <widget class="QListView" name="windowsExeDllCfgDirectoriesLV"/>
-          </item>
           <item row="0" column="1" rowspan="2">
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
@@ -314,6 +311,9 @@
              </spacer>
             </item>
            </layout>
+          </item>
+          <item row="0" column="0" rowspan="2">
+           <widget class="QListWidget" name="exeDllCfgDirectoriesLW"/>
           </item>
          </layout>
         </widget>
@@ -564,6 +564,13 @@
        </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="restoreDefaultsPB">
+     <property name="text">
+      <string>Restore Defaults</string>
+     </property>
     </widget>
    </item>
   </layout>
