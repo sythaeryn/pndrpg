@@ -17,23 +17,30 @@
 
 #include "build_gamedata_settings_page.h"
 
+
 // Qt includes
 #include <QtGui/QWidget>
 #include <QFileDialog>
+#include <QSignalMapper>
+#include <QSettings>
 
 // NeL includes
 
 // Project includes
+#include "build_gamedata_constants.h"
+#include "../core/icore.h"
 
 namespace BuildGamedata
 {
+
+QString lastDir = ".";
 
 CBuildGamedataSettingsPage::CBuildGamedataSettingsPage(BuildGamedataPlugin *plugin, QObject *parent)
 	: IOptionsPage(parent),
 	  m_currentPage(NULL),
 	  m_buildGamedataPlugin(plugin)
 {
-//	connect(m_ui.toolDirectoryAddTB, SIGNAL(clicked()), this, SLOT(addToolDirectory());
+	m_directoryButtonMapper = new QSignalMapper();
 }
 
 QString CBuildGamedataSettingsPage::id() const
@@ -48,12 +55,12 @@ QString CBuildGamedataSettingsPage::trName() const
 
 QString CBuildGamedataSettingsPage::category() const
 {
-	return QLatin1String("General");
+	return QLatin1String("Build Gamedata");
 }
 
 QString CBuildGamedataSettingsPage::trCategory() const
 {
-	return tr("General");
+	return tr("Build Gamedata");
 }
 
 QIcon CBuildGamedataSettingsPage::categoryIcon() const
@@ -65,18 +72,241 @@ QWidget *CBuildGamedataSettingsPage::createPage(QWidget *parent)
 {
 	m_currentPage = new QWidget(parent);
 	m_ui.setupUi(m_currentPage);
+
+	// Read in the settings information.
+	readSettings();
+
+	/*
+	 * Connections for the tool directory list widget and its tool buttons.
+	 */
+	connect(m_ui.toolDirectoryAddTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.toolDirectoryAddTB, TOOL_ADD);
+	connect(m_ui.toolDirectoryRemoveTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.toolDirectoryRemoveTB, TOOL_DEL);
+	connect(m_ui.toolDirectoryUpTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.toolDirectoryUpTB, TOOL_UP);
+	connect(m_ui.toolDirectoryDownTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.toolDirectoryDownTB, TOOL_DWN);
+
+	/*
+	 * Connections for the exe/dll/cfg directory list widget and its tool buttons.
+	 */
+	connect(m_ui.exeDllCfgDirAddTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.exeDllCfgDirAddTB, EXE_ADD);
+	connect(m_ui.exeDllCfgDirRemoveTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.exeDllCfgDirRemoveTB, EXE_DEL);
+	connect(m_ui.exeDllCfgDirUpTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.exeDllCfgDirUpTB, EXE_UP);
+	connect(m_ui.exeDllCfgDirDownTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.exeDllCfgDirDownTB, EXE_DWN);
+
+	/*
+	 * Connections on 'General' page for tool buttons.
+	 */
+	connect(m_ui.pythonExeTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.pythonExeTB, PYTHON_TB);
+	connect(m_ui.scriptDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.scriptDirectoryTB, SCRIPT_TB);
+	connect(m_ui.workspaceDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.workspaceDirectoryTB, WORKSPC_TB);
+	connect(m_ui.databaseDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.databaseDirectoryTB, DATABASE_TB);
+
+	/*
+	 * Connections on 'Level Design' page for tool buttons.
+	 */
+	connect(m_ui.levelDesignDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.levelDesignDirectoryTB, LVLDSN_TB);
+	connect(m_ui.levelDesignDfnDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.levelDesignDfnDirectoryTB, LVLDSN_DFN_TB);
+	connect(m_ui.levelDesignWorldDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.levelDesignWorldDirectoryTB, LVLDSN_WRLD_TB);
+	connect(m_ui.primitivesDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.primitivesDirectoryTB, PRIMS_TB);
+	connect(m_ui.gamedevDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.gamedevDirectoryTB, GAMEDEV_TB);
+	connect(m_ui.dataCommonDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.dataCommonDirectoryTB, DATACOMMON_TB);
+
+	/*
+	 * Connections on 'Output Paths' page for tool buttons.
+	 */
+	connect(m_ui.exportBuildDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.exportBuildDirectoryTB, OUTPUT_EXPORT_TB);
+	connect(m_ui.installDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.installDirectoryTB, OUTPUT_INSTALL_TB);
+	connect(m_ui.dataShardDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.dataShardDirectoryTB, OUTPUT_DATASHARD_TB);
+	connect(m_ui.clientDevDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.clientDevDirectoryTB, OUTPUT_CLIENTDEV_TB);
+	connect(m_ui.clientPatchDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.clientPatchDirectoryTB, OUTPUT_CLIENTPATCH_TB);
+	connect(m_ui.clientInstallDirectoryTB, SIGNAL(clicked()), m_directoryButtonMapper, SLOT(map()));
+	m_directoryButtonMapper->setMapping(m_ui.clientInstallDirectoryTB, OUTPUT_CLIENTINSTALL_TB);
+
+	// Final connection for the mega signal mapper.
+	connect(m_directoryButtonMapper, SIGNAL(mapped(int)), this, SLOT(buttonClicked(int)));
+
 	return m_currentPage;
 }
 
 void CBuildGamedataSettingsPage::apply()
 {
+	writeSettings();
 }
 
-void CBuildGamedataSettingsPage::addToolDirectory()
+void CBuildGamedataSettingsPage::buttonClicked(int buttonId)
 {
-	//QString curPath = m_ui->serverTextPathEdit->text();
-	QString path = QFileDialog::getExistingDirectory(NULL, "", QString());
+	switch(buttonId)
+	{
+	case TOOL_ADD:
+		pathDialogForListWidget(m_ui.toolDirectoriesLW);
+		break;
+	case EXE_ADD:
+		pathDialogForListWidget(m_ui.exeDllCfgDirectoriesLW);
+		break;
+
+	case PYTHON_TB:
+		fileDialogForLineEdit(m_ui.pythonExeLE);
+		break;
+	case SCRIPT_TB:
+		pathDialogForLineEdit(m_ui.scriptDirectoryLE);
+		break;
+	case WORKSPC_TB:
+		pathDialogForLineEdit(m_ui.workspaceDirectoryLE);
+		break;
+	case DATABASE_TB:
+		pathDialogForLineEdit(m_ui.databaseDirectoryLE);
+		break;
+
+
+	case LVLDSN_TB:
+		pathDialogForLineEdit(m_ui.levelDesignDirectoryLE);
+		break;
+	case LVLDSN_DFN_TB:
+		pathDialogForLineEdit(m_ui.levelDesignDfnDirectoryLE);
+		break;
+	case LVLDSN_WRLD_TB:
+		pathDialogForLineEdit(m_ui.levelDesignWorldDirectoryLE);
+		break;
+	case PRIMS_TB:
+		pathDialogForLineEdit(m_ui.primitivesDirectoryLE);
+		break;
+	case GAMEDEV_TB:
+		pathDialogForLineEdit(m_ui.gamedevDirectoryLE);
+		break;
+	case DATACOMMON_TB:
+		pathDialogForLineEdit(m_ui.dataCommonDirectoryLE);
+		break;
+
+	case OUTPUT_EXPORT_TB:
+		pathDialogForLineEdit(m_ui.exportBuildDirectoryLE);
+		break;
+	case OUTPUT_INSTALL_TB:
+		pathDialogForLineEdit(m_ui.installDirectoryLE);
+		break;
+	case OUTPUT_DATASHARD_TB:
+		pathDialogForLineEdit(m_ui.dataShardDirectoryLE);
+		break;
+	case OUTPUT_CLIENTDEV_TB:
+		pathDialogForLineEdit(m_ui.clientDevDirectoryLE);
+		break;
+	case OUTPUT_CLIENTPATCH_TB:
+		pathDialogForLineEdit(m_ui.clientPatchDirectoryLE);
+		break;
+	case OUTPUT_CLIENTINSTALL_TB:
+		pathDialogForLineEdit(m_ui.clientInstallDirectoryLE);
+		break;
+	};
+}
+
+void CBuildGamedataSettingsPage::pathDialogForLineEdit(QLineEdit *lineEditWidget)
+{
+	QString prevDir = (lineEditWidget->text().isEmpty()?lastDir:lineEditWidget->text());
+	QString path = QFileDialog::getExistingDirectory(m_currentPage, "", prevDir);
+	if(!path.isEmpty())
+	{
+		lineEditWidget->setText(path);
+		lastDir = path;
+	}
+}
+
+void CBuildGamedataSettingsPage::fileDialogForLineEdit(QLineEdit *lineEditWidget)
+{
+	QString prevDir = (lineEditWidget->text().isEmpty()?lastDir:lineEditWidget->text());
+	QString path = QFileDialog::getOpenFileName(m_currentPage, "", prevDir);
+	if(!path.isEmpty())
+	{
+		lineEditWidget->setText(path);
+		lastDir = path;
+	}
+}
+
+void CBuildGamedataSettingsPage::pathDialogForListWidget(QListWidget *listWidget)
+{
+	QString path = QFileDialog::getExistingDirectory(m_currentPage, "", lastDir);
+	if(!path.isEmpty())
+	{
+		QListWidgetItem *newItem = new QListWidgetItem();
+		newItem->setText(path);
+		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+		listWidget->addItem(newItem);
+		lastDir = path;
+	}
+}
+
+void CBuildGamedataSettingsPage::readSettings()
+{
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(BuildGamedata::Constants::BUILD_GAMEDATA_SECTION);
+
+	m_ui.pythonExeLE->setText(settings->value(Constants::SETTING_PYTHON_EXE_PATH, Constants::SETTING_PYTHON_EXE_PATH_DEFAULT).toString());
+	m_ui.scriptDirectoryLE->setText(settings->value(Constants::SETTING_SCRIPT_PATH, Constants::SETTING_SCRIPT_PATH_DEFAULT).toString());
+	m_ui.workspaceDirectoryLE->setText(settings->value(Constants::SETTING_WORKSPACE_PATH, Constants::SETTING_WORKSPACE_PATH_DEFAULT).toString());
+	m_ui.databaseDirectoryLE->setText(settings->value(Constants::SETTING_DATABASE_PATH, Constants::SETTING_DATABASE_PATH_DEFAULT).toString());
+	m_ui.levelDesignDirectoryLE->setText(settings->value(Constants::SETTING_LEVELDESIGN_PATH, Constants::SETTING_LEVELDESIGN_PATH_DEFAULT).toString());
+	m_ui.levelDesignDfnDirectoryLE->setText(settings->value(Constants::SETTING_LEVELDESIGN_DFN_PATH, Constants::SETTING_LEVELDESIGN_DFN_PATH_DEFAULT).toString());
+	m_ui.levelDesignWorldDirectoryLE->setText(settings->value(Constants::SETTING_LEVELDESIGN_WORLD_PATH, Constants::SETTING_LEVELDESIGN_WORLD_PATH_DEFAULT).toString());
+	m_ui.primitivesDirectoryLE->setText(settings->value(Constants::SETTING_PRIMITIVES_PATH, Constants::SETTING_PRIMITIVES_PATH_DEFAULT).toString());
+	m_ui.gamedevDirectoryLE->setText(settings->value(Constants::SETTING_GAMEDEV_PATH, Constants::SETTING_GAMEDEV_PATH_DEFAULT).toString());
+	m_ui.dataCommonDirectoryLE->setText(settings->value(Constants::SETTING_DATA_COMMON_PATH, Constants::SETTING_DATA_COMMON_PATH_DEFAULT).toString());
+	m_ui.exportBuildDirectoryLE->setText(settings->value(Constants::SETTING_EXPORT_PATH, Constants::SETTING_EXPORT_PATH_DEFAULT).toString());
+	m_ui.installDirectoryLE->setText(settings->value(Constants::SETTING_INSTALL_PATH, Constants::SETTING_INSTALL_PATH_DEFAULT).toString());
+	m_ui.dataShardDirectoryLE->setText(settings->value(Constants::SETTING_DATA_SHARD_PATH, Constants::SETTING_DATA_SHARD_PATH_DEFAULT).toString());
+	m_ui.clientDevDirectoryLE->setText(settings->value(Constants::SETTING_CLIENT_DEV_PATH, Constants::SETTING_CLIENT_DEV_PATH_DEFAULT).toString());
+	m_ui.clientPatchDirectoryLE->setText(settings->value(Constants::SETTING_CLIENT_PATCH_PATH, Constants::SETTING_CLIENT_PATCH_PATH_DEFAULT).toString());
+	m_ui.clientInstallDirectoryLE->setText(settings->value(Constants::SETTING_CLIENT_INSTALL_PATH, Constants::SETTING_CLIENT_INSTALL_PATH_DEFAULT).toString());
 	
+	m_ui.toolSuffixLE->setText(settings->value(Constants::SETTING_TOOL_SUFFIX, Constants::SETTING_TOOL_SUFFIX_DEFAULT).toString());
+
+	settings->endGroup();
+}
+
+void CBuildGamedataSettingsPage::writeSettings()
+{
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(BuildGamedata::Constants::BUILD_GAMEDATA_SECTION);
+
+	settings->setValue(Constants::SETTING_PYTHON_EXE_PATH, m_ui.pythonExeLE->text());
+	settings->setValue(Constants::SETTING_SCRIPT_PATH, m_ui.scriptDirectoryLE->text());
+	settings->setValue(Constants::SETTING_WORKSPACE_PATH, m_ui.workspaceDirectoryLE->text());
+	settings->setValue(Constants::SETTING_DATABASE_PATH, m_ui.databaseDirectoryLE->text());
+	settings->setValue(Constants::SETTING_LEVELDESIGN_PATH, m_ui.levelDesignDirectoryLE->text());
+	settings->setValue(Constants::SETTING_LEVELDESIGN_DFN_PATH, m_ui.levelDesignDfnDirectoryLE->text());
+	settings->setValue(Constants::SETTING_LEVELDESIGN_WORLD_PATH, m_ui.levelDesignWorldDirectoryLE->text());
+	settings->setValue(Constants::SETTING_PRIMITIVES_PATH, m_ui.primitivesDirectoryLE->text());
+	settings->setValue(Constants::SETTING_GAMEDEV_PATH, m_ui.gamedevDirectoryLE->text());
+	settings->setValue(Constants::SETTING_DATA_COMMON_PATH, m_ui.dataCommonDirectoryLE->text());
+	settings->setValue(Constants::SETTING_EXPORT_PATH, m_ui.exportBuildDirectoryLE->text());
+	settings->setValue(Constants::SETTING_INSTALL_PATH, m_ui.installDirectoryLE->text());
+	settings->setValue(Constants::SETTING_DATA_SHARD_PATH, m_ui.dataShardDirectoryLE->text());
+	settings->setValue(Constants::SETTING_CLIENT_DEV_PATH, m_ui.clientDevDirectoryLE->text());
+	settings->setValue(Constants::SETTING_CLIENT_PATCH_PATH, m_ui.clientPatchDirectoryLE->text());
+	settings->setValue(Constants::SETTING_CLIENT_INSTALL_PATH, m_ui.clientInstallDirectoryLE->text());
+	
+	settings->setValue(Constants::SETTING_TOOL_SUFFIX, m_ui.toolSuffixLE->text());
+
+	settings->endGroup();
 }
 
 } /* namespace BuildGamedata */
