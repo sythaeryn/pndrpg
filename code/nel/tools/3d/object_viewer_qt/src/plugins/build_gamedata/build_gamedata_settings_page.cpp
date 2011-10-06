@@ -162,8 +162,26 @@ void CBuildGamedataSettingsPage::buttonClicked(int buttonId)
 	case TOOL_ADD:
 		pathDialogForListWidget(m_ui.toolDirectoriesLW);
 		break;
+	case TOOL_DEL:
+		removePath(m_ui.toolDirectoriesLW);
+		break;
+	case TOOL_UP:
+		upPath(m_ui.toolDirectoriesLW);
+		break;
+	case TOOL_DWN:
+		downPath(m_ui.toolDirectoriesLW);
+		break;
 	case EXE_ADD:
 		pathDialogForListWidget(m_ui.exeDllCfgDirectoriesLW);
+		break;
+	case EXE_DEL:
+		removePath(m_ui.exeDllCfgDirectoriesLW);
+		break;
+	case EXE_UP:
+		upPath(m_ui.exeDllCfgDirectoriesLW);
+		break;
+	case EXE_DWN:
+		downPath(m_ui.exeDllCfgDirectoriesLW);
 		break;
 
 	case PYTHON_TB:
@@ -255,6 +273,35 @@ void CBuildGamedataSettingsPage::pathDialogForListWidget(QListWidget *listWidget
 	}
 }
 
+void CBuildGamedataSettingsPage::upPath(QListWidget *listWidget)
+{
+	int currentRow = listWidget->currentRow();
+	if (!(currentRow == 0))
+	{
+		QListWidgetItem *item = listWidget->takeItem(currentRow);
+		listWidget->insertItem(--currentRow, item);
+		listWidget->setCurrentRow(currentRow);
+	}
+}
+
+void CBuildGamedataSettingsPage::downPath(QListWidget *listWidget)
+{
+	int currentRow = listWidget->currentRow();
+	if (!(currentRow == listWidget->count()-1))
+	{
+		QListWidgetItem *item = listWidget->takeItem(currentRow);
+		listWidget->insertItem(++currentRow, item);
+		listWidget->setCurrentRow(currentRow);
+	}
+}
+
+void CBuildGamedataSettingsPage::removePath(QListWidget *listWidget)
+{
+	QListWidgetItem *removeItem = listWidget->takeItem(listWidget->currentRow());
+	if (!removeItem)
+		delete removeItem;
+}
+
 void CBuildGamedataSettingsPage::readSettings()
 {
 	QSettings *settings = Core::ICore::instance()->settings();
@@ -279,6 +326,43 @@ void CBuildGamedataSettingsPage::readSettings()
 	
 	m_ui.toolSuffixLE->setText(settings->value(Constants::SETTING_TOOL_SUFFIX, Constants::SETTING_TOOL_SUFFIX_DEFAULT).toString());
 
+	settings->endGroup();
+
+	/*
+	 * Read in the tool directories.
+	 */
+	QStringList toolDefaults;
+	toolDefaults << Constants::SETTING_TOOL_DIRECTORIES_DEFAULT_1;
+	toolDefaults << Constants::SETTING_TOOL_DIRECTORIES_DEFAULT_2;
+	readDirectorySettings(Constants::SETTING_TOOL_DIRECTORIES, m_ui.toolDirectoriesLW, toolDefaults);
+
+	QStringList exeDefaults;
+	exeDefaults << Constants::SETTING_EXE_DIRECTORIES_DEFAULT_1;
+	exeDefaults << Constants::SETTING_EXE_DIRECTORIES_DEFAULT_2;
+	exeDefaults << Constants::SETTING_EXE_DIRECTORIES_DEFAULT_3;
+	exeDefaults << Constants::SETTING_EXE_DIRECTORIES_DEFAULT_4;
+	exeDefaults << Constants::SETTING_EXE_DIRECTORIES_DEFAULT_5;
+	exeDefaults << Constants::SETTING_EXE_DIRECTORIES_DEFAULT_6;
+	exeDefaults << Constants::SETTING_EXE_DIRECTORIES_DEFAULT_7;
+	readDirectorySettings(Constants::SETTING_EXE_DIRECTORIES, m_ui.exeDllCfgDirectoriesLW, exeDefaults);
+}
+
+void CBuildGamedataSettingsPage::readDirectorySettings(const char *settingKey, QListWidget *listWidget, QStringList defaults)
+{
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(BuildGamedata::Constants::BUILD_GAMEDATA_SECTION);
+
+	QStringList paths = settings->value(settingKey).toStringList();
+	if(paths.size() < 1)
+		paths = defaults;
+
+	Q_FOREACH(QString path, paths)
+	{
+		QListWidgetItem *newItem = new QListWidgetItem;
+		newItem->setText(path);
+		newItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+		listWidget->addItem(newItem);
+	}
 	settings->endGroup();
 }
 
@@ -307,6 +391,23 @@ void CBuildGamedataSettingsPage::writeSettings()
 	settings->setValue(Constants::SETTING_TOOL_SUFFIX, m_ui.toolSuffixLE->text());
 
 	settings->endGroup();
+	settings->sync();
+
+	writeDirectorySettings(Constants::SETTING_TOOL_DIRECTORIES, m_ui.toolDirectoriesLW);
+	writeDirectorySettings(Constants::SETTING_EXE_DIRECTORIES, m_ui.exeDllCfgDirectoriesLW);
+}
+
+void CBuildGamedataSettingsPage::writeDirectorySettings(const char *settingKey, QListWidget *listWidget)
+{
+	QStringList paths;
+	for (int i = 0; i < listWidget->count(); ++i)
+		paths << listWidget->item(i)->text();
+
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(BuildGamedata::Constants::BUILD_GAMEDATA_SECTION);
+	settings->setValue(settingKey, paths);
+	settings->endGroup();
+	settings->sync();
 }
 
 } /* namespace BuildGamedata */
