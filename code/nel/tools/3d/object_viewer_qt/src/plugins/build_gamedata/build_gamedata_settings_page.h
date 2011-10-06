@@ -95,12 +95,17 @@ private Q_SLOTS:
 	void buttonClicked(int buttonId);
 
 private:
+	void readDirectorySettings(const char *settingKey, QListWidget *listWidget, QStringList defaults);
 	void readSettings();
+	void writeDirectorySettings(const char *settingKey, QListWidget *listWidget);
 	void writeSettings();
 
 	void pathDialogForListWidget(QListWidget *listWidget);
 	void pathDialogForLineEdit(QLineEdit *lineEditWidget);
 	void fileDialogForLineEdit(QLineEdit *lineEditWidget);
+	void upPath(QListWidget *listWidget);
+	void downPath(QListWidget *listWidget);
+	void removePath(QListWidget *listWidget);
 
 	QWidget *m_currentPage;
 	Ui::BuildGamedataSettingsPage m_ui;
