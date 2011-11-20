@@ -37,10 +37,6 @@ CDirectionWidget::CDirectionWidget(QWidget *parent)
 {
 	_ui.setupUi(this);
 
-	_ui.xzWidget->installEventFilter(this);
-	_ui.yzWidget->installEventFilter(this);
-	_ui.xzWidget->setObjectName("XZ");
-	_ui.yzWidget->setObjectName("YZ");
 	_ui.globalPushButton->hide();
 
 	connect(_ui.globalPushButton ,SIGNAL(clicked()), this, SLOT(setGlobalDirection()));
@@ -51,6 +47,9 @@ CDirectionWidget::CDirectionWidget(QWidget *parent)
 	connect(_ui.decVecJPushButton ,SIGNAL(clicked()), this, SLOT(decVecJ()));
 	connect(_ui.decVecKPushButton ,SIGNAL(clicked()), this, SLOT(decVecK()));
 
+	connect(_ui.zenithSpinBox ,SIGNAL(valueChanged(int)), this, SLOT(setNewSphericalCoord()));
+	connect(_ui.azimuthSpinBox ,SIGNAL(valueChanged(int)), this, SLOT(setNewSphericalCoord()));
+		
 	// Set default value +K
 	setValue(NLMISC::CVector::K);
 }
@@ -65,11 +64,28 @@ void CDirectionWidget::enabledGlobalVariable(bool enabled)
 	setGlobalName("", false);
 }
 
-void CDirectionWidget::setValue(const NLMISC::CVector &value, bool emit)
+void CDirectionWidget::setValue(const NLMISC::CVector &value, bool emit, bool updateWidget)
 {
 	_value = value;
-	_ui.xzWidget->repaint();
-	_ui.yzWidget->repaint();
+
+	float azimuth, zenith, r;
+	value.cartesianToSpheric(r, azimuth, zenith);
+
+	// rad -> deg
+	azimuth *= 180.0 / NLMISC::Pi;
+	zenith *= 180.0 / NLMISC::Pi;
+	
+	if (updateWidget)
+	{
+		_ui.azimuthSpinBox->blockSignals(true);
+		_ui.zenithSpinBox->blockSignals(true);
+
+		_ui.azimuthDial->setValue(azimuth);
+		_ui.zenithDial->setValue(zenith);
+
+		_ui.azimuthSpinBox->blockSignals(false);
+		_ui.zenithSpinBox->blockSignals(false);
+	}
 
 	if (emit)
 	{
@@ -80,9 +96,6 @@ void CDirectionWidget::setValue(const NLMISC::CVector &value, bool emit)
 void CDirectionWidget::setGlobalName(const QString &globalName, bool emit)
 {
 	_globalName = globalName;
-
-	_ui.xzWidget->setVisible(_globalName.isEmpty());
-	_ui.yzWidget->setVisible(_globalName.isEmpty());
 
 	_ui.incVecIPushButton->setEnabled(_globalName.isEmpty());
 	_ui.incVecJPushButton->setEnabled(_globalName.isEmpty());
@@ -136,93 +149,17 @@ void CDirectionWidget::decVecK()
 	setValue( - NLMISC::CVector::K);
 }
 
-void CDirectionWidget::setNewVecXZ(float x, float y)
+void CDirectionWidget::setNewSphericalCoord()
 {
-	const float epsilon = 10E-3f;
 	NLMISC::CVector v = _value;
+	
+	// deg -> rad
+	float azimuth = _ui.azimuthSpinBox->value() * (NLMISC::Pi / 180.0);
+	float zenith = _ui.zenithSpinBox->value() * (NLMISC::Pi / 180.0);
 
-	v.x = x;
-	v.z = y;
-
-	float d = v.x * v.x + v.z * v.z;
-	float f;
-	if (fabs(d) > epsilon)
-		f = sqrt((1.f - v.y * v.y) / d);
-	else
-		f = 1;
-
-	v.x *= f;
-	v.z *= f;
-
-	v.normalize();
-
-	setValue(v);
-}
-
-void CDirectionWidget::setNewVecYZ(float x, float y)
-{
-	const float epsilon = 10E-3f;
-	NLMISC::CVector v = _value;
-
-	v.y = x;
-	v.z = y;
-
-	float d = v.y * v.y + v.z * v.z;
-	float f;
-	if (fabs(d) > epsilon)
-		f = sqrt((1.f - v.x * v.x) / d);
-	else
-		f = 1;
-
-	v.y *= f;
-	v.z *= f;
-
-	v.normalize();
-
-	setValue(v);
-}
-
-bool CDirectionWidget::eventFilter(QObject *object, QEvent *event)
-{
-	QWidget *widget = qobject_cast<QWidget *>(object);
-	switch (event->type())
-	{
-	case QEvent::Paint:
-	{
-		float x;
-		if (widget->objectName() == "XZ")
-			x = _value.x;
-		else
-			x = _value.y;
-		QPainter painter(widget);
-		painter.setRenderHint(QPainter::Antialiasing, true);
-		painter.setBrush(QBrush(Qt::white));
-		painter.setPen(QPen(Qt::black, 2, Qt::SolidLine));
-		painter.drawRoundedRect(QRect(3, 3, widget->width() - 6, widget->height() - 6), 3.0, 3.0);
-		painter.setPen(QPen(Qt::gray, 1, Qt::SolidLine));
-		painter.drawLine(widget->width() / 2, 4, widget->width() / 2, widget->height() - 4);
-		painter.drawLine(4, widget->height() / 2, widget->width() - 4, widget->height() / 2);
-		painter.drawText( 10, 15, widget->objectName());
-		painter.setPen(QPen(Qt::red, 2, Qt::SolidLine));
-		painter.drawLine(widget->width() / 2, widget->height() / 2,
-						 int((widget->width() / 2) + x * 0.9f * directionSize), int((widget->height() / 2) - _value.z * 0.9f * directionSize));
-		break;
-	}
-	case QEvent::MouseButtonDblClick:
-	{
-		QMouseEvent *mouseEvent = (QMouseEvent *) event;
-		float vx = (mouseEvent->x() - (widget->width() / 2)) / 0.9f;
-		float vy = ((widget->height() / 2) - mouseEvent->y()) / 0.9f;
-
-		if (widget->objectName() == "XZ")
-			setNewVecXZ(vx, vy);
-		else
-			setNewVecYZ(vx, vy);
-
-		break;
-	}
-	}
-	return QWidget::eventFilter(object, event);
+	v.sphericToCartesian(1.0, azimuth, zenith);
+	
+	setValue(v, true, false);
 }
 
 } /* namespace NLQT */

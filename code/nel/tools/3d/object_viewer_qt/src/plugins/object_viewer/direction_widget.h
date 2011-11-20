@@ -52,7 +52,7 @@ Q_SIGNALS:
 	void globalNameChanged(const QString &globalName);
 
 public Q_SLOTS:
-	void setValue(const NLMISC::CVector &value, bool emit = true);
+	void setValue(const NLMISC::CVector &value, bool emit = true, bool updateWidget = true);
 	void setGlobalName(const QString &globalName, bool emit = true);
 
 private Q_SLOTS:
@@ -63,12 +63,10 @@ private Q_SLOTS:
 	void decVecI();
 	void decVecJ();
 	void decVecK();
-	void setNewVecXZ(float x, float y);
-	void setNewVecYZ(float x, float y);
 
+	void setNewSphericalCoord();
+	
 private:
-	bool eventFilter(QObject *object, QEvent *event);
-
 	NLMISC::CVector _value;
 	QString _globalName;
 
