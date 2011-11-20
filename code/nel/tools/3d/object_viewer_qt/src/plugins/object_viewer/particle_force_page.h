@@ -84,6 +84,8 @@ private Q_SLOTS:
 	void setDir(const NLMISC::CVector &value);
 	void setGlobalName(const QString &globalName);
 	void setFactorBrownianForce(float value);
+	void setScaleTurbul(float value);
+	void setNumOctavesTurbul(uint32 value);
 
 private:
 

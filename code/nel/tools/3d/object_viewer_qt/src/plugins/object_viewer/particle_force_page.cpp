@@ -45,6 +45,9 @@ CForcePage::CForcePage(QWidget *parent)
 	_ui.radialViscosityWidget->setRange(0.0, 1.0);
 	_ui.tangentialViscosityWidget->setRange(0, 1);
 
+	_ui.scaleTurbulWidget->setRange(0.0, 1.0);
+	_ui.numOctavesWidget->setRange(0, 10);
+
 	connect(_ui.toTargetsButton, SIGNAL(clicked()), this, SLOT(addTarget()));
 	connect(_ui.toAvaibleTargetsButton, SIGNAL(clicked()), this, SLOT(removeTarget()));
 
@@ -53,6 +56,8 @@ CForcePage::CForcePage(QWidget *parent)
 	connect(_ui.tangentialViscosityWidget, SIGNAL(valueChanged(float)), this, SLOT(setTangentialViscosity(float)));
 	connect(_ui.directionWidget, SIGNAL(valueChanged(NLMISC::CVector)), this, SLOT(setDir(NLMISC::CVector)));
 	connect(_ui.directionWidget, SIGNAL(globalNameChanged(QString)), this, SLOT(setGlobalName(QString)));
+	connect(_ui.scaleTurbulWidget, SIGNAL(valueChanged(float)), this, SLOT(setScaleTurbul(float)));
+	connect(_ui.numOctavesWidget, SIGNAL(valueChanged(uint32)), this, SLOT(setNumOctavesTurbul(uint32)));
 }
 
 CForcePage::~CForcePage()
@@ -107,6 +112,18 @@ void CForcePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLocatedBindab
 		_ui.parametricFactorWidget->setValue(brownianForce->getParametricFactor(), false);
 		_ui.parametricFactorLabel->show();
 		_ui.parametricFactorWidget->show();
+	}
+
+	// Turbulence (to tune scale factor and num octaves)
+	NL3D::CPSTurbul *turbulForce = dynamic_cast<NL3D::CPSTurbul *>(_LBTarget);
+	if (turbulForce)
+	{
+		_ui.scaleTurbulWidget->setValue(turbulForce->getScale(), false);
+		_ui.numOctavesWidget->setValue(turbulForce->getNumOctaves(), false);
+		_ui.scaleTurbulLabel->show();
+		_ui.scaleTurbulWidget->show();
+		_ui.numOctavesLabel->show();
+		_ui.numOctavesWidget->show();
 	}
 }
 
@@ -201,6 +218,20 @@ void CForcePage::setFactorBrownianForce(float value)
 	updateModifiedFlag();
 }
 
+void CForcePage::setScaleTurbul(float value)
+{
+	nlassert(_LBTarget);
+	dynamic_cast<NL3D::CPSTurbul *>(_LBTarget)->setScale(value);
+	updateModifiedFlag();
+}
+
+void CForcePage::setNumOctavesTurbul(uint value)
+{
+	nlassert(_LBTarget);
+	dynamic_cast<NL3D::CPSTurbul *>(_LBTarget)->setNumOctaves(value);
+	updateModifiedFlag();
+}
+
 void CForcePage::hideAdditionalWidget()
 {
 	_ui.directionWidget->hide();
@@ -210,6 +241,10 @@ void CForcePage::hideAdditionalWidget()
 	_ui.radialViscosityWidget->hide();
 	_ui.tangentialViscosityLabel->hide();
 	_ui.tangentialViscosityWidget->hide();
+	_ui.scaleTurbulLabel->hide();
+	_ui.scaleTurbulWidget->hide();
+	_ui.numOctavesLabel->hide();
+	_ui.numOctavesWidget->hide();
 }
 
 void CForcePage::updateTargets()

@@ -59,6 +59,7 @@ static const char *const LocatedBindable[] =
 	QT_TR_NOOP("ShockWave"),
 	QT_TR_NOOP("Ribbon look at"),
 	QT_TR_NOOP("Gravity"),
+	QT_TR_NOOP("Turbulence force"),
 	QT_TR_NOOP("Directional force"),
 	QT_TR_NOOP("Spring"),
 	QT_TR_NOOP("Flyid friction"),
@@ -97,6 +98,7 @@ struct Action
 		ParticleShockWave,
 		ParticleRibbonLookAt,
 		ForceGravity,
+		ForceTurbulence,
 		ForceDirectional,
 		ForceSpring,
 		ForceFlyidFriction,
@@ -450,6 +452,9 @@ void CParticleWorkspaceDialog::bindNewLocatedBindable(int id)
 		break;
 	case Action::ForceGravity:
 		toCreate = new NL3D::CPSGravity;
+		break;
+	case Action::ForceTurbulence:
+		toCreate = new NL3D::CPSTurbul;
 		break;
 	case Action::ForceDirectional:
 		toCreate = new NL3D::CPSDirectionnalForce;

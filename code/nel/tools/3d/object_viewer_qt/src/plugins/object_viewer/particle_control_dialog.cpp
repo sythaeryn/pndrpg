@@ -55,7 +55,7 @@ CParticleControlDialog::CParticleControlDialog(CSkeletonTreeModel *model, QWidge
 
 	connect(_ui.playToolButton, SIGNAL(clicked()), this, SLOT(play()));
 	connect(_ui.stopToolButton, SIGNAL(clicked()), this, SLOT(stop()));
-	connect(_ui.horizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
+	connect(_ui.horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
 	connect(_ui.helpersCheckBox, SIGNAL(toggled(bool)), this, SLOT(displayHelpers(bool)));
 	connect(_ui.displayBoxCheckBox, SIGNAL(toggled(bool)), this, SLOT(displayBBox(bool)));
 	connect(_ui.loopCheckBox, SIGNAL(toggled(bool)), this, SLOT(autoRepeat(bool)));
