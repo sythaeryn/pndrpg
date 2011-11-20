@@ -632,20 +632,19 @@ struct CPSTurbulForceFunc
 	#endif
 	void operator() (const NLMISC::CVector &pos, NLMISC::CVector &speed, float invMass)
 	{
-		nlassert(0);
+	//	nlassert(0);
 
 		// TODO : complete that
 
-	/*	static const NLMISC::CVector v1(1.235f, - 45.32f, 157.5f);
+		static const NLMISC::CVector v1(1.235f, - 45.32f, 157.5f);
 		static const NLMISC::CVector v2(-0.35f, 7.77f, 220.77f);
 
 
-		speed += ellapsedTime * _Intensity
+		speed += CParticleSystem::EllapsedTime * _Intensity
 			   * NLMISC::CVector(2.f * (-0.5f + CPSUtil::buildPerlinNoise(_Scale * pos, _NumOctaves))
 						 , 2.f * (-0.5f +  CPSUtil::buildPerlinNoise(_Scale * (pos +  v1) , _NumOctaves))
 						 , 2.f * (-0.5f +  CPSUtil::buildPerlinNoise(_Scale * (pos +  v2) , _NumOctaves))
-						 );
-						 */
+						 ) / 10000000000;
 	}
 
 	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
@@ -667,7 +666,7 @@ class CPSTurbul : public CIsotropicForceT<CPSTurbulForceFunc>, public CPSForceIn
 {
 public:
 	// create the force with a friction coefficient
-	CPSTurbul(float scale = 1.f , uint numOctaves = 4)
+	CPSTurbul(float scale = 0.5 , uint numOctaves = 3)
 	{
 		nlassert(numOctaves > 0);
 		setScale(scale);

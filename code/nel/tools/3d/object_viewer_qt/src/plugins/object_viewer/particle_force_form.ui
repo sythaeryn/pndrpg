@@ -6,21 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>212</width>
-    <height>335</height>
+    <width>217</width>
+    <height>289</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="leftMargin">
-    <number>6</number>
-   </property>
-   <property name="topMargin">
-    <number>6</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>6</number>
    </property>
    <property name="spacing">
@@ -73,59 +67,6 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
-    <spacer name="verticalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>56</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="5" column="0" colspan="3">
-    <widget class="NLQT::CAttribFloatWidget" name="forceIntensityWidget">
-     <property name="title">
-      <string>Force intensity</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0" colspan="3">
-    <widget class="QLabel" name="parametricFactorLabel">
-     <property name="text">
-      <string>Parametric factor:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="0" colspan="3">
-    <widget class="NLQT::CEditRangeFloatWidget" name="parametricFactorWidget" native="true"/>
-   </item>
-   <item row="8" column="0">
-    <widget class="QLabel" name="radialViscosityLabel">
-     <property name="text">
-      <string>Radial viscosity:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="0" colspan="3">
-    <widget class="NLQT::CEditRangeFloatWidget" name="radialViscosityWidget" native="true"/>
-   </item>
-   <item row="10" column="0" colspan="2">
-    <widget class="QLabel" name="tangentialViscosityLabel">
-     <property name="text">
-      <string>Tangential viscosity:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="0" colspan="3">
-    <widget class="NLQT::CEditRangeFloatWidget" name="tangentialViscosityWidget" native="true"/>
-   </item>
-   <item row="12" column="0" colspan="3">
-    <widget class="NLQT::CDirectionWidget" name="directionWidget" native="true"/>
-   </item>
    <item row="2" column="1">
     <widget class="QToolButton" name="toTargetsButton">
      <property name="maximumSize">
@@ -158,6 +99,79 @@
      </property>
     </widget>
    </item>
+   <item row="4" column="1">
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>56</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="5" column="0" colspan="3">
+    <widget class="NLQT::CAttribFloatWidget" name="forceIntensityWidget">
+     <property name="title">
+      <string>Force intensity</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="parametricFactorLabel">
+     <property name="text">
+      <string>Parametric factor:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0" colspan="3">
+    <widget class="NLQT::CEditRangeFloatWidget" name="parametricFactorWidget" native="true"/>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="radialViscosityLabel">
+     <property name="text">
+      <string>Radial viscosity:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0" colspan="3">
+    <widget class="NLQT::CEditRangeFloatWidget" name="radialViscosityWidget" native="true"/>
+   </item>
+   <item row="10" column="0" colspan="2">
+    <widget class="QLabel" name="tangentialViscosityLabel">
+     <property name="text">
+      <string>Tangential viscosity:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="0" colspan="3">
+    <widget class="NLQT::CEditRangeFloatWidget" name="tangentialViscosityWidget" native="true"/>
+   </item>
+   <item row="12" column="0" colspan="3">
+    <widget class="NLQT::CDirectionWidget" name="directionWidget" native="true"/>
+   </item>
+   <item row="13" column="0">
+    <widget class="QLabel" name="scaleTurbulLabel">
+     <property name="text">
+      <string>Scale</string>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="0" colspan="3">
+    <widget class="NLQT::CEditRangeFloatWidget" name="scaleTurbulWidget" native="true"/>
+   </item>
+   <item row="15" column="0">
+    <widget class="QLabel" name="numOctavesLabel">
+     <property name="text">
+      <string>Numbers octaves</string>
+     </property>
+    </widget>
+   </item>
+   <item row="16" column="0" colspan="3">
+    <widget class="NLQT::CEditRangeUIntWidget" name="numOctavesWidget" native="true"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -177,6 +191,12 @@
    <class>NLQT::CAttribFloatWidget</class>
    <extends>QGroupBox</extends>
    <header>attrib_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NLQT::CEditRangeUIntWidget</class>
+   <extends>QWidget</extends>
+   <header>edit_range_widget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
