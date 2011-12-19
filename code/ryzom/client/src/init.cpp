@@ -921,20 +921,32 @@ void prelogInit()
 		Driver->setWindowTitle(CI18N::get("TheSagaOfRyzom"));
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-		vector<CBitmap> bitmaps;
+		// add all existing icons
+		vector<string> filenames;
+		filenames.push_back("/usr/share/icons/hicolor/128x128/apps/ryzom.png");
+		filenames.push_back("/usr/share/icons/hicolor/48x48/apps/ryzom.png");
+		filenames.push_back("/usr/share/icons/hicolor/32x32/apps/ryzom.png");
+		filenames.push_back("/usr/share/icons/hicolor/24x24/apps/ryzom.png");
+		filenames.push_back("/usr/share/icons/hicolor/22x22/apps/ryzom.png");
+		filenames.push_back("/usr/share/icons/hicolor/16x16/apps/ryzom.png");
+		filenames.push_back("/usr/share/pixmaps/ryzom.png");
 
-		string fileName = "/usr/share/pixmaps/ryzom.png";
-
+		// check if an icon is present in registered paths
 		if(CPath::exists("ryzom.png"))
-		  fileName = CPath::lookup("ryzom.png");
+		  filenames.push_back(CPath::lookup("ryzom.png"));
 
-		CIFile file;
-
-		if (file.open(fileName))
+		vector<CBitmap> bitmaps;
+		
+		for(size_t i = 0; i < filenames.size(); ++i)
 		{
-			CBitmap bitmap;
-			if (bitmap.load(file))
-				bitmaps.push_back(bitmap);
+			CIFile file;
+
+			if (CFile::fileExists(filenames[i]) && file.open(filenames[i]))
+			{
+				CBitmap bitmap;
+				if (bitmap.load(file))
+					bitmaps.push_back(bitmap);
+			}
 		}
 
 		Driver->setWindowIcon(bitmaps);
@@ -1105,7 +1117,7 @@ void prelogInit()
 
 		FPU_CHECKER_ONCE
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		ExitClientError (e.what());
 	}
@@ -1264,7 +1276,7 @@ void postlogInit()
 				{
 					SoundMngr->init(&ProgressBar);
 				}
-				catch(Exception &e)
+				catch(const Exception &e)
 				{
 					nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
 					// leak the alocated sound manager...
@@ -1326,7 +1338,7 @@ void postlogInit()
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 
 			CSBrickManager::getInstance()->init(); // Must be done after sheet loading
-			STRING_MANAGER::CStringManagerClient::specialWordsMemoryCompress(); // Must be done after brick manager init
+			//STRING_MANAGER::CStringManagerClient::specialWordsMemoryCompress(); // Must be done after brick manager init
 
 			initLast = initCurrent;
 			initCurrent = ryzomGetLocalTime();
@@ -1433,7 +1445,7 @@ void postlogInit()
 
 		nlinfo ("PROFILE: %d seconds for postlogInit", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		ExitClientError (e.what());
 	}

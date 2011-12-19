@@ -46,7 +46,7 @@
 namespace NLQT
 {
 
-static const char * const LocatedBindable[] =
+static const char *const LocatedBindable[] =
 {
 	QT_TR_NOOP("Point"),
 	QT_TR_NOOP("LookAt"),
@@ -220,26 +220,29 @@ void CParticleWorkspaceDialog::touchPSState(CParticleTreeItem *item)
 	}
 }
 
-void CParticleWorkspaceDialog::clickedItem(const QModelIndex & index)
+void CParticleWorkspaceDialog::clickedItem(const QModelIndex &index)
 {
-	if (_currentItem != NULL)
+	if (_currentItem != 0)
 		_treeModel->getOwnerNode(_currentItem)->getPSPointer()->setCurrentEditedElement(NULL);
 
 	_currentItem = static_cast<CParticleTreeItem *>(index.internalPointer());
+
+	if (_currentItem == 0)
+		return;
 
 	if (index.flags() != Qt::NoItemFlags)
 		_PropertyDialog->setCurrentEditedElement(_currentItem);
 
 	if ((_currentItem->itemType() == ItemType::Workspace) ||
 			(_currentItem->itemType() == ItemType::ParticleSystemNotLoaded))
-		_currentItem = NULL;
+		_currentItem = 0;
 }
 
 void CParticleWorkspaceDialog::customContextMenu()
 {
 	if (!Modules::psEdit().getParticleWorkspace()) return;
 	clickedItem(_ui.treeView->currentIndex());
-	if (_currentItem == NULL) return;
+	if (_currentItem == 0) return;
 	QMenu *popurMenu = new QMenu(this);
 	switch (_currentItem->itemType())
 	{
@@ -302,6 +305,8 @@ void CParticleWorkspaceDialog::customContextMenu()
 	_instanciateAction->setEnabled(stopped);
 	_savePSAction->setEnabled(stopped);
 	_saveAsPSAction->setEnabled(stopped);
+	_removeFromWSAction->setEnabled(stopped);
+	_clearContentAction->setEnabled(stopped);
 
 	popurMenu->exec(QCursor::pos());
 	delete popurMenu;
@@ -366,13 +371,14 @@ void CParticleWorkspaceDialog::clearContent()
 
 void CParticleWorkspaceDialog::removePS()
 {
-	if (_treeModel->getOwnerNode(_currentItem) == Modules::psEdit().getActiveNode())
+	CWorkspaceNode *node = _currentItem->getNode();
+	if (node == Modules::psEdit().getActiveNode())
 		Modules::psEdit().setActiveNode(NULL);
 
 	QModelIndex index = _ui.treeView->currentIndex();
 	_ui.treeView->setCurrentIndex(index.parent());
 	clickedItem(index.parent());
-	Modules::psEdit().getParticleWorkspace()->removeNode(static_cast<CParticleTreeItem *>(index.internalPointer())->getNode());
+	Modules::psEdit().getParticleWorkspace()->removeNode(node);
 	_treeModel->removeRows(index.row(), index.parent());
 }
 

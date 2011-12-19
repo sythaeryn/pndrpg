@@ -11,7 +11,7 @@
 #include "painter_dock_widget.h"
 
 #include "../core/icore.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../core/core_constants.h"
 
 ZonePainterMainWindow::ZonePainterMainWindow(QWidget *parent) :
@@ -77,7 +77,7 @@ ZonePainterMainWindow::ZonePainterMainWindow(QWidget *parent) :
 
     Core::ICore::instance()->mainWindow()->statusBar()->addPermanentWidget(m_statusInfo);
 
-	
+	m_undoStack = new QUndoStack(this);
 }
 
 void ZonePainterMainWindow::showEvent(QShowEvent *showEvent)
@@ -145,6 +145,7 @@ void ZonePainterMainWindow::loadConfig() {
 
 	QColor color;
 	color = settings->value("BackgroundColor", QColor(80, 80, 80)).value<QColor>();
+	settings->endGroup();
 	m_nelWidget->setBackgroundColor(NLMISC::CRGBA(color.red(), color.green(), color.blue(), color.alpha()));
 }
 

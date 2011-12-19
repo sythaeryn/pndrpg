@@ -25,26 +25,28 @@
 
 // Qt includes
 #include <QtCore/QObject>
-
+#include <QtGui/QUndoStack>
 class QWidget;
 
 namespace Plugin
 {
 
-class CSimpleViewer : public QWidget
+class SimpleViewer : public QWidget
 {
 	Q_OBJECT
 public:
-	CSimpleViewer(QWidget *parent = 0);
-	virtual ~CSimpleViewer() {}
+	SimpleViewer(QWidget *parent = 0);
+	virtual ~SimpleViewer() {}
+
+	QUndoStack *m_undoStack;
 };
 
-class CCoreListener : public Core::ICoreListener
+class ExampleCoreListener : public Core::ICoreListener
 {
 	Q_OBJECT
 public:
-	CCoreListener(QObject *parent = 0): ICoreListener(parent) {}
-	virtual ~CCoreListener() {}
+	ExampleCoreListener(QObject *parent = 0): ICoreListener(parent) {}
+	virtual ~ExampleCoreListener() {}
 
 	virtual bool closeMainWindow() const;
 };

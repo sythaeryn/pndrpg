@@ -149,14 +149,28 @@ static NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
 
 bool CCocoaEventEmitter::pasteTextFromClipboard(ucstring &text)
 {
-#warning "OpenGL Driver: Missing Mac Implementation for pasteTextFromClipboard"
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+	NSArray *classArray = [NSArray arrayWithObject:[NSString class]];
+	NSDictionary *options = [NSDictionary dictionary];
+	
+	BOOL ok = [pasteboard canReadObjectForClasses:classArray options:options];
+	if (ok) 
+	{
+		NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
+		NSString *nstext = [objectsToPaste objectAtIndex:0];
+		text.fromUtf8([nstext UTF8String]);
+		return true;
+	}
 	return false;
 }
 
 bool CCocoaEventEmitter::copyTextToClipboard(const ucstring &text)
 {
-#warning "OpenGL Driver: Missing Mac Implementation for copyTextToClipboard"
-	return false;
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+	[pasteboard clearContents];
+	NSArray *copiedObjects = [NSArray arrayWithObject:[NSString stringWithUTF8String:text.toUtf8().c_str()]];
+	[pasteboard writeObjects:copiedObjects];
+	return true;
 }
 
 /// convert modifier key state to nel internal modifier key state
@@ -359,7 +373,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 		// push the key press event to the event server
 		server->postEvent(new NLMISC::CEventKeyDown(
 			virtualKeycodeToNelKey([event keyCode]),
-			modifierFlagsToNelKeyButton([event modifierFlags]),
+			modifiers,
 			[event isARepeat] == NO, this));
 
 		// if this was a text event
@@ -372,7 +386,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 
 			// push the text event to event server as well
 			server->postEvent(new NLMISC::CEventChar(
-				ucstr[0], NLMISC::noKeyButton, this));
+				ucstr[0], modifiers, this));
 		}
 		break;
 	}
@@ -381,7 +395,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 		// push the key release event to the event server
 		server->postEvent(new NLMISC::CEventKeyUp(
 			virtualKeycodeToNelKey([event keyCode]),
-			modifierFlagsToNelKeyButton([event modifierFlags]), this));
+			modifiers, this));
 		break;
 	}
 	case NSFlagsChanged:break;

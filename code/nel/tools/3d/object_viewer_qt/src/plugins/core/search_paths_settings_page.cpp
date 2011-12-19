@@ -33,37 +33,49 @@ namespace Core
 
 QString lastDir = ".";
 
-CSearchPathsSettingsPage::CSearchPathsSettingsPage(QObject *parent)
+SearchPathsSettingsPage::SearchPathsSettingsPage(bool recurse, QObject *parent)
 	: IOptionsPage(parent),
+	  m_recurse(recurse),
 	  m_page(0)
 {
 }
 
-CSearchPathsSettingsPage::~CSearchPathsSettingsPage()
+SearchPathsSettingsPage::~SearchPathsSettingsPage()
 {
 }
 
-QString CSearchPathsSettingsPage::id() const
+QString SearchPathsSettingsPage::id() const
 {
-	return QLatin1String("SearchPaths");
+	if (m_recurse)
+		return QLatin1String("search_recurse_paths");
+	else
+		return QLatin1String("search_paths");
 }
 
-QString CSearchPathsSettingsPage::trName() const
+QString SearchPathsSettingsPage::trName() const
 {
-	return tr("Search Paths");
+	if (m_recurse)
+		return tr("Search Recurse Paths");
+	else
+		return tr("Search Paths");
 }
 
-QString CSearchPathsSettingsPage::category() const
+QString SearchPathsSettingsPage::category() const
 {
-	return QLatin1String("General");
+	return QLatin1String(Constants::SETTINGS_CATEGORY_GENERAL);
 }
 
-QString CSearchPathsSettingsPage::trCategory() const
+QString SearchPathsSettingsPage::trCategory() const
 {
-	return tr("General");
+	return tr(Constants::SETTINGS_TR_CATEGORY_GENERAL);
 }
 
-QWidget *CSearchPathsSettingsPage::createPage(QWidget *parent)
+QIcon SearchPathsSettingsPage::categoryIcon() const
+{
+	return QIcon();
+}
+
+QWidget *SearchPathsSettingsPage::createPage(QWidget *parent)
 {
 	m_page = new QWidget(parent);
 	m_ui.setupUi(m_page);
@@ -78,34 +90,41 @@ QWidget *CSearchPathsSettingsPage::createPage(QWidget *parent)
 	return m_page;
 }
 
-void CSearchPathsSettingsPage::apply()
+void SearchPathsSettingsPage::apply()
 {
 	writeSettings();
 	applySearchPaths();
 }
 
-void CSearchPathsSettingsPage::finish()
+void SearchPathsSettingsPage::finish()
 {
 	delete m_page;
 	m_page = 0;
 }
 
-void CSearchPathsSettingsPage::applySearchPaths()
+void SearchPathsSettingsPage::applySearchPaths()
 {
-	QStringList paths;
+	QStringList paths, remapExt;
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+	if (m_recurse)
+		paths = settings->value(Core::Constants::RECURSIVE_SEARCH_PATHS).toStringList();
+	else
+		paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+
+	remapExt = settings->value(Core::Constants::REMAP_EXTENSIONS).toStringList();
 	settings->endGroup();
+
+	for (int i = 1; i < remapExt.size(); i += 2)
+		NLMISC::CPath::remapExtension(remapExt.at(i - 1).toStdString(), remapExt.at(i).toStdString(), true);
+
 	Q_FOREACH(QString path, paths)
 	{
-		NLMISC::CPath::addSearchPath(path.toStdString(), false, false);
+		NLMISC::CPath::addSearchPath(path.toStdString(), m_recurse, false);
 	}
-	NLMISC::CPath::remapExtension("png", "tga", true);
-	NLMISC::CPath::remapExtension("png", "dds", true);
 }
 
-void CSearchPathsSettingsPage::addPath()
+void SearchPathsSettingsPage::addPath()
 {
 	QString newPath = QFileDialog::getExistingDirectory(m_page, "", lastDir);
 	if (!newPath.isEmpty())
@@ -120,7 +139,7 @@ void CSearchPathsSettingsPage::addPath()
 	checkEnabledButton();
 }
 
-void CSearchPathsSettingsPage::delPath()
+void SearchPathsSettingsPage::delPath()
 {
 	QListWidgetItem *removeItem = m_ui.pathsListWidget->takeItem(m_ui.pathsListWidget->currentRow());
 	if (!removeItem)
@@ -129,7 +148,7 @@ void CSearchPathsSettingsPage::delPath()
 	checkEnabledButton();
 }
 
-void CSearchPathsSettingsPage::upPath()
+void SearchPathsSettingsPage::upPath()
 {
 	int currentRow = m_ui.pathsListWidget->currentRow();
 	if (!(currentRow == 0))
@@ -140,7 +159,7 @@ void CSearchPathsSettingsPage::upPath()
 	}
 }
 
-void CSearchPathsSettingsPage::downPath()
+void SearchPathsSettingsPage::downPath()
 {
 	int currentRow = m_ui.pathsListWidget->currentRow();
 	if (!(currentRow == m_ui.pathsListWidget->count()-1))
@@ -151,12 +170,15 @@ void CSearchPathsSettingsPage::downPath()
 	}
 }
 
-void CSearchPathsSettingsPage::readSettings()
+void SearchPathsSettingsPage::readSettings()
 {
 	QStringList paths;
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
+	if (m_recurse)
+		paths = settings->value(Core::Constants::RECURSIVE_SEARCH_PATHS).toStringList();
+	else
+		paths = settings->value(Core::Constants::SEARCH_PATHS).toStringList();
 	settings->endGroup();
 	Q_FOREACH(QString path, paths)
 	{
@@ -167,7 +189,7 @@ void CSearchPathsSettingsPage::readSettings()
 	}
 }
 
-void CSearchPathsSettingsPage::writeSettings()
+void SearchPathsSettingsPage::writeSettings()
 {
 	QStringList paths;
 	for (int i = 0; i < m_ui.pathsListWidget->count(); ++i)
@@ -175,11 +197,15 @@ void CSearchPathsSettingsPage::writeSettings()
 
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	settings->setValue(Core::Constants::SEARCH_PATHS, paths);
+	if (m_recurse)
+		settings->setValue(Core::Constants::RECURSIVE_SEARCH_PATHS, paths);
+	else
+		settings->setValue(Core::Constants::SEARCH_PATHS, paths);
 	settings->endGroup();
+	settings->sync();
 }
 
-void CSearchPathsSettingsPage::checkEnabledButton()
+void SearchPathsSettingsPage::checkEnabledButton()
 {
 	bool bEnabled = true;
 	if (m_ui.pathsListWidget->count() == 0)

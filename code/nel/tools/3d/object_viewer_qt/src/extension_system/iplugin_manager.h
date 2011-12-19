@@ -40,7 +40,6 @@ class IPluginSpec;
 class IPluginManager: public QObject
 {
 	Q_OBJECT
-
 public:
 	IPluginManager(QObject *parent = 0): QObject(parent) {}
 	virtual ~IPluginManager() {}
@@ -99,7 +98,7 @@ public:
 	{
 		QList<QObject *> all = allObjects();
 		QObject *result = 0;
-		Q_FOREACH (QObject *qobj, all)
+		Q_FOREACH(QObject *qobj, all)
 		{
 			if (qobj->objectName() == name)
 			{

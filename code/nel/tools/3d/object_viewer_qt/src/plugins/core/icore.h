@@ -35,7 +35,8 @@ class IPluginManager;
 
 namespace Core
 {
-class IMenuManager;
+class MenuManager;
+class ContextManager;
 
 class CORE_EXPORT ICore : public QObject
 {
@@ -51,7 +52,8 @@ public:
 								   const QString &page = QString(),
 								   QWidget *parent = 0) = 0;
 
-	virtual IMenuManager *menuManager() const = 0;
+	virtual MenuManager *menuManager() const = 0;
+	virtual ContextManager *contextManager() const = 0;
 
 	virtual QSettings *settings() const = 0;
 	virtual QMainWindow *mainWindow() const = 0;
@@ -59,6 +61,7 @@ public:
 	virtual ExtensionSystem::IPluginManager *pluginManager() const = 0;
 
 Q_SIGNALS:
+	void changeSettings();
 	void closeMainWindow();
 };
 

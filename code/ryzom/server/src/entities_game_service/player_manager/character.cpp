@@ -25,6 +25,8 @@
 #include "nel/misc/o_xml.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/path.h"
+#include "nel/misc/md5.h"
+#include "nel/misc/sha1.h"
 #include "nel/misc/vectord.h"
 #include "nel/misc/vector_2d.h"
 #include "nel/misc/sstring.h"
@@ -217,6 +219,7 @@ CVariable<uint32> NBLoginStats("egs","NBLoginStats", "Nb logins stats kept (logo
 // Max Bonus/malus/consumable effects displayed by client (database corresponding array must have the same size, and client must process the same size)
 const uint32 MaxBonusMalusDisplayed = 12;
 
+const string randomStrings = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#";
 // We use this constant instead of the _StartingCharacteristicValues because _StartingCharacteristicValues is not working
 //TODO
 //const uint32 StartCharacteristicsValue = 10;
@@ -344,7 +347,6 @@ CCharacter::CCharacter():	CEntityBase(false),
 							_AggroableSave(true),
 							_GodModeSave(false)
 {
-
 	// todo : uncomment that when sadge item api is plugged
 	_AggroCount = 0;
 //	_Bulk = 0;
@@ -928,7 +930,7 @@ bool CCharacter::setValue( string var, string value )
 			sint32 &temp = lookupStat(var);
 			NLMISC::fromString(value, temp);
 		}
-		catch( CCharacter::EInvalidStat &e)
+		catch(const CCharacter::EInvalidStat &e)
 		{
 			nlwarning("<CCharacter::setValue> Exception : %s",e.what( var ) );
 			return false;
@@ -953,7 +955,7 @@ bool CCharacter::modifyValue( string var, string value )
 			NLMISC::fromString(value, valueInt);
 			temp = temp + valueInt;
 		}
-		catch( CCharacter::EInvalidStat &e)
+		catch(const CCharacter::EInvalidStat &e)
 		{
 			nlwarning("<CCharacter::modifyValue> Exception : %s",e.what( var ) );
 			return false;
@@ -972,7 +974,7 @@ bool CCharacter::getValue( string var, string& value )
 	{
 		CEntityBase::getValue( var, value );
 	}
-	catch( CCharacter::EInvalidStat &e)
+	catch(const CCharacter::EInvalidStat &e)
 	{
 		nlwarning("<CCharacter::getValue> Exception : %s",e.what( var ) );
 		return false;
@@ -1338,6 +1340,22 @@ uint32 CCharacter::tickUpdate()
 						nlassert(team->getMissions()[i]);
 						team->getMissions()[i]->updateCompass(*this, string(""));
 						team->getMissions()[i]->updateCompass(*this, string("GROUP:"));
+					}
+				}
+			}
+
+			// Adding UpdateCompass for guild missions
+			{
+				H_AUTO(CharacterUpdateGuildCompass);
+				CGuild * guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
+				if ( guild )
+				{
+					const uint size = (uint)guild->getMissions().size();
+					for ( uint i =  0; i < size; i++ )
+					{
+						nlassert(guild->getMissions()[i]);
+						guild->getMissions()[i]->updateCompass(*this, string(""));
+						guild->getMissions()[i]->updateCompass(*this, string("GROUP:"));
 					}
 				}
 			}
@@ -4207,6 +4225,20 @@ void CCharacter::setName(const ucstring &name)
 	}
 }
 
+//-----------------------------------------------
+// CCharacter::haveBrick check if player have the brick
+//-----------------------------------------------
+bool CCharacter::haveBrick( const CSheetId& brickId )
+{
+	const CStaticBrick* brickForm = CSheets::getSBrickForm( brickId );
+	if( brickForm )
+	{
+		// if brick already known, just return
+		if ( _KnownBricks.find( brickId ) != _KnownBricks.end())
+			return true;
+	}
+	return false;
+}
 
 //-----------------------------------------------
 // CCharacter::addKnownBrick add a know brick
@@ -10693,6 +10725,7 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 		}
 
 		CTeam * team = TeamManager.getRealTeam( _TeamId );
+		CGuild* guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
 		if (_BotGift == NULL)
 		{
 			nlwarning("Player %s has no bot gift", _Id.toString().c_str());
@@ -10715,6 +10748,15 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 				return;
 			}
 			mission = team->getMissionByAlias( missionAlias );
+		}
+		else if (type == MISSION_DESC::Guild)
+		{
+			if (guild == NULL)
+			{
+				nlwarning("CCharacter::acceptExchange : character %s ->  no guild",_Id.toString().c_str() );
+				return;
+			}
+			mission = guild->getMissionByAlias( missionAlias );
 		}
 
 		vector<CGameItemPtr> vect;
@@ -10749,6 +10791,8 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 					processMissionStepUserEvent( eventList,missionAlias,stepIndex );
 				else if ( type == MISSION_DESC::Group )
 					team->processTeamMissionStepEvent( eventList,missionAlias,stepIndex );
+				else if ( type == MISSION_DESC::Guild )
+					guild->processGuildMissionStepEvent( eventList,missionAlias,stepIndex );
 				eventList.pop_front();
 				for ( std::list< CMissionEvent* >::iterator it = eventList.begin(); it != eventList.end(); ++it  )
 					processMissionEvent(*(*it));
@@ -10768,6 +10812,8 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 							processMissionStepUserEvent( eventList,missionAlias,stepIndex );
 						else if ( type == MISSION_DESC::Group )
 							team->processTeamMissionStepEvent( eventList,missionAlias,stepIndex );
+						else if ( type == MISSION_DESC::Guild )
+							guild->processGuildMissionStepEvent( eventList,missionAlias,stepIndex );
 						eventList.pop_front();
 						for ( std::list< CMissionEvent* >::iterator it = eventList.begin(); it != eventList.end(); ++it  )
 							processMissionEvent(*(*it));
@@ -11600,7 +11646,7 @@ bool CCharacter::processMissionEventList( std::list< CMissionEvent* > & eventLis
 	bool processed = false;
 
 	bool firstEvent = true;
-	CGuild * guild = NULL;
+	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( _GuildId );
 	while ( !eventList.empty() )
 	{
 		bool eventProcessed = false;
@@ -11612,11 +11658,33 @@ bool CCharacter::processMissionEventList( std::list< CMissionEvent* > & eventLis
 			TAIAlias mission = eventSpe.Mission;
 			TAIAlias giver = eventSpe.Giver;
 			TAIAlias mainMission = eventSpe.MainMission;
+			bool missionForGuild = eventSpe.Guild;
 
 			// add mission event are always allocated on heap
 			delete ( CMissionEvent *) ( eventList.front() );
 			eventList.pop_front();
-			CMissionManager::getInstance()->instanciateMission(this, mission, giver ,eventList, mainMission);
+
+			// If the mission is not for guild members we just instanciate it
+			if (!missionForGuild)
+				CMissionManager::getInstance()->instanciateMission(this, mission, giver ,eventList, mainMission);
+			else
+			{
+				// We find the guild and each guild members and we instanciate the mission for them
+				if (guild)
+				{
+					for ( std::map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it = guild->getMembersBegin();
+						it != guild->getMembersEnd();++it )
+					{
+						CCharacter * guildUser = PlayerManager.getChar( it->first );
+						if ( !guildUser )
+						{
+							nlwarning( "<MISSIONS>cant find user %s", it->first.toString().c_str() );
+							continue;
+						}
+						CMissionManager::getInstance()->instanciateMission(guildUser, mission, giver ,eventList, mainMission);
+					}
+				}
+			}
 		}
 		// event may have been processed during instanciateMission
 		if ( eventList.empty() )
@@ -11635,6 +11703,13 @@ bool CCharacter::processMissionEventList( std::list< CMissionEvent* > & eventLis
 		{
 			if (team != NULL)
 				eventProcessed = team->processTeamMissionEvent(eventList, alias);
+		}
+
+		// THIRD - Check with guild missions (if event not already processed and char belongs to a guild)
+		if (!eventProcessed)// && (event.Restriction != CMissionEvent::NoGroup))
+		{
+			if (guild != NULL)
+				eventProcessed = guild->processGuildMissionEvent(eventList, alias);
 		}
 
 		processed |= eventProcessed;
@@ -13330,6 +13405,144 @@ uint16 CCharacter::getFirstFreeSlotInKnownPhrase()
 } // getFirstFreeSlotInKnownPhrase //
 
 
+void CCharacter::sendUrl(const string &url, const string &salt)
+{
+	string control;
+	if (!salt.empty())
+	{
+		string checksum = salt+url;
+		control = "&hmac="+getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&salt[0], (uint32)salt.size()).toString();;
+	}
+
+	nlinfo(url.c_str());
+	TVectorParamCheck titleParams;
+	TVectorParamCheck textParams;
+	uint32 userId = PlayerManager.getPlayerId(getId());
+	std::string name = "CUSTOM_URL_"+toString(userId);
+	ucstring phrase = ucstring(name+"(){[WEB : "+url+control+"]}");
+	NLNET::CMessage	msgout("SET_PHRASE");
+	msgout.serial(name);
+	msgout.serial(phrase);
+	sendMessageViaMirror("IOS", msgout);
+
+	uint32 titleId = STRING_MANAGER::sendStringToUser(userId, "web_transactions", titleParams);
+	uint32 textId = STRING_MANAGER::sendStringToUser(userId, name, textParams);
+	PlayerManager.sendImpulseToClient(getId(), "USER:POPUP", titleId, textId);
+}
+
+
+void CCharacter::addWebCommandCheck(const string &url, const string &data, const string &salt)
+{
+	uint webCommand = getWebCommandCheck(url);
+	string randomString;
+
+	for (uint8 i = 0; i < 8; i++)
+	{
+		uint32 r = (uint32)((double)rand()/((double)RAND_MAX)*62);
+		randomString += randomStrings[r];
+	}
+ 
+	if (webCommand == INVENTORIES::NbBagSlots)
+	{
+		CGameItemPtr item = createItemInInventoryFreeSlot(INVENTORIES::bag, 1, 1, CSheetId("web_transaction.sitem"));
+		if (item != 0)
+		{
+			if (data.empty())
+			{
+				item->setCustomText(ucstring(url));
+				vector<string> infos;
+				NLMISC::splitString(url, "\n", infos);
+				sendUrl(infos[0]+"&player_eid="+getId().toString()+"&event=command_added", salt);
+			}
+			else
+			{
+				vector<string> infos;
+				NLMISC::splitString(data, ",", infos);
+				string finalData = randomString+infos[0];
+				for (uint i = 1; i < infos.size(); i++)
+				{
+					finalData += ","+randomString+infos[i];
+				}
+				item->setCustomText(ucstring(url+"\n"+finalData));
+				sendUrl(url+"&player_eid="+getId().toString()+"&event=command_added&transaction_id="+randomString, salt);
+			}
+		}
+	}
+	else
+	{
+		CInventoryPtr inv = getInventory(INVENTORIES::bag);
+		if(inv)
+		{
+			CGameItemPtr item = inv->getItem(webCommand);
+			if (item != NULL && item->getStaticForm() != NULL )
+			{
+				if(item->getStaticForm()->Name == "Web Transaction"
+					|| item->getStaticForm()->Family == ITEMFAMILY::SCROLL)
+				{
+					string cText = item->getCustomText().toString();
+					if (!cText.empty())
+					{
+						vector<string> infos;
+						NLMISC::splitString(cText, "\n", infos);
+						vector<string> datas;
+						NLMISC::splitString(infos[1], ",", datas);
+						sendUrl(infos[0]+"&player_eid="+getId().toString()+"&event=command_added&transaction_id="+datas[0].substr(0, 8), salt);
+					}
+				}
+			}
+		}
+	}
+}
+
+uint CCharacter::getWebCommandCheck(const string &url)
+{
+	CInventoryPtr inv = getInventory(INVENTORIES::bag);
+	if(inv)
+	{
+		for(uint i = 0; i < INVENTORIES::NbBagSlots; ++i)
+		{
+			CGameItemPtr item = inv->getItem(i);
+			if (item != NULL && item->getStaticForm() != NULL )
+			{
+				if(item->getStaticForm()->Name == "Web Transaction"
+					|| item->getStaticForm()->Family == ITEMFAMILY::SCROLL)
+				{
+					string cText = item->getCustomText().toString();
+					if (!cText.empty())
+					{
+						vector<string> infos;
+						NLMISC::splitString(cText, "\n", infos);
+						if (infos.size() == 2)
+						{
+							if (infos[0] == url)
+							{
+								return i;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return INVENTORIES::NbBagSlots;
+}
+
+uint CCharacter::checkWebCommand(const string &url, const string &data, const string &hmac, const string &salt)
+{
+	if (salt.empty())
+		return INVENTORIES::NbBagSlots;
+	uint slot = getWebCommandCheck(url);
+	if (slot == INVENTORIES::NbBagSlots)
+		return slot;
+	string checksum = url + data + getId().toString();
+	string realhmac = getHMacSHA1((uint8*)&checksum[0], (uint32)checksum.size(), (uint8*)&salt[0], (uint32)salt.size()).toString();
+	if (realhmac == hmac)
+		return slot;
+	return INVENTORIES::NbBagSlots;
+}
+
+
 //-----------------------------------------------
 // getAvailablePhrasesList
 //-----------------------------------------------
@@ -13727,9 +13940,12 @@ void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint
 	{
 		sint32 fame = CFameInterface::getInstance().getFameIndexed(_Id, fameIdx);
 
-		if (fame >= PVPFameRequired*6000) {
+		if (fame >= PVPFameRequired*6000)
+		{
 			canPvp = true;
-		} else if (fame <= -PVPFameRequired*6000) {
+		}
+		else if (fame <= -PVPFameRequired*6000)
+		{
 			canPvp = true;
 		}
 	}
@@ -14577,7 +14793,7 @@ void CCharacter::addPlayerToIgnoreList(const NLMISC::CEntityId &id)
 	// update ios state
 	uint32 playerId = PlayerManager.getPlayerId(id);
 	CPlayer *player = PlayerManager.getPlayer( playerId );
-	if ( (!player) || (!player->havePriv( ":SGM:GM:VG:SG:G:" )) ) // if online, messages from CSRs can't be ignored
+	if ( (!player) || (!player->havePriv( ":SGM:GM:VG:SG:G:EM:EG:" )) ) // if online, messages from CSRs can't be ignored
 	{
 		CEntityId senderId = getId();
 		CEntityId ignoredId = id;
@@ -15079,7 +15295,7 @@ void CCharacter::online(bool onlineStatus)
 
 
 	// if the character has a CSR grade, remove from all ignore lists
-	if ( onlineStatus && (! _IsIgnoredBy.empty()) && havePriv( ":SGM:GM:VG:SG:G:" ) )
+	if ( onlineStatus && (! _IsIgnoredBy.empty()) && havePriv( ":SGM:GM:VG:SG:G:EM:EG:" ) )
 	{
 		CMessage msgout( "UNIGNORE_ALL" );
 		msgout.serial( _Id );
@@ -15268,6 +15484,8 @@ void CCharacter::onConnection()
 	{
 		IShardUnifierEvent::getInstance()->charConnected(_Id, getLastDisconnectionDate());
 	}
+
+	CPVPManager2::getInstance()->playerConnects(this);
 }
 
 //--------------------------------------------------------------
@@ -17925,7 +18143,7 @@ void CCharacter::resetTpTicketSlot()
 //----------------------------------------------------------------------------
 void CCharacter::updateParry(ITEMFAMILY::EItemFamily family, SKILLS::ESkills skill)
 {
-	if (family == ITEMFAMILY::MELEE_WEAPON && skill < SKILLS::NUM_SKILLS)
+	if ((family == ITEMFAMILY::MELEE_WEAPON || family == ITEMFAMILY::RANGE_WEAPON)  && skill < SKILLS::NUM_SKILLS)
 		_CurrentParrySkill = skill;
 	else
 		_CurrentParrySkill = BarehandCombatSkill;

@@ -29,28 +29,27 @@ class QWidget;
 
 namespace Plugin
 {
-/**
-@class CExampleSettingsPage
-*/
-class CExampleSettingsPage : public Core::IOptionsPage
+
+class ExampleSettingsPage : public Core::IOptionsPage
 {
 	Q_OBJECT
 public:
-	CExampleSettingsPage(QObject *parent = 0);
-	virtual ~CExampleSettingsPage() {}
+	ExampleSettingsPage(QObject *parent = 0);
+	virtual ~ExampleSettingsPage() {}
 
 	virtual QString id() const;
 	virtual QString trName() const;
 	virtual QString category() const;
 	virtual QString trCategory() const;
+	QIcon categoryIcon() const;
 	virtual QWidget *createPage(QWidget *parent);
 
 	virtual void apply();
 	virtual void finish() {}
 
 private:
-	QWidget *_currentPage;
-	Ui::CExampleSettingsPage _ui;
+	QWidget *m_currentPage;
+	Ui::ExampleSettingsPage m_ui;
 };
 
 } // namespace Plugin
