@@ -3,7 +3,7 @@
 #include "zone_painter_settings_page.h"
 #include "../core/icore.h"
 #include "../core/core_constants.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../../extension_system/iplugin_spec.h"
 
 // NeL includes
@@ -20,20 +20,22 @@
 
 namespace Plugin
 {
+//	NLMISC_SAFE_SINGLETON_IMPL(CZoneManager)
+
 ZonePainterPlugin::~ZonePainterPlugin()
 {
-	Q_FOREACH(QObject *obj, _autoReleaseObjects)
+	Q_FOREACH(QObject *obj, m_autoReleaseObjects)
 	{
-		_plugMan->removeObject(obj);
+		m_plugMan->removeObject(obj);
 	}
-	qDeleteAll(_autoReleaseObjects);
-	_autoReleaseObjects.clear();
+	qDeleteAll(m_autoReleaseObjects);
+	m_autoReleaseObjects.clear();
 }
 
 bool ZonePainterPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
-	_plugMan = pluginManager;
+	m_plugMan = pluginManager;
 
 	addAutoReleasedObject(new CZonePainterSettingsPage(this));
 	addAutoReleasedObject(new CZonePainterContext(this));
@@ -45,7 +47,7 @@ bool ZonePainterPlugin::initialize(ExtensionSystem::IPluginManager *pluginManage
 void ZonePainterPlugin::extensionsInitialized()
 {
 	Core::ICore *core = Core::ICore::instance();
-	Core::IMenuManager *menuManager = core->menuManager();
+	Core::MenuManager *menuManager = core->menuManager();
 	QAction *loadZoneAction = new QAction("Load Zone", this);
 	QAction *saveZoneAction = new QAction("Save Zone", this);
 
@@ -73,57 +75,13 @@ void ZonePainterPlugin::setNelContext(NLMISC::INelContext *nelContext)
 	// This only applies to platforms without PIC, e.g. Windows.
 	nlassert(!NLMISC::INelContext::isContextInitialised());
 #endif // NL_OS_WINDOWS
-	_LibContext = new NLMISC::CLibraryContext(*nelContext);
-}
-
-QString ZonePainterPlugin::name() const
-{
-	return "ZonePainterPlugin";
-}
-
-QString ZonePainterPlugin::version() const
-{
-	return "0.2";
-}
-
-QString ZonePainterPlugin::vendor() const
-{
-	return "Ryzom Core";
-}
-
-QString ZonePainterPlugin::description() const
-{
-	return "Zone Painter Plugin";
-}
-
-QStringList ZonePainterPlugin::dependencies() const
-{
-	QStringList list;
-	list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	//list.append("ObjectViewer");
-	return list;
+	m_LibContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
 void ZonePainterPlugin::addAutoReleasedObject(QObject *obj)
 {
-	_plugMan->addObject(obj);
-	_autoReleaseObjects.prepend(obj);
-}
-
-QObject* ZonePainterPlugin::objectByName(const QString &name) const
-{
-	Q_FOREACH (QObject *qobj, _plugMan->allObjects())
-	if (qobj->objectName() == name)
-		return qobj;
-	return 0;
-}
-
-ExtensionSystem::IPluginSpec *ZonePainterPlugin::pluginByName(const QString &name) const
-{
-	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, _plugMan->plugins())
-	if (spec->name() == name)
-		return spec;
-	return 0;
+	m_plugMan->addObject(obj);
+	m_autoReleaseObjects.prepend(obj);
 }
 
 }

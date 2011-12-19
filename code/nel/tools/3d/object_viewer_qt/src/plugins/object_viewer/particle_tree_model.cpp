@@ -177,7 +177,7 @@ CParticleTreeModel::~CParticleTreeModel()
 int CParticleTreeModel::columnCount(const QModelIndex &parent) const
 {
 	if (parent.isValid())
-		return static_cast<CParticleTreeItem*>(parent.internalPointer())->columnCount();
+		return static_cast<CParticleTreeItem *>(parent.internalPointer())->columnCount();
 	else
 		return _rootItem->columnCount();
 }
@@ -404,7 +404,7 @@ bool CParticleTreeModel::insertRows(NL3D::CPSLocated *loc, int position, const Q
 bool CParticleTreeModel::insertRow(NL3D::CPSLocated *loc, uint32 index, int position, const QModelIndex &parent)
 {
 	beginInsertRows(parent, position, position);
-	createItemFromLocatedInstance(loc, index, static_cast<CParticleTreeItem  *>(parent.internalPointer()));
+	createItemFromLocatedInstance(loc, index, static_cast<CParticleTreeItem *>(parent.internalPointer()));
 	endInsertRows();
 	return true;
 }
@@ -424,7 +424,7 @@ bool CParticleTreeModel::removeRows(int position, const QModelIndex &parent)
 		removeRows(0, parent.child(position, 0));
 
 	beginRemoveRows(parent, position, position);
-	static_cast<CParticleTreeItem*>(parent.internalPointer())->deleteChild(position);
+	static_cast<CParticleTreeItem *>(parent.internalPointer())->deleteChild(position);
 	endRemoveRows();
 	return false;
 }

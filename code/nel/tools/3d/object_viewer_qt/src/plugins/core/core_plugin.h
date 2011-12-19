@@ -53,26 +53,20 @@ public:
 
 	void setNelContext(NLMISC::INelContext *nelContext);
 
-	QString name() const;
-	QString version() const;
-	QString vendor() const;
-	QString description() const;
-	QStringList dependencies() const;
-
 	void addAutoReleasedObject(QObject *obj);
 
 	ExtensionSystem::IPluginManager *pluginManager() const
 	{
-		return _plugMan;
+		return m_plugMan;
 	}
 
 protected:
-	NLMISC::CLibraryContext *_LibContext;
+	NLMISC::CLibraryContext *m_libContext;
 
 private:
-	ExtensionSystem::IPluginManager *_plugMan;
-	MainWindow *_mainWindow;
-	QList<QObject *> _autoReleaseObjects;
+	ExtensionSystem::IPluginManager *m_plugMan;
+	MainWindow *m_mainWindow;
+	QList<QObject *> m_autoReleaseObjects;
 };
 
 } // namespace Core

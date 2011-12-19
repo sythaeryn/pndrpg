@@ -27,40 +27,45 @@
 namespace Plugin
 {
 
-CExampleSettingsPage::CExampleSettingsPage(QObject *parent)
+ExampleSettingsPage::ExampleSettingsPage(QObject *parent)
 	: IOptionsPage(parent),
-	  _currentPage(NULL)
+	  m_currentPage(0)
 {
 }
 
-QString CExampleSettingsPage::id() const
+QString ExampleSettingsPage::id() const
 {
 	return QLatin1String("ExamplePage");
 }
 
-QString CExampleSettingsPage::trName() const
+QString ExampleSettingsPage::trName() const
 {
 	return tr("Example page");
 }
 
-QString CExampleSettingsPage::category() const
+QString ExampleSettingsPage::category() const
 {
-	return QLatin1String("General");
+	return QLatin1String("Example");
 }
 
-QString CExampleSettingsPage::trCategory() const
+QString ExampleSettingsPage::trCategory() const
 {
-	return tr("General");
+	return tr("Example");
 }
 
-QWidget *CExampleSettingsPage::createPage(QWidget *parent)
+QIcon ExampleSettingsPage::categoryIcon() const
 {
-	_currentPage = new QWidget(parent);
-	_ui.setupUi(_currentPage);
-	return _currentPage;
+	return QIcon();
 }
 
-void CExampleSettingsPage::apply()
+QWidget *ExampleSettingsPage::createPage(QWidget *parent)
+{
+	m_currentPage = new QWidget(parent);
+	m_ui.setupUi(m_currentPage);
+	return m_currentPage;
+}
+
+void ExampleSettingsPage::apply()
 {
 }
 
