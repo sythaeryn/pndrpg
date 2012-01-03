@@ -1,0 +1,18 @@
+<RCC>
+  <qresource prefix="/">
+    <file>icons/ic_nel_add_item.png</file>
+    <file>icons/ic_nel_anim.png</file>
+    <file>icons/ic_nel_animset.png</file>
+    <file>icons/ic_nel_delete_item.png</file>
+    <file>icons/ic_nel_down_item.png</file>
+    <file>icons/ic_nel_ig_item.png</file>
+    <file>icons/ic_nel_landscape_item.png</file>
+    <file>icons/ic_nel_light_item.png</file>
+    <file>icons/ic_nel_particles.png</file>
+    <file>icons/ic_nel_shape_item.png</file>
+    <file>icons/ic_nel_skel_item.png</file>
+    <file>icons/ic_nel_up_item.png</file>
+    <file>icons/ic_nel_water_shape.png</file>
+    <file>icons/ic_nel_wind.png</file>
+  </qresource>
+</RCC>
