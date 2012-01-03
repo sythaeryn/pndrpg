@@ -1,0 +1,10 @@
+<plugin-spec>
+    <library-name>ovqt_plugin_scene_editor</library-name>
+    <name>Instance Group Editor</name>
+    <version>0.0.1</version>
+    <vendor>dnk-88</vendor>
+    <description>Instance group editor ovqt plugin.</description>
+    <dependencies>
+        <dependency plugin-name="Core" version="0.8"/>
+    </dependencies>
+</plugin-spec>
