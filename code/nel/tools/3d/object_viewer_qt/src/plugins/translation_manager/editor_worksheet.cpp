@@ -103,7 +103,7 @@ void CEditorWorksheet::open(QString filename)
 		setCurrentFile(filename);
 		setAttribute(Qt::WA_DeleteOnClose);
 		setWidget(table_editor);
-		editor_type = Constants::ED_SHEET;
+		editor_type = Constants::ED_WORKSHEET;
 		table_editor->resizeColumnsToContents();
 		table_editor->resizeRowsToContents();
 		// set editor signals
@@ -379,14 +379,15 @@ void CEditorWorksheet::insertTableRecords(QList<QString> records, QList<CTableWi
 bool CEditorWorksheet::compareWorksheetFile(QString filename)
 {
 	STRING_MANAGER::TWorksheet wk_file;
-	int colIndex = 0;
+	unsigned int colIndex = 0;
 	if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
 	{
 		if(wk_file.getData(0, 0) == ucstring("*HASH_VALUE"))
 		{
 			colIndex = 1;
 		}
-		if(wk_file.ColCount - colIndex != table_editor->columnCount())
+
+		if((wk_file.ColCount - colIndex) != static_cast<unsigned int>(table_editor->columnCount()))
 		{
 			return false;
 		}

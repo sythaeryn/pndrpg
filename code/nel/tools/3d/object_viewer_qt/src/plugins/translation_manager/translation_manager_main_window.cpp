@@ -44,6 +44,10 @@
 namespace TranslationManager
 {
 
+/**
+ * Main Window Constructor
+ * Set the signals for subwindows and settings and the toolbar
+ */
 CMainWindow::CMainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -52,6 +56,8 @@ CMainWindow::CMainWindow(QWidget *parent)
 	_ui.mdiArea->closeAllSubWindows();
 	windowMapper = new QSignalMapper(this);
 	connect(windowMapper, SIGNAL(mapped(QWidget *)), this, SLOT(setActiveSubWindow(QWidget *)));
+
+	editorWindow = new CEditorBase();
 
 	initialize_settings["georges"] = false;
 	initialize_settings["ligo"] = false;
@@ -63,7 +69,10 @@ CMainWindow::CMainWindow(QWidget *parent)
 
 }
 
-// Functions that will insert the plugin buttons
+/**
+ * Create toolbar
+ * Set the actions and the window menu
+ */
 void CMainWindow::createToolbar()
 {
 	// File menu
@@ -77,21 +86,20 @@ void CMainWindow::createToolbar()
 	_ui.toolBar->addAction(saveAsAct);
 	connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-	// Tools menu
+	// Words Extraction Menu
 	QMenu *wordsExtractionMenu = new QMenu("&Words extraction...");
+	QSignalMapper *wordsExtractionMapper = new QSignalMapper(this);
 	wordsExtractionMenu->setIcon(QIcon(Core::Constants::ICON_SETTINGS));
-	_ui.toolBar->addAction(wordsExtractionMenu->menuAction());
+	_ui.toolBar->addAction(wordsExtractionMenu->menuAction());	
+	connect(wordsExtractionMapper, SIGNAL(mapped(QString)), this, SLOT(extractMenu(QString)));
 
 	// extract bot names
 	QAction *extractBotNamesAct = wordsExtractionMenu->addAction("&Extract bot names...");
 	extractBotNamesAct->setStatusTip(tr("Extract bot names from primitives."));
-	connect(extractBotNamesAct, SIGNAL(triggered()), this, SLOT(extractBotNames()));
+	connect(extractBotNamesAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));
+	wordsExtractionMapper->setMapping(extractBotNamesAct, QString(Constants::WK_BOTNAMES));
 
-	// Words extraction
-	QSignalMapper *wordsExtractionMapper = new QSignalMapper(this);
-	connect(wordsExtractionMapper, SIGNAL(mapped(QString)), this, SLOT(extractWords(QString)));
 	// extract item words
-
 	QAction *extractItemWordsAct = wordsExtractionMenu->addAction("&Extract item words...");
 	extractItemWordsAct->setStatusTip(tr("Extract item words"));
 	connect(extractItemWordsAct, SIGNAL(triggered()), wordsExtractionMapper, SLOT(map()));
@@ -143,21 +151,6 @@ void CMainWindow::createToolbar()
 		_ui.toolBar->addAction(redoAction);
 }
 
-// Update the toolbar if the editor is worksheet
-void CMainWindow::updateToolbar(QMdiSubWindow *window)
-{
-	if(_ui.mdiArea->subWindowList().size() > 0)
-		if(QString(window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
-		{
-			QAction *insertRowAct = new QAction(tr("Insert new row"), this);
-			connect(insertRowAct, SIGNAL(triggered()), window, SLOT(insertRow()));
-			windowMenu->addAction(insertRowAct);
-			QAction *deleteRowAct = new QAction(tr("Delete row"), this);
-			connect(deleteRowAct, SIGNAL(triggered()), window, SLOT(deleteRow()));
-			windowMenu->addAction(deleteRowAct);
-		}
-}
-
 // Set the active subwindow
 void CMainWindow::setActiveSubWindow(QWidget *window)
 {
@@ -206,6 +199,21 @@ void CMainWindow::updateWindowsList()
 	}
 }
 
+// Update the toolbar if the editor is worksheet
+void CMainWindow::updateToolbar(QMdiSubWindow *window)
+{
+	if(_ui.mdiArea->subWindowList().size() > 0)
+		if(QString(window->widget()->metaObject()->className()) == "QTableWidget") // Sheet Editor
+		{
+			QAction *insertRowAct = new QAction(tr("Insert new row"), this);
+			connect(insertRowAct, SIGNAL(triggered()), window, SLOT(insertRow()));
+			windowMenu->addAction(insertRowAct);
+			QAction *deleteRowAct = new QAction(tr("Delete row"), this);
+			connect(deleteRowAct, SIGNAL(triggered()), window, SLOT(deleteRow()));
+			windowMenu->addAction(deleteRowAct);
+		}
+}
+
 // Open signal
 void CMainWindow::open()
 {
@@ -219,7 +227,7 @@ void CMainWindow::open()
 
 	if(!file_name.isEmpty())
 	{
-		CEditor *editor = getEditorByWindowFilePath(file_name);
+		CEditor *editor = editorWindow->getEditorWindowByFileName(file_name, _ui.mdiArea->subWindowList());
 		if(editor != NULL)
 		{
 			editor->activateWindow();
@@ -227,8 +235,8 @@ void CMainWindow::open()
 		}
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 
-		// sheet editor
-		if(isWorksheetEditor(file_name))
+		// worksheet editor
+		if(editorWindow->getEditorType(file_name) == Constants::ED_WORKSHEET)
 		{
 			CEditorWorksheet *new_window = new CEditorWorksheet(_ui.mdiArea);
 			new_window->setUndoStack(m_undoStack);
@@ -236,7 +244,7 @@ void CMainWindow::open()
 			new_window->activateWindow();
 		}
 		// phrase editor
-		if(isPhraseEditor(file_name))
+		if(editorWindow->getEditorType(file_name) == Constants::ED_PHRASE)
 		{
 			CEditorPhrase *new_window = new CEditorPhrase(_ui.mdiArea);
 			new_window->setUndoStack(m_undoStack);
@@ -248,24 +256,27 @@ void CMainWindow::open()
 }
 
 // Open a work file. You can set the directory for work file in the settings dialog
-void CMainWindow::openWorkFile(QString file)
+CEditorWorksheet* CMainWindow::openWorkFile(QString fileName)
 {
-	QFileInfo *file_path = new QFileInfo(QString("%1/%2").arg(work_path).arg(file));
-	if(file_path->exists())
+	QFileInfo *filePath = new QFileInfo(QString("%1/%2").arg(work_path).arg(fileName));
+	if(filePath->exists())
 	{
-		if(isWorksheetEditor(file_path->filePath()))
+		if(editorWindow->getEditorType(filePath->filePath()) == Constants::ED_WORKSHEET)
 		{
-			CEditorWorksheet *new_window = new CEditorWorksheet(_ui.mdiArea);
-			new_window->open(file_path->filePath());
-			new_window->activateWindow();
+			CEditorWorksheet *editor = new CEditorWorksheet(_ui.mdiArea);
+			editor->open(filePath->filePath());
+			editor->activateWindow();
+			return editor;
 		}
 	}
 	else
 	{
 		QErrorMessage error;
-		error.showMessage(tr("The %1 file don't exists.").arg(file_path->fileName()));
+		error.showMessage(tr("The %1 file don't exists.").arg(filePath->fileName()));
 		error.exec();
 	}
+
+	return NULL;
 }
 
 void CMainWindow::save()
@@ -324,64 +335,69 @@ void CMainWindow::initializeSettings(bool georges = false)
 	}
 }
 
-// Extracting words
-void CMainWindow::extractWords(QString typeq)
+void CMainWindow::extractMenu(QString workSheetType)
 {
-	if(verifySettings() == true)
+	if(verifySettings())
 	{
-		CEditorWorksheet *editor_window = getEditorByWorksheetType(typeq);
-		if(editor_window != NULL)
+
+		CEditorWorksheet *worksheetEditor = editorWindow->getEditorWindowByWorksheetType(workSheetType, _ui.mdiArea->subWindowList());		
+		if(worksheetEditor == NULL)
 		{
-			editor_window->activateWindow();
-			QString file_path = editor_window->windowFilePath();
-		}
-		else
-		{
-			openWorkFile(typeq);
-			editor_window = getEditorByWorksheetType(typeq);
-			if(editor_window != NULL)
-			{
-				editor_window->activateWindow();
-				QString file_path = editor_window->windowFilePath();
-			}
-			else return;
+			worksheetEditor = openWorkFile(workSheetType);
 		}
 
+		worksheetEditor->activateWindow();
+		QString fileName = worksheetEditor->windowFilePath();
+
+		if(workSheetType.toAscii() == Constants::WK_BOTNAMES)
+		{
+			extractBotNames(worksheetEditor);
+		} 
+		else
+		{
+			extractWords(worksheetEditor, fileName);
+		}
+	}
+}
+
+// Extracting words
+void CMainWindow::extractWords(CEditorWorksheet *editor, QString fileName)
+{
 		QString column_name;
 		// Sheet extraction
 		CSheetWordListBuilder	builderS;
 		// Primitives extraction
 		CRegionPrimWordListBuilder builderP;
 		bool isSheet = false;
-		if(typeq.toAscii() == Constants::WK_ITEM)
+		if(fileName.toAscii() == Constants::WK_ITEM)
 		{
 			column_name = "item ID";
 			builderS.SheetExt = "sitem";
 			builderS.SheetPath = level_design_path.append("/game_element/sitem").toStdString();
 			isSheet = true;
 		}
-		else if(typeq.toAscii() == Constants::WK_CREATURE)
+		else if(fileName.toAscii() == Constants::WK_CREATURE)
 		{
 			column_name = "creature ID";
 			builderS.SheetExt = "creature";
 			builderS.SheetPath = level_design_path.append("/Game_elem/Creature/fauna").toStdString();
 			isSheet = true;
 		}
-		else if(typeq.toAscii() == Constants::WK_SBRICK)
+		else if(fileName.toAscii() == Constants::WK_SBRICK)
 		{
 			column_name = "sbrick ID";
 			builderS.SheetExt = "sbrick";
 			builderS.SheetPath = level_design_path.append("/game_element/sbrick").toStdString();
 			isSheet = true;
 		}
-		else if(typeq.toAscii() == Constants::WK_SPHRASE)
+		else if(fileName.toAscii() == Constants::WK_SPHRASE)
 		{
 			column_name = "sphrase ID";
 			builderS.SheetExt = "sphrase";
 			builderS.SheetPath = level_design_path.append("/game_element/sphrase").toStdString();
 			isSheet = true;
 		}
-		else if(typeq.toAscii() == Constants::WK_PLACE)
+		else if(fileName.toAscii() == Constants::WK_PLACE)
 		{
 			column_name = "placeId";
 			builderP.PrimPath = primitives_path.toStdString();
@@ -389,48 +405,28 @@ void CMainWindow::extractWords(QString typeq)
 			builderP.PrimFilter.push_back("indoors_*.primitive");
 			isSheet = false;
 		}
+
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 		if(isSheet)
 		{
-			editor_window->extractWords(editor_window->windowFilePath(), column_name, builderS);
+			editor->extractWords(editor->windowFilePath(), column_name, builderS);
 		}
 		else
 		{
 			initializeSettings(false);
-			editor_window->extractWords(editor_window->windowFilePath(), column_name, builderP);
+			editor->extractWords(editor->windowFilePath(), column_name, builderP);
 		}
 		QApplication::restoreOverrideCursor();
-	}
+	
 }
 
 // Extract bot names from primitives
-void CMainWindow::extractBotNames()
+void CMainWindow::extractBotNames(CEditorWorksheet *editor)
 {
-	if(verifySettings() == true)
-	{
-		CEditorWorksheet *editor_window = getEditorByWorksheetType(NULL);
-		if(editor_window != NULL)
-		{
-			editor_window->activateWindow();
-			QString file_path = editor_window->windowFilePath();
-		}
-		else
-		{
-			openWorkFile(Constants::WK_BOTNAMES);
-			editor_window = getEditorByWorksheetType(NULL);
-			if(editor_window != NULL)
-			{
-				editor_window->activateWindow();
-				QString file_path = editor_window->windowFilePath();
-			}
-			else return;
-		}
-
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 		initializeSettings(true);
-		editor_window->extractBotNames(convertQStringList(filters), level_design_path.toStdString(), ligoConfig);
+		editor->extractBotNames(convertQStringList(filters), level_design_path.toStdString(), ligoConfig);
 		QApplication::restoreOverrideCursor();
-	}
 }
 
 // Merge the content for 2 worksheet files
@@ -450,7 +446,7 @@ void CMainWindow::mergeSingleFile()
 		return;
 	}
 
-	if(editor_window->eType() != Constants::ED_SHEET) // Sheet Editor
+	if(editor_window->eType() != Constants::ED_WORKSHEET) // Sheet Editor
 	{
 		QErrorMessage error;
 		error.showMessage(tr("Please open or activate the window with a sheet file."));
@@ -549,6 +545,7 @@ bool CMainWindow::verifySettings()
 		error_settings.exec();
 		count_errors = true;
 	}
+
 	return !count_errors;
 }
 
@@ -581,46 +578,6 @@ bool CCoreListener::closeMainWindow() const
 	return okToClose;
 }
 
-
-// Helper functions
-CEditor *CMainWindow::getEditorByWindowFilePath(const QString &fileName)
-{
-	Q_FOREACH(QMdiSubWindow *subWindow, _ui.mdiArea->subWindowList())
-	{
-		CEditor *currentEditor = qobject_cast<CEditor *>(subWindow);
-		if(currentEditor->subWindowFilePath() == fileName)
-			return currentEditor;
-	}
-	return NULL;
-}
-
-CEditorWorksheet *CMainWindow::getEditorByWorksheetType(const QString &type)
-{
-	Q_FOREACH(QMdiSubWindow *subWindow, _ui.mdiArea->subWindowList())
-	{
-		CEditor *currentEditor = qobject_cast<CEditor *>(subWindow);
-		if(currentEditor->eType() == Constants::ED_SHEET)
-		{
-			CEditorWorksheet *editor = qobject_cast<CEditorWorksheet *>(currentEditor);
-			if(type != NULL)
-			{
-				if(editor->isSheetTable(type))
-				{
-					return editor;
-				}
-			}
-			else
-			{
-				if(editor->isBotNamesTable())
-				{
-					return editor;
-				}
-			}
-		}
-	}
-	return NULL;
-}
-
 std::list<std::string> CMainWindow::convertQStringList(QStringList listq)
 {
 	std::list<std::string> stdlist;
@@ -630,23 +587,6 @@ std::list<std::string> CMainWindow::convertQStringList(QStringList listq)
 		stdlist.push_back(text.toStdString());
 	}
 	return stdlist;
-}
-
-bool CMainWindow::isWorksheetEditor(QString filename)
-{
-	STRING_MANAGER::TWorksheet wk_file;
-	if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
-	{
-		if(wk_file.ColCount > 1)
-			return true;
-	}
-	return false;
-}
-
-bool CMainWindow::isPhraseEditor(QString filename)
-{
-	vector<STRING_MANAGER::TPhrase> phrases;
-	return readPhraseFile(filename.toStdString(), phrases, false);
 }
 
 } /* namespace TranslationManager */

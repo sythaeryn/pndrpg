@@ -17,12 +17,14 @@
 #ifndef TRANSLATION_MANAGER_EDITOR_H
 #define TRANSLATION_MANAGER_EDITOR_H
 
+// Qt includes
 #include <QtCore/QObject>
 #include <QtGui/QWidget>
 #include <QtGui/QMdiArea>
 #include <QtGui/QMdiSubWindow>
 #include <QtGui/QUndoStack>
 #include <QtCore/QFileInfo>
+
 
 namespace TranslationManager
 {
@@ -65,6 +67,7 @@ protected:
 	QString current_file;
 	int editor_type;
 };
+
 
 }
 

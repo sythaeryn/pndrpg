@@ -21,8 +21,7 @@
 #include "ui_translation_manager_main_window.h"
 #include "translation_manager_editor.h"
 #include "source_selection.h"
-#include "editor_worksheet.h"
-#include "editor_phrase.h"
+#include "editor_base.h"
 
 // Project system includes
 #include "../core/icore_listener.h"
@@ -65,12 +64,14 @@ public:
 	Ui::CMainWindow _ui;
 
 private:
+	// editors
+	CEditorBase* editorWindow;
 	// actions
-	QAction *openAct;
-	QAction *saveAct;
-	QAction *saveAsAct;
-	QMenu *windowMenu;
-	QSignalMapper *windowMapper;
+	QAction* openAct;
+	QAction* saveAct;
+	QAction* saveAsAct;
+	QMenu* windowMenu;
+	QSignalMapper* windowMapper;
 	// config
 	QMap<string,bool> initialize_settings;
 	QList<QString> filters;
@@ -82,8 +83,7 @@ private:
 	NLLIGO::CLigoConfig ligoConfig;
 
 private Q_SLOTS:
-	void extractBotNames();
-	void extractWords(QString typeq);
+	void extractMenu(QString workSheetType);
 	void open();
 	void save();
 	void saveAs();
@@ -92,19 +92,16 @@ private Q_SLOTS:
 	void mergeSingleFile();
 
 private:
-	void openWorkFile(QString file);
+	CEditorWorksheet* openWorkFile(QString file);
 	void updateToolbar(QMdiSubWindow *window);
 	bool verifySettings();
 	void readSettings();
 	void createMenus();
 	void createToolbar();
 	void initializeSettings(bool georges);
+	void extractBotNames(CEditorWorksheet *editor);
+	void extractWords(CEditorWorksheet *editor, QString fileName);
 	std::list<std::string> convertQStringList(QStringList listq);
-	CEditor *getEditorByWindowFilePath(const QString &fileName);
-	// Worksheet specific functions
-	CEditorWorksheet *getEditorByWorksheetType(const QString &type);
-	bool isWorksheetEditor(QString filename);
-	bool isPhraseEditor(QString filename);
 };
 
 class CCoreListener : public Core::ICoreListener
