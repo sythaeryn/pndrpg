@@ -81,7 +81,6 @@ private:
 	QString translation_path;
 	QString work_path;
 	NLLIGO::CLigoConfig ligoConfig;
-
 private Q_SLOTS:
 	void extractMenu(QString workSheetType);
 	void open();
@@ -90,7 +89,6 @@ private Q_SLOTS:
 	void setActiveSubWindow(QWidget *window);
 	void updateWindowsList();
 	void mergeSingleFile();
-
 private:
 	CEditorWorksheet* openWorkFile(QString file);
 	void updateToolbar(QMdiSubWindow *window);
@@ -101,7 +99,6 @@ private:
 	void initializeSettings(bool georges);
 	void extractBotNames(CEditorWorksheet *editor);
 	void extractWords(CEditorWorksheet *editor, QString fileName);
-	std::list<std::string> convertQStringList(QStringList listq);
 };
 
 class CCoreListener : public Core::ICoreListener
