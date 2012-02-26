@@ -151,7 +151,10 @@ void CMainWindow::createToolbar()
 		_ui.toolBar->addAction(redoAction);
 }
 
-// Set the active subwindow
+/**
+ * Set the active subwindow
+ * Convert the window to QMdiSubWindow and set active window on mdiArea
+ */
 void CMainWindow::setActiveSubWindow(QWidget *window)
 {
 	if (!window)
@@ -162,7 +165,12 @@ void CMainWindow::setActiveSubWindow(QWidget *window)
 		_ui.mdiArea->setActiveSubWindow(mdiWindow);
 }
 
-// Functions for updating the windows list
+/**
+ * Update the menu Windows
+ * Get the active subwindows and list them in Windows menu with
+ * options to switch from them.
+ * This function is used when the Windows menu is clicked.
+ */
 void CMainWindow::updateWindowsList()
 {
 	if(_ui.mdiArea->activeSubWindow())
@@ -199,7 +207,10 @@ void CMainWindow::updateWindowsList()
 	}
 }
 
-// Update the toolbar if the editor is worksheet
+/**
+ * Update the Windows menu with options for a Worksheet editor
+ * This function is called by the updateWindowsList()
+ */
 void CMainWindow::updateToolbar(QMdiSubWindow *window)
 {
 	if(_ui.mdiArea->subWindowList().size() > 0)
@@ -214,7 +225,10 @@ void CMainWindow::updateToolbar(QMdiSubWindow *window)
 		}
 }
 
-// Open signal
+/**
+ * Open function
+ * Open a file using the correct editor
+ */
 void CMainWindow::open()
 {
 	QSettings *settings = Core::ICore::instance()->settings();
@@ -251,11 +265,18 @@ void CMainWindow::open()
 			new_window->open(file_name);
 			new_window->activateWindow();
 		}
+
 		QApplication::restoreOverrideCursor();
 	}
 }
 
-// Open a work file. You can set the directory for work file in the settings dialog
+/**
+ * Open work file
+ * In the settings dialog there is a option to set the directory
+ * for work files.
+ * This function is used by the extraction options. 
+ * If there is no file in the editor we use a work a file.
+ */
 CEditorWorksheet* CMainWindow::openWorkFile(QString fileName)
 {
 	QFileInfo *filePath = new QFileInfo(QString("%1/%2").arg(work_path).arg(fileName));
@@ -279,6 +300,10 @@ CEditorWorksheet* CMainWindow::openWorkFile(QString fileName)
 	return NULL;
 }
 
+/**
+ * Save function
+ * Save the modification made in the editor in the coresponding file
+ */
 void CMainWindow::save()
 {
 	if(_ui.mdiArea->subWindowList().size() > 0)
@@ -290,6 +315,10 @@ void CMainWindow::save()
 	}
 }
 
+/**
+ * Save as function
+ * Save the modification made in the editor in a custom file
+ */
 void CMainWindow::saveAs()
 {
 	QString file_name;
@@ -306,7 +335,10 @@ void CMainWindow::saveAs()
 	}
 }
 
-// This function is needed by extraction.
+/**
+ * Initialize settings
+ * This function is needed by extraction.
+ */
 void CMainWindow::initializeSettings(bool georges = false)
 {
 	if(georges == true && initialize_settings["georges"] == false)
@@ -330,11 +362,15 @@ void CMainWindow::initializeSettings(bool georges = false)
 		}
 		catch (NLMISC::Exception &e)
 		{
-			nlerror("Can't found path to world_editor_classes.xml");
+			nlerror("We haven't find the path to world_editor_classes.xml");
 		}
 	}
 }
 
+/**
+ * Extract menu
+ * Extraction options for the worksheet editor
+ */
 void CMainWindow::extractMenu(QString workSheetType)
 {
 	if(verifySettings())
@@ -360,7 +396,10 @@ void CMainWindow::extractMenu(QString workSheetType)
 	}
 }
 
-// Extracting words
+/**
+ * Extract words
+ * Extract words : sitem, creature, sbrick, sphrase, placeId
+ */
 void CMainWindow::extractWords(CEditorWorksheet *editor, QString fileName)
 {
 		QString column_name;
@@ -420,12 +459,22 @@ void CMainWindow::extractWords(CEditorWorksheet *editor, QString fileName)
 	
 }
 
-// Extract bot names from primitives
+/**
+ * Extract bot names
+ * Extract bot names from primitives
+ */
 void CMainWindow::extractBotNames(CEditorWorksheet *editor)
 {
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 		initializeSettings(true);
-		editor->extractBotNames(convertQStringList(filters), level_design_path.toStdString(), ligoConfig);
+
+		std::list<std::string> stdFilters;
+		Q_FOREACH(QString filter, filters)
+		{
+			stdFilters.push_back(filter.toStdString());
+		}
+
+		editor->extractBotNames(stdFilters, level_design_path.toStdString(), ligoConfig);
 		QApplication::restoreOverrideCursor();
 }
 
@@ -576,17 +625,6 @@ bool CCoreListener::closeMainWindow() const
 		}
 	}
 	return okToClose;
-}
-
-std::list<std::string> CMainWindow::convertQStringList(QStringList listq)
-{
-	std::list<std::string> stdlist;
-
-	Q_FOREACH(QString text, listq)
-	{
-		stdlist.push_back(text.toStdString());
-	}
-	return stdlist;
 }
 
 } /* namespace TranslationManager */
