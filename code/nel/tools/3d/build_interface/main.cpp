@@ -14,10 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// lightmap_optimizer
-// ------------------
-// the goal is to regroup lightmap of a level into lightmap with a higher level
-
 #include "nel/misc/common.h"
 #include "nel/misc/file.h"
 #include "nel/misc/bitmap.h"
@@ -30,6 +26,8 @@
 #include <vector>
 #include <string>
 
+#include "../../pipeline/pipeline_library/tool_logger.h"
+
 // ---------------------------------------------------------------------------
 
 using namespace std;
@@ -39,8 +37,9 @@ using namespace NLMISC;
 //char sExeDir[MAX_PATH];
 std::string sExeDir;
 NLMISC::CApplicationContext _ApplicationContext;
+PIPELINE::CToolLogger ToolLogger;
 
-void outString (const string &sText)
+void outString(const string &sText)
 {
 	std::string sCurDir = CPath::getCurrentPath();
 	CPath::setCurrentPath(sExeDir.c_str());
@@ -196,15 +195,6 @@ int main(int nNbArg, char **ppArgs)
 {
 	//GetCurrentDirectory (MAX_PATH, sExeDir);
 	sExeDir = CPath::getCurrentPath();
-
-	if (nNbArg < 3)
-	{
-		outString ("ERROR : Wrong number of arguments\n");
-		outString ("USAGE : build_interface [-s<existing_uv_txt_name>] <out_tga_name> <path_maps1> [path_maps2] [path_maps3] ....\n");
-		outString ("   -s : build a subset of an existing interface definition while preserving the existing texture ids,");
-		outString (" to support freeing up VRAM by switching to the subset without rebuilding the entire interface\n");
-		return -1;
-	}
 	
 	// build as a subset of existing interface
 	bool buildSubset = false;
@@ -219,7 +209,13 @@ int main(int nNbArg, char **ppArgs)
 			case 'S':
 			case 's':
 				buildSubset = true;
-				existingUVfilename = string( ppArgs[i]+2 );
+				existingUVfilename = string(ppArgs[i] + 2);
+				break;
+			case 'd':
+				ToolLogger.initDepend(string(ppArgs[i] + 2));
+				break;
+			case 'e':
+				ToolLogger.initError(string(ppArgs[i] + 2));
 				break;
 			default:
 				break;
@@ -229,14 +225,24 @@ int main(int nNbArg, char **ppArgs)
 			inputDirs.push_back(ppArgs[i]);
 	}
 
-	string fmtName;
-	uint iNumDirs =  (uint)inputDirs.size(); 
-	if( iNumDirs )
+	uint iNumDirs =  (uint)inputDirs.size();
+	if (iNumDirs < 2)
 	{
-		fmtName = inputDirs.front();
-		inputDirs.pop_front();
-		--iNumDirs;
+		outString ("ERROR : Wrong number of arguments\n");
+		outString ("USAGE : build_interface [-s<existing_uv_txt_name>] [-d<depend_log_file>] [-e<error_log_file>] <out_tga_name> <path_maps1> [path_maps2] [path_maps3] ....\n");
+		outString ("   -s : build a subset of an existing interface definition while preserving the existing texture ids,");
+		outString (" to support freeing up VRAM by switching to the subset without rebuilding the entire interface\n");
+		return -1;
 	}
+
+	std::string tgaName = inputDirs.front();
+	inputDirs.pop_front();
+	--iNumDirs;
+	if (tgaName.rfind('.') == string::npos)
+		tgaName += ".tga";
+	std::string uvName = tgaName.substr(0, tgaName.rfind('.'));
+	uvName += ".txt";
+
 	vector<string> AllMapNames;
 	list<string>::iterator it = inputDirs.begin();
 	list<string>::iterator itEnd = inputDirs.end();
@@ -245,7 +251,9 @@ int main(int nNbArg, char **ppArgs)
 		string sDir = *it++;
 		if( !CFile::isDirectory(sDir) )
 		{
-			outString (string("ERROR : directory ") + sDir + " does not exist\n");
+			outString(string("ERROR : directory ") + sDir + " does not exist\n");
+			ToolLogger.writeError(PIPELINE::ERROR, sDir, "Directory does not exist.");
+			ToolLogger.release();
 			return -1;
 		}
 		CPath::getPathContent(sDir, false, false, true, AllMapNames);
@@ -255,25 +263,36 @@ int main(int nNbArg, char **ppArgs)
 	sint32 i, j;
 
 	// Load all maps
-	sint32 mapSize = (sint32)AllMapNames.size();
-	AllMaps.resize( mapSize );
-	for( i = 0; i < mapSize; ++i )
+	//sint32 mapSize = (sint32)AllMapNames.size();
+	//AllMaps.resize( mapSize );
+	AllMaps.reserve(AllMapNames.size());
+	for (std::vector<std::string>::size_type i = 0; i < AllMapNames.size(); ++i)
 	{
 		try
 		{
+			ToolLogger.writeDepend(tgaName, AllMapNames[i]); // Write depend before error can occur.
+			ToolLogger.writeDepend(uvName, AllMapNames[i]);
+
 			NLMISC::CBitmap *pBtmp = new NLMISC::CBitmap;
 			NLMISC::CIFile inFile;
 			inFile.open( AllMapNames[i] );
 			pBtmp->load(inFile);
-			AllMaps[i] = pBtmp;
+			AllMaps.push_back(pBtmp);
 		}
 		catch (const NLMISC::Exception &e)
 		{
-			outString (string("ERROR :") + e.what());
-			return -1;
-		}
-	}
+			// Allow the build process to continue without the bad file.
 
+			outString (string("ERROR :") + e.what());
+			ToolLogger.writeError(PIPELINE::WARNING, AllMapNames[i], e.what());
+
+			AllMapNames.erase(AllMapNames.begin() + i);
+			--i;
+		}
+		nlassert(AllMaps.size() == i + 1); // It's a coding error otherwise.
+	}
+	
+	sint32 mapSize = (sint32)AllMapNames.size();
 	// Sort all maps by decreasing size
 	for (i = 0; i < mapSize-1; ++i)
 	for (j = i+1; j < mapSize; ++j)
@@ -362,12 +381,10 @@ int main(int nNbArg, char **ppArgs)
 	CPath::setCurrentPath(sExeDir.c_str());
 
 	NLMISC::COFile outTga;
-	if (fmtName.rfind('.') == string::npos)
-		fmtName += ".tga";
-	if (outTga.open(fmtName))
+	if (outTga.open(tgaName))
 	{
 		std::string ext;
-		if (toLower(fmtName).find(".png") != string::npos)
+		if (toLower(tgaName).find(".png") != string::npos)
 		{
 			ext = "png";
 			GlobalTexture.writePNG (outTga, 32);
@@ -379,19 +396,20 @@ int main(int nNbArg, char **ppArgs)
 		}
 
 		outTga.close();
-		outString (toString("Writing %s file : %s\n", ext.c_str(), fmtName.c_str()));
+		outString (toString("Writing %s file : %s\n", ext.c_str(), tgaName.c_str()));
 	}
 	else
 	{
-		outString (string("ERROR: Cannot write tga file : ") + fmtName + "\n");
+		outString (string("ERROR: Cannot write tga or png file : ") + tgaName + "\n");
+		ToolLogger.writeError(PIPELINE::ERROR, tgaName, "Cannot write tga or png file.");
+		ToolLogger.release();
+		return EXIT_FAILURE;
 	}
 
 	// Write UV text file
 	if( !buildSubset )
 	{
-		fmtName = fmtName.substr(0, fmtName.rfind('.'));
-		fmtName += ".txt";
-		FILE *f = fopen (fmtName.c_str(), "wt");
+		FILE *f = fopen (uvName.c_str(), "wt");
 		if (f != NULL)
 		{
 			for (i = 0; i < mapSize; ++i)
@@ -402,11 +420,14 @@ int main(int nNbArg, char **ppArgs)
 												UVMax[i].U, UVMax[i].V);
 			}
 			fclose (f);
-			outString (string("Writing UV file : ") + fmtName + "\n");
+			outString (string("Writing UV file : ") + uvName + "\n");
 		}
 		else
 		{
-			outString (string("ERROR: Cannot write UV file : ") + fmtName + "\n");
+			outString (string("ERROR: Cannot write UV file : ") + uvName + "\n");
+			ToolLogger.writeError(PIPELINE::ERROR, uvName, "Cannot write UV file.");
+			ToolLogger.release();
+			return EXIT_FAILURE;
 		}
 	}
 	else // build as a subset
@@ -414,21 +435,27 @@ int main(int nNbArg, char **ppArgs)
 		// Load existing uv file
 		CIFile iFile;
 		string filename = CPath::lookup (existingUVfilename, false);
+
+		ToolLogger.writeDepend(tgaName, existingUVfilename); // Write depend before error can occur.
+		ToolLogger.writeDepend(uvName, existingUVfilename);
+
 		if( (filename == "") || (!iFile.open(filename)) )
 		{
 			outString (string("ERROR : could not open file ") + existingUVfilename + "\n");
-			return -1;
+			ToolLogger.writeError(PIPELINE::ERROR, existingUVfilename, "Could not open file.");
+			ToolLogger.release();
+			return EXIT_FAILURE;
 		}
 		
 		// Write subset UV text file
-		fmtName = fmtName.substr(0, fmtName.rfind('.'));
-		fmtName += ".txt";
-		FILE *f = fopen (fmtName.c_str(), "wt");
+		FILE *f = fopen (uvName.c_str(), "wt");
 		if (f == NULL)
 		{
-			outString (string("ERROR: Cannot write UV file : ") + fmtName + "\n");
+			outString (string("ERROR: Cannot write UV file : ") + uvName + "\n");
+			ToolLogger.writeError(PIPELINE::ERROR, uvName, "Cannot write UV file.");
+			ToolLogger.release();
 //			fclose (iFile);
-			return -1;
+			return EXIT_FAILURE;
 		}
 
 		char bufTmp[256], tgaName[256];
@@ -467,8 +494,9 @@ int main(int nNbArg, char **ppArgs)
 		}	
 //		fclose (iFile);
 		fclose (f);
-		outString (string("Writing UV file : ") + fmtName + "\n");
+		outString (string("Writing UV file : ") + uvName + "\n");
 	}
 	
-	return 0;
+	ToolLogger.release();
+	return EXIT_SUCCESS;
 }
