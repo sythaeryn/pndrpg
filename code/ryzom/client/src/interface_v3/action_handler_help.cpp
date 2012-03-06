@@ -57,6 +57,9 @@
 #include "sbrick_manager.h"
 #include "sphrase_manager.h"
 #include "action_handler_help.h"
+#include "nel/misc/i18n.h"
+#include "nel/misc/algo.h"
+#include "nel/net/email.h"
 #include "game_share/mission_desc.h"
 #include "game_share/inventories.h"
 #include "game_share/visual_slot_manager.h"
@@ -248,8 +251,10 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 		CDBCtrlSheet		*ctrlSrc= elt;
 		// get the ctrl sheet in this help window.
 		CDBCtrlSheet		*ctrlDst= dynamic_cast<CDBCtrlSheet*>(group->getCtrl(":ctrl_slot"));
+		bool showSlotAndCreator = false;
 		if(ctrlDst && ctrlSrc)
 		{
+			showSlotAndCreator = true;
 			// if same Aspect
 			if( ctrlSrc->sameAspect(ctrlDst) )
 			{
@@ -274,6 +279,13 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 				}
 			}
 		}
+
+		CInterfaceElement *ctrl = group->getElement(group->getId()+":content:ctrl_slot");
+		if (ctrl) ctrl->setActive(showSlotAndCreator);
+		ctrl = group->getElement(group->getId()+":content:creator");
+		if (ctrl) ctrl->setActive(showSlotAndCreator);
+		ctrl = group->getElement(group->getId()+":content:creator_header");
+		if (ctrl) ctrl->setActive(showSlotAndCreator);
 	}
 
 	// If some free window possible, search which to take
@@ -378,7 +390,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 	setup.setupDefaultIDs();
 	setup.SrcSheet = elt;
 	setup.HelpWindow = group;
-	setupCreatorName(setup);
+	//setupCreatorName(setup);
 
 	// Hide elements by defaults
 	resetSheetHelp(setup);
@@ -2064,6 +2076,12 @@ void getItemText (CDBCtrlSheet *item, ucstring &itemText, const CItemSheet*pIS)
 			strFindReplace(itemText, "%r2_comment_text", toString(itemInfo.R2ItemComment));
 		}
 		break;
+	case ITEMFAMILY::PET_ANIMAL_TICKET:
+		{
+			string nr = (itemInfo.PetNumber > 0) ? toString(itemInfo.PetNumber) : "(slot)" + toString(item->getIndexInDB());
+			strFindReplace(itemText, "%petnumber", nr);
+		}
+		break;
 	default:
 		{
 			strFindReplace(itemText, "%no_rent", pIS->IsItemNoRent ? CI18N::get("uihelpItemNoRent") : string(""));
@@ -2745,8 +2763,15 @@ void setupCreatorName(CSheetHelpSetup &setup)
 	CViewText	*vthd = dynamic_cast<CViewText*>(setup.HelpWindow->getView("creator_header"));
 	if (vtid != NULL)
 	{
-		// if not an item, disable the view
-		if(!setup.SrcSheet || setup.SrcSheet->getType()!=CCtrlSheetInfo::SheetType_Item	)
+		bool bIsRM = false;
+		if (setup.SrcSheet)
+		{
+			const CItemSheet *pIS= dynamic_cast<const CItemSheet*>(SheetMngr.get(CSheetId(setup.SrcSheet->getSheetId())));
+			bIsRM = (pIS && pIS->Family == ITEMFAMILY::RAW_MATERIAL);
+		}
+
+		// if a RM or not an item, disable the view
+		if(!setup.SrcSheet || bIsRM || setup.SrcSheet->getType()!=CCtrlSheetInfo::SheetType_Item	)
 		{
 			// important else a brick could display a creator name....
 			vtid->setActive(false);
@@ -3569,6 +3594,31 @@ public:
 };
 REGISTER_ACTION_HANDLER( CHandlerAuraModifierTooltip, "aura_modifier_tooltip");
 
+// ***************************************************************************
+class CHandlerUserPaToolTip : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &Params)
+	{
+		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+
+		uint8 index;
+		fromString(Params, index);
+		--index; // Param is 1-based so subtract 1
+		if (index < 0 || index >= MAX_INVENTORY_ANIMAL)
+		{
+			return;
+		}
+
+		ucstring txt;
+		CCDBNodeLeaf *node = pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:NAME", index));
+		if (node && CStringManagerClient::instance()->getDynString(node->getValue32(), txt))
+		{
+			pIM->setContextHelpText(CEntityCL::removeTitleFromName(txt));
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerUserPaToolTip, "userpa_name_tooltip");
 
 // ***************************************************************************
 class CHandlerAnimalDeadPopupTooltip : public IActionHandler
@@ -3922,7 +3972,7 @@ public:
 		#ifdef NL_OS_WINDOWS
 			if (Driver)
 			{
-				HWND wnd = Driver->getDisplay();
+				HWND wnd = (HWND) Driver->getDisplay();
 				ShowWindow(wnd, SW_MINIMIZE);
 			}
 		#endif
