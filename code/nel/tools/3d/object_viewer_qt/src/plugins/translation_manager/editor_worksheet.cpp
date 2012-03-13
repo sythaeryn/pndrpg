@@ -139,7 +139,6 @@ void CEditorWorksheet::contextMenuEvent(QContextMenuEvent *e)
 void CEditorWorksheet::activateWindow()
 {
 	showMaximized();
-	current_stack->setActive(true);
 }
 
 void CEditorWorksheet::save()

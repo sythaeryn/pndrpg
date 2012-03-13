@@ -98,7 +98,7 @@ public:
 	}
 	virtual QUndoStack *undoStack()
 	{
-		return m_MainWindow->undoStack;
+		return m_MainWindow->getCurrentUndoStack();
 	}
 	virtual void open()
 	{

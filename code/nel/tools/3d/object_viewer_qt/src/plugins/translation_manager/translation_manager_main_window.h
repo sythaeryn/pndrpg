@@ -62,12 +62,11 @@ public:
 	
 public:
 	Ui::CMainWindow _ui;
-	QUndoStack *undoStack;
-
+	QUndoStack* getCurrentUndoStack();
 private:
 	// editors
 	CEditorBase* editorWindow;
-	
+	QUndoStack* undoStack;
 	// actions
 	QAction* openAct;
 	QAction* saveAct;
@@ -90,7 +89,7 @@ private Q_SLOTS:
 	void saveAs();
 	void setActiveSubWindow(QWidget *window);
 	void updateWindowsList();
-	void subWindowActivated(QMdiSubWindow *window);
+	void windowActivated(QMdiSubWindow *window);
 	void mergeSingleFile();
 	void readSettings();
 private:
