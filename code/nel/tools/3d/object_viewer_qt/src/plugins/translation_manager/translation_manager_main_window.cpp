@@ -57,15 +57,20 @@ CMainWindow::CMainWindow(QWidget *parent)
 	windowMapper = new QSignalMapper(this);
 	connect(windowMapper, SIGNAL(mapped(QWidget *)), this, SLOT(setActiveSubWindow(QWidget *)));
 
+	connect(_ui.mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(subWindowActivated(QMdiSubWindow *)));
 	editorWindow = new CEditorBase();
 
 	initialize_settings["georges"] = false;
 	initialize_settings["ligo"] = false;
 
+
+	undoStack = new QUndoStack();
+
 	connect(Core::ICore::instance(), SIGNAL(changeSettings()), this, SLOT(readSettings()));
 	readSettings();
 	createToolbar();
-	m_undoStack = new QUndoStack(this);
+
+	
 
 }
 
@@ -149,6 +154,13 @@ void CMainWindow::createToolbar()
 	QAction *redoAction = menuManager->action(Core::Constants::REDO);
 	if (redoAction != 0)
 		_ui.toolBar->addAction(redoAction);
+}
+
+void CMainWindow::subWindowActivated(QMdiSubWindow *window) 
+{
+
+	CEditor *editor = qobject_cast<CEditor *>(window);
+	editor->getUndoStack()->setActive(true);
 }
 
 /**
@@ -246,14 +258,14 @@ void CMainWindow::open()
 		{
 			editor->activateWindow();
 			return;
-		}
+		} 
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 
 		// worksheet editor
 		if(editorWindow->getEditorType(file_name) == Constants::ED_WORKSHEET)
 		{
 			CEditorWorksheet *new_window = new CEditorWorksheet(_ui.mdiArea);
-			new_window->setUndoStack(m_undoStack);
+			undoStacks->addStack(new_window->getUndoStack());
 			new_window->open(file_name);
 			new_window->activateWindow();
 		}
@@ -261,7 +273,7 @@ void CMainWindow::open()
 		if(editorWindow->getEditorType(file_name) == Constants::ED_PHRASE)
 		{
 			CEditorPhrase *new_window = new CEditorPhrase(_ui.mdiArea);
-			new_window->setUndoStack(m_undoStack);
+			undoStacks->addStack(new_window->getUndoStack());
 			new_window->open(file_name);
 			new_window->activateWindow();
 		}
