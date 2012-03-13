@@ -21,8 +21,7 @@
 #include "ui_translation_manager_main_window.h"
 #include "translation_manager_editor.h"
 #include "source_selection.h"
-#include "editor_worksheet.h"
-#include "editor_phrase.h"
+#include "editor_base.h"
 
 // Project system includes
 #include "../core/icore_listener.h"
@@ -30,6 +29,7 @@
 // Qt includes
 #include <QtCore/QObject>
 #include <QtGui/QUndoStack>
+#include <QtGui/QUndoGroup>
 #include <QtGui/QMainWindow>
 #include <QtGui/QTableWidget>
 #include <QtGui/QMenu>
@@ -59,18 +59,21 @@ class CMainWindow : public QMainWindow
 public:
 	CMainWindow(QWidget *parent = 0);
 	virtual ~CMainWindow() {}
-	QUndoStack *m_undoStack;
-
+	
 public:
 	Ui::CMainWindow _ui;
+	QUndoStack *undoStack;
 
 private:
+	// editors
+	CEditorBase* editorWindow;
+	
 	// actions
-	QAction *openAct;
-	QAction *saveAct;
-	QAction *saveAsAct;
-	QMenu *windowMenu;
-	QSignalMapper *windowMapper;
+	QAction* openAct;
+	QAction* saveAct;
+	QAction* saveAsAct;
+	QMenu* windowMenu;
+	QSignalMapper* windowMapper;
 	// config
 	QMap<string,bool> initialize_settings;
 	QList<QString> filters;
@@ -80,31 +83,25 @@ private:
 	QString translation_path;
 	QString work_path;
 	NLLIGO::CLigoConfig ligoConfig;
-
 private Q_SLOTS:
-	void extractBotNames();
-	void extractWords(QString typeq);
+	void extractMenu(QString workSheetType);
 	void open();
 	void save();
 	void saveAs();
 	void setActiveSubWindow(QWidget *window);
 	void updateWindowsList();
+	void subWindowActivated(QMdiSubWindow *window);
 	void mergeSingleFile();
-
-private:
-	void openWorkFile(QString file);
-	void updateToolbar(QMdiSubWindow *window);
-	bool verifySettings();
 	void readSettings();
+private:
+	CEditorWorksheet* openWorkFile(QString file);
+	void updateToolbar(QMdiSubWindow *window);
+	bool verifySettings();	
 	void createMenus();
 	void createToolbar();
 	void initializeSettings(bool georges);
-	std::list<std::string> convertQStringList(QStringList listq);
-	CEditor *getEditorByWindowFilePath(const QString &fileName);
-	// Worksheet specific functions
-	CEditorWorksheet *getEditorByWorksheetType(const QString &type);
-	bool isWorksheetEditor(QString filename);
-	bool isPhraseEditor(QString filename);
+	void extractBotNames(CEditorWorksheet *editor);
+	void extractWords(CEditorWorksheet *editor, QString fileName);
 };
 
 class CCoreListener : public Core::ICoreListener

@@ -14,28 +14,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef TRANSLATION_MANAGER_CONSTANTS_H
-#define	TRANSLATION_MANAGER_CONSTANTS_H
+#ifndef EDITOR_BASE_H
+#define EDITOR_BASE_H
+
+// Project includes
+#include "editor_worksheet.h"
+#include "editor_phrase.h"
 
 namespace TranslationManager
 {
 
-namespace Constants
+class CEditorBase
 {
-const int ED_PHRASE = 2;
-const int ED_WORKSHEET = 1;
+public:
+	CEditorBase();
+	int getEditorType(QString fileName);
+	CEditor* getEditorWindowByFileName(const QString &fileName,  QList<QMdiSubWindow*> subWindows);
+	CEditorWorksheet* getEditorWindowByWorksheetType(const QString &workSheetType,  QList<QMdiSubWindow*> subWindows);
+};
 
-const char *const WK_BOTNAMES = "bot_names_wk.txt";
-const char *const WK_ITEM = "item_words_wk.txt";
-const char *const WK_CREATURE = "creature_words_wk.txt";
-const char *const WK_SBRICK = "sbrick_words_wk.txt";
-const char *const WK_SPHRASE = "sphrase_words_wk.txt";
-const char *const WK_PLACE = "place_words_wk.txt";
-const char *const WK_CONTINENT = "place_words_wk.txt";
-const char *const WK_STABLE = "place_words_wk.txt";
-}
 
 }
 
-#endif	/* TRANSLATION_MANAGER_CONSTANTS_H */
 
+
+#endif	/* EDITOR_BASE_H */
