@@ -17,12 +17,21 @@
 #ifndef TRANSLATION_MANAGER_EDITOR_H
 #define TRANSLATION_MANAGER_EDITOR_H
 
+// Project system includes
+#include "../core/icore.h"
+#include "../core/core_constants.h"
+#include "../core/menu_manager.h"
+#include "../core/context_manager.h"
+#include "../../extension_system/iplugin_spec.h"
+
+// Qt includes
 #include <QtCore/QObject>
 #include <QtGui/QWidget>
 #include <QtGui/QMdiArea>
 #include <QtGui/QMdiSubWindow>
 #include <QtGui/QUndoStack>
 #include <QtCore/QFileInfo>
+
 
 namespace TranslationManager
 {
@@ -32,8 +41,15 @@ class CEditor : public QMdiSubWindow
 	Q_OBJECT
 
 public:
-	CEditor(QMdiArea *parent) : QMdiSubWindow(parent) {}
+	CEditor(QMdiArea *parent) : QMdiSubWindow(parent) 
+	{
+		current_stack = new QUndoStack(); 
+		Core::ICore *core = Core::ICore::instance();	
+		core->contextManager()->registerUndoStack(current_stack);		
+	}
+
 	CEditor() : QMdiSubWindow() {}
+
 	virtual void open(QString filename) =0;
 	virtual void save() =0;
 	virtual void saveAs(QString filename) =0;
@@ -47,9 +63,9 @@ public:
 	{
 		return current_file;
 	}
-	void setUndoStack(QUndoStack *stack)
+	QUndoStack* getUndoStack()
 	{
-		current_stack = stack;
+		return current_stack;
 	}
 	void setCurrentFile(QString filename)
 	{
@@ -65,6 +81,7 @@ protected:
 	QString current_file;
 	int editor_type;
 };
+
 
 }
 
