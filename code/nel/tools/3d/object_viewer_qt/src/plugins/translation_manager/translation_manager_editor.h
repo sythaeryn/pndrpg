@@ -18,7 +18,11 @@
 #define TRANSLATION_MANAGER_EDITOR_H
 
 // Project system includes
-#include "../core/icore_listener.h"
+#include "../core/icore.h"
+#include "../core/core_constants.h"
+#include "../core/menu_manager.h"
+#include "../core/context_manager.h"
+#include "../../extension_system/iplugin_spec.h"
 
 // Qt includes
 #include <QtCore/QObject>
