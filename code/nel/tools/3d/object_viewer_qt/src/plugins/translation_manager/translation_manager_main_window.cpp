@@ -57,14 +57,14 @@ CMainWindow::CMainWindow(QWidget *parent)
 	windowMapper = new QSignalMapper(this);
 	connect(windowMapper, SIGNAL(mapped(QWidget *)), this, SLOT(setActiveSubWindow(QWidget *)));
 
-	connect(_ui.mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(subWindowActivated(QMdiSubWindow *)));
+	connect(_ui.mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow *)), this, SLOT(windowActivated(QMdiSubWindow *)));
 	editorWindow = new CEditorBase();
 
 	initialize_settings["georges"] = false;
 	initialize_settings["ligo"] = false;
 
 
-	undoStack = new QUndoStack();
+	undoStack = new QUndoStack(this);
 
 	connect(Core::ICore::instance(), SIGNAL(changeSettings()), this, SLOT(readSettings()));
 	readSettings();
@@ -156,11 +156,21 @@ void CMainWindow::createToolbar()
 		_ui.toolBar->addAction(redoAction);
 }
 
-void CMainWindow::subWindowActivated(QMdiSubWindow *window) 
+QUndoStack* CMainWindow::getCurrentUndoStack() 
 {
+	if(_ui.mdiArea->activeSubWindow() == 0)
+	{
+		return undoStack;
+	} else {
+		CEditor *editor = qobject_cast<CEditor *>(_ui.mdiArea->activeSubWindow());
+		return editor->getUndoStack();
+	}	
+}
 
-	CEditor *editor = qobject_cast<CEditor *>(window);
-	editor->getUndoStack()->setActive(true);
+void CMainWindow::windowActivated(QMdiSubWindow *window) 
+{
+	Core::ICore *core = Core::ICore::instance();	
+	core->contextManager()->updateCurrentContext();	
 }
 
 /**
@@ -175,6 +185,9 @@ void CMainWindow::setActiveSubWindow(QWidget *window)
 	QMdiSubWindow *mdiWindow = qobject_cast<QMdiSubWindow *>(window);
 	if (mdiWindow != 0)
 		_ui.mdiArea->setActiveSubWindow(mdiWindow);
+
+
+
 }
 
 /**
@@ -265,7 +278,6 @@ void CMainWindow::open()
 		if(editorWindow->getEditorType(file_name) == Constants::ED_WORKSHEET)
 		{
 			CEditorWorksheet *new_window = new CEditorWorksheet(_ui.mdiArea);
-			undoStacks->addStack(new_window->getUndoStack());
 			new_window->open(file_name);
 			new_window->activateWindow();
 		}
@@ -273,7 +285,6 @@ void CMainWindow::open()
 		if(editorWindow->getEditorType(file_name) == Constants::ED_PHRASE)
 		{
 			CEditorPhrase *new_window = new CEditorPhrase(_ui.mdiArea);
-			undoStacks->addStack(new_window->getUndoStack());
 			new_window->open(file_name);
 			new_window->activateWindow();
 		}

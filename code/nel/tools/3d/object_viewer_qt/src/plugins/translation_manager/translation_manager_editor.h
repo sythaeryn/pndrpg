@@ -45,7 +45,7 @@ public:
 	{
 		current_stack = new QUndoStack(); 
 		Core::ICore *core = Core::ICore::instance();	
-		core->contextManager()->registerUndoStack(current_stack);		
+		core->contextManager()->registerUndoStack(current_stack);	
 	}
 
 	CEditor() : QMdiSubWindow() {}
