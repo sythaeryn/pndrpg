@@ -60,7 +60,7 @@ class CEditorWorksheet : public CEditor
 	Q_OBJECT
 
 public:
-	CEditorWorksheet(QMdiArea *parent) : CEditor(parent) {}
+	CEditorWorksheet(QMdiArea *parent) : CEditor(parent) { }
 	CEditorWorksheet() : CEditor() {}
 	QTableWidget *table_editor;
 	void open(QString filename);

@@ -29,6 +29,7 @@
 // Qt includes
 #include <QtCore/QObject>
 #include <QtGui/QUndoStack>
+#include <QtGui/QUndoGroup>
 #include <QtGui/QMainWindow>
 #include <QtGui/QTableWidget>
 #include <QtGui/QMenu>
@@ -58,14 +59,15 @@ class CMainWindow : public QMainWindow
 public:
 	CMainWindow(QWidget *parent = 0);
 	virtual ~CMainWindow() {}
-	QUndoStack *m_undoStack;
-
+	
 public:
 	Ui::CMainWindow _ui;
+	QUndoStack *undoStack;
 
 private:
 	// editors
 	CEditorBase* editorWindow;
+	
 	// actions
 	QAction* openAct;
 	QAction* saveAct;
@@ -88,12 +90,13 @@ private Q_SLOTS:
 	void saveAs();
 	void setActiveSubWindow(QWidget *window);
 	void updateWindowsList();
+	void subWindowActivated(QMdiSubWindow *window);
 	void mergeSingleFile();
+	void readSettings();
 private:
 	CEditorWorksheet* openWorkFile(QString file);
 	void updateToolbar(QMdiSubWindow *window);
-	bool verifySettings();
-	void readSettings();
+	bool verifySettings();	
 	void createMenus();
 	void createToolbar();
 	void initializeSettings(bool georges);
