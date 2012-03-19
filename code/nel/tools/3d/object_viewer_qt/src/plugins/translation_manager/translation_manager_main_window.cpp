@@ -156,17 +156,6 @@ void CMainWindow::createToolbar()
 		_ui.toolBar->addAction(redoAction);
 }
 
-QUndoStack* CMainWindow::getCurrentUndoStack() 
-{
-	if(_ui.mdiArea->activeSubWindow() == 0)
-	{
-		return undoStack;
-	} else {
-		CEditor *editor = qobject_cast<CEditor *>(_ui.mdiArea->activeSubWindow());
-		return editor->getUndoStack();
-	}	
-}
-
 void CMainWindow::windowActivated(QMdiSubWindow *window) 
 {
 	Core::ICore *core = Core::ICore::instance();	
@@ -587,6 +576,21 @@ void CMainWindow::mergeSingleFile()
 	}
 }
 
+/**
+ * Return the current Undo Stack
+ * Used by the context manager
+ */
+QUndoStack* CMainWindow::getCurrentUndoStack() 
+{
+	if(_ui.mdiArea->activeSubWindow() == 0)
+	{
+		return undoStack;
+	} else {
+		CEditor *editor = qobject_cast<CEditor *>(_ui.mdiArea->activeSubWindow());
+		return editor->getUndoStack();
+	}	
+}
+
 // Read the settings from QSettings
 void CMainWindow::readSettings()
 {
@@ -631,7 +635,7 @@ bool CCoreListener::closeMainWindow() const
 		{
 			QMessageBox msgBox;
 			msgBox.setIcon(QMessageBox::Question);
-			msgBox.setText(tr("The document has been modified ( %1 ).").arg(currentEditor->windowFilePath()));
+			msgBox.setText(tr("The document has been modified (%1).").arg(currentEditor->windowFilePath()));
 			msgBox.setInformativeText(tr("Do you want to save your changes?"));
 			msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
 			msgBox.setDefaultButton(QMessageBox::Save);
@@ -639,11 +643,14 @@ bool CCoreListener::closeMainWindow() const
 			if(ret == QMessageBox::Save)
 			{
 				currentEditor->save();
+				currentEditor->removeUndoStack();
 			}
 			else if(ret == QMessageBox::Cancel)
 			{
 				okToClose = false;
 				break;
+			} else {
+				currentEditor->removeUndoStack();
 			}
 		}
 	}

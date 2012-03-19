@@ -127,6 +127,8 @@ void CEditorPhrase::closeEvent(QCloseEvent *event)
 			return;
 		}
 	}
+
+	removeUndoStack();
 	event->accept();
 	close();
 }
