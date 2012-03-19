@@ -59,14 +59,23 @@ public:
 	{
 		return editor_type;
 	}
+
 	QString subWindowFilePath()
 	{
 		return current_file;
 	}
+
 	QUndoStack* getUndoStack()
 	{
 		return current_stack;
 	}
+
+	void removeUndoStack()
+	{
+		Core::ICore *core = Core::ICore::instance();
+		core->contextManager()->unregisterUndoStack(current_stack);
+	}
+
 	void setCurrentFile(QString filename)
 	{
 		QFileInfo *file = new QFileInfo(filename);

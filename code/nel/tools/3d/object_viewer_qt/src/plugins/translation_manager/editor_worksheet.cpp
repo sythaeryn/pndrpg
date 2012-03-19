@@ -473,6 +473,8 @@ void CEditorWorksheet::closeEvent(QCloseEvent *event)
 			return;
 		}
 	}
+
+	removeUndoStack();
 	event->accept();
 	close();
 }
