@@ -11,6 +11,8 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 
 SET(OVQT_PLUGIN_SCENE_EDITOR_HDR	scene_editor_plugin.h
 					scene_editor_window.h
+					graphics_widget.h
+					nel_widget.h
 )
 
 SET(OVQT_PLUGIN_SCENE_EDITOR_UIS	scene_editor_window.ui

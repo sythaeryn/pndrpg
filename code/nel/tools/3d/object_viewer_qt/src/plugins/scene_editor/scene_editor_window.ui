@@ -20,7 +20,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QWidget" name="widget" native="true"/>
+     <widget class="SceneViewer::GraphicsWidget" name="widget" native="true"/>
     </item>
    </layout>
   </widget>
@@ -36,6 +36,14 @@
    </attribute>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SceneViewer::GraphicsWidget</class>
+   <extends>QWidget</extends>
+   <header>graphics_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="scene_editor.qrc"/>
  </resources>
