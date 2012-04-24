@@ -29,7 +29,7 @@ namespace RenderMisc
 void init(NL3D::UDriver *driver);
 void release();
 
-void drawAxis(const NLMISC::CVector &start, const NLMISC::CVector &dir, const NLMISC::CRGBA &color, float size);
+void drawArrow(const NLMISC::CVector &start, const NLMISC::CVector &dir, const NLMISC::CRGBA &color, float size);
 void drawBox(const NLMISC::CVector &vMin, const NLMISC::CVector &vMax, const NLMISC::CRGBA &color);
 
 }
