@@ -23,9 +23,7 @@
 #include <nel/3d/u_transform.h>
 #include <nel/3d/u_instance.h>
 #include <nel/3d/u_skeleton.h>
-#include <nel/3d/u_driver.h>
 #include <nel/3d/u_scene.h>
-#include <nel/3d/u_light.h>
 
 #include <QtCore/QList>
 #include <QtCore/QHash>
