@@ -24,6 +24,14 @@ namespace Constants
 {
 const char * const SCENE_EDITOR_PLUGIN = "SceneEditor";
 
+const int USER_TYPE = 65536;
+const int NODE_IS_MODIFIED = USER_TYPE + 1;
+const int NODE_FILE_IS_CREATED = USER_TYPE + 2;
+const int NODE_IS_VISIBLE = USER_TYPE + 3;
+const int NODE_IS_ENABLD = USER_TYPE + 4;
+const int NODE_FILE_NAME = USER_TYPE + 5;
+const int NODE_NON_REMOVABLE = USER_TYPE + 6;
+
 //settings
 const char * const SCENE_EDITOR_SECTION = "SceneEditor";
 

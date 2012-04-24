@@ -25,7 +25,7 @@ namespace RenderMisc
 {
 
 NL3D::UMaterial	GenericMat;
-NL3D::UDriver *Driver;
+NL3D::UDriver *Driver = 0;
 
 void init(NL3D::UDriver *driver)
 {
@@ -40,6 +40,7 @@ void init(NL3D::UDriver *driver)
 void release()
 {
 	Driver->deleteMaterial(GenericMat);
+	Driver = 0;
 }
 
 void buildSchmidtBasis(const NLMISC::CVector &k_, NLMISC::CMatrix &result)
@@ -68,6 +69,9 @@ void buildSchmidtBasis(const NLMISC::CVector &k_, NLMISC::CMatrix &result)
 
 void drawArrow(const NLMISC::CVector &start, const NLMISC::CVector &dir, const NLMISC::CRGBA &color, float size)
 {
+	if (Driver == 0)
+		return;
+
 	NLMISC::CLineColor line;
 	line.Color0 = color;
 	line.Color1 = color;
@@ -117,6 +121,9 @@ void drawArrow(const NLMISC::CVector &start, const NLMISC::CVector &dir, const N
 
 void drawBox(const NLMISC::CVector &vMin, const NLMISC::CVector &vMax, const NLMISC::CRGBA &color)
 {
+	if (Driver == 0)
+		return;
+
 	NLMISC::CLineColor line;
 	line.Color0 = color;
 	line.Color1 = color;
