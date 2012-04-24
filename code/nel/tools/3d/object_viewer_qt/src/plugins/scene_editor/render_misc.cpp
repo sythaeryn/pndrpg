@@ -66,7 +66,7 @@ void buildSchmidtBasis(const NLMISC::CVector &k_, NLMISC::CMatrix &result)
 	result.setRot(i, k ^ i, k, true);
 }
 
-void drawAxis(const NLMISC::CVector &start, const NLMISC::CVector &dir, const NLMISC::CRGBA &color, float size)
+void drawArrow(const NLMISC::CVector &start, const NLMISC::CVector &dir, const NLMISC::CRGBA &color, float size)
 {
 	NLMISC::CLineColor line;
 	line.Color0 = color;
