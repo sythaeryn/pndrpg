@@ -17,16 +17,16 @@
 
 
 #include "stdpch.h"
-#include "../cdb_leaf.h"
-#include "../cdb_branch.h"
+#include "nel/misc/cdb_leaf.h"
+#include "nel/misc/cdb_branch.h"
 #include "inventory_manager.h"
 #include "interface_manager.h"
 #include "bot_chat_page_trade.h"
 #include "bot_chat_page_all.h"
 #include "group_container.h"
 #include "group_menu.h"
-#include "../cdb_leaf.h"
-#include "../cdb_branch.h"
+#include "nel/misc/cdb_leaf.h"
+#include "nel/misc/cdb_branch.h"
 #include "list_sheet_base.h"
 #include "../net_manager.h"
 #include "../user_entity.h"
@@ -1864,7 +1864,8 @@ void CTempInvManager::open(TEMP_INV_MODE::TInventoryMode m)
 	}
 	pIM->getDbProp("LOCAL:INVENTORY:TEMP:TYPE")->setValue8((uint8)_Mode);
 
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
 	if (pGC != NULL)
 	{

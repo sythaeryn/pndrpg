@@ -269,7 +269,7 @@ void impulseDatabaseResetBank(NLMISC::CBitMemStream &impulse)
 		impulse.serial( bank, nbits );
 
 		// reset the bank
-		IngameDbMngr.getNodePtr()->resetBank( serverTick, (TCDBBank)bank );
+		IngameDbMngr.resetBank( serverTick, bank );
 		nldebug( "CDB: DB_GROUP:RESET_BANK %s", CDBBankNames[bank] );
 	}
 	catch (const Exception &e)

@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "interface_manager.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 
 /**
@@ -30,7 +30,7 @@
  * \author Nevrax France
  * \date 2002
  */
-class IInterfaceObserver : public ICDBNode::IPropertyObserver
+class IInterfaceObserver : public NLMISC::ICDBNode::IPropertyObserver
 {
 public:
 
@@ -45,7 +45,7 @@ public:
 	/**
 	 * observer update
 	 */
-	virtual void update (CCDBNodeLeaf* leaf)=0;
+	virtual void update (NLMISC::CCDBNodeLeaf* leaf)=0;
 
 
 };
@@ -160,7 +160,7 @@ public:
 					return NULL;
 				}
 			}
-			if ( ! iMngr->addDBObserver(obs,ICDBNode::CTextId (data) ) )
+			if ( ! iMngr->addDBObserver(obs,NLMISC::ICDBNode::CTextId (data) ) )
 			{
 				return NULL;
 			}

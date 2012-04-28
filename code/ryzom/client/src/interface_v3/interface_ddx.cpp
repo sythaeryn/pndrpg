@@ -25,7 +25,7 @@
 #include "group_modal.h"
 #include "../client_cfg.h"
 
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 //
 
 using namespace std;
@@ -790,7 +790,8 @@ void CInterfaceDDX::updateRealtime(CCtrlBase *pSB, bool updateOnScrollEnd)
 		ClientCfg.IsInvalidated = true;
 	}
 
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	CInterfaceManager::getInstance()->flushObserverCalls();
 
 	for (i = 0; i < _Parameters.size(); ++i)
 	{

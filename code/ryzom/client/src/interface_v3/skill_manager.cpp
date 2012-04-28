@@ -20,11 +20,11 @@
 #include "skill_manager.h"
 #include "interface_manager.h"
 #include "game_share/skills.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "game_share/character_title.h"
 #include "game_share/fame.h"
 #include "../sheet_manager.h"
-#include "../cdb_leaf.h"
+#include "nel/misc/cdb_leaf.h"
 #include "action_handler.h"
 #include "sbrick_manager.h"
 #include "dbgroup_combo_box.h"
@@ -158,7 +158,7 @@ void CSkillManager::initInGame()
 	// Get a node used to inform interface that a skill has changed
 	_TrackSkillChange= pIM->getDbProp("UI:VARIABLES:TRACK_SKILL_CHANGE", true);
 	// Add a branch observer on skill value change
-	pIM->getDbBranch("SERVER:CHARACTER_INFO:SKILLS")->addBranchObserver(&_SkillChangeObs);
+	pIM->addBranchObserver( "SERVER:CHARACTER_INFO:SKILLS", &_SkillChangeObs );
 
 }
 

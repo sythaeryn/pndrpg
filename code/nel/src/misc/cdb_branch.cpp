@@ -16,8 +16,6 @@
 
 
 
-#include "stdpch.h"
-
 //#define TRACE_READ_DELTA
 //#define TRACE_WRITE_DELTA
 //#define TRACE_SET_VALUE
@@ -28,16 +26,14 @@
 //////////////
 // Includes //
 //////////////
-#include "cdb_branch.h"
-#include "cdb_leaf.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/cdb_branch.h"
+#include "nel/misc/cdb_leaf.h"
+#include "nel/misc/xml_auto_ptr.h"
 //#include <iostream.h>
-#include "interface_v3/interface_manager.h"
 
 ////////////////
 // Namespaces //
 ////////////////
-using namespace NLMISC;
 using namespace std;
 
 
@@ -46,6 +42,9 @@ using namespace std;
 #include "nel/misc/file.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/progress_callback.h"
+#include "nel/misc/bit_mem_stream.h"
+#include "nel/misc/bit_set.h"
+#include "nel/misc/cdb_bank_handler.h"
 
 #include <libxml/parser.h>
 //#include <io.h>
@@ -56,76 +55,9 @@ using namespace std;
 
 
 using namespace std;
-using namespace NLMISC;
 
-/////////////
-// GLOBALS //
-/////////////
 
-CCDBNodeBranch::CDBBranchObsInfo *CCDBNodeBranch::_FirstNotifiedObs[2] = { NULL, NULL };
-CCDBNodeBranch::CDBBranchObsInfo *CCDBNodeBranch::_LastNotifiedObs[2] = { NULL, NULL };
-CCDBNodeBranch::CDBBranchObsInfo *CCDBNodeBranch::_CurrNotifiedObs = NULL;
-CCDBNodeBranch::CDBBranchObsInfo *CCDBNodeBranch::_NextNotifiedObs = NULL;
-
-//
-uint CCDBNodeBranch::_CurrNotifiedObsList = 0;
-
-// Mapping from server database index to client database index (first-level nodes)
-vector<uint> CCDBNodeBranch::_CDBBankToUnifiedIndexMapping [NB_CDB_BANKS];
-
-// Mapping from client database index to TCDBBank (first-level nodes)
-vector<TCDBBank> CCDBNodeBranch::_UnifiedIndexToBank;
-
-// Last index mapped
-uint CCDBNodeBranch::_CDBLastUnifiedIndex = 0;
-
-// Number of bits for first-level branches, by bank
-uint CCDBNodeBranch::_FirstLevelIdBitsByBank [NB_CDB_BANKS];
-
-extern const char *CDBBankNames[INVALID_CDB_BANK+1];
-
-// reset all static data
-void CCDBNodeBranch::reset()
-{
-	for ( uint b=0; b<NB_CDB_BANKS; ++b )
-		_CDBBankToUnifiedIndexMapping[b].clear();
-	_UnifiedIndexToBank.clear();
-	_CDBLastUnifiedIndex = 0;
-
-	_FirstNotifiedObs[0] = NULL;
-	_FirstNotifiedObs[1] = NULL;
-	_LastNotifiedObs[0] = NULL;
-	_LastNotifiedObs[1] = NULL;
-	_CurrNotifiedObsList = 0;
-	_CurrNotifiedObs = NULL;
-	_NextNotifiedObs = NULL;
-}
-
-// Internal use only. First-level bank-mapping.
-void CCDBNodeBranch::mapNodeByBank( ICDBNode * /* node */, const string& bankStr, bool /* clientOnly */, uint /* nodeIndex */ )
-{
-	/*if ( clientOnly )
-	{
-		//nldebug( "CDB: Unified.%u is ClientOnly", _CDBLastUnifiedIndex );
-		++_CDBLastUnifiedIndex;
-		_UnifiedIndexToBank.push_back( CDBPlayer );
-	}
-	else*/ // now clientOnly indices are known by the server as well
-	{
-		for ( uint b=0; b!=INVALID_CDB_BANK; ++b )
-		{
-			if ( string(CDBBankNames[b]) == bankStr )
-			{
-				//nldebug( "CDB: Mapping %s.%u to Unified.%u", CDBBankNames[b], _CDBBankToUnifiedIndexMapping[b].size(), _CDBLastUnifiedIndex );
-				_CDBBankToUnifiedIndexMapping[b].push_back( _CDBLastUnifiedIndex );
-				++_CDBLastUnifiedIndex;
-				_UnifiedIndexToBank.push_back( (TCDBBank)b );
-				break;
-			}
-		}
-	}
-}
-
+namespace NLMISC{
 
 //-----------------------------------------------
 //	init
@@ -135,8 +67,8 @@ static /*inline*/ void addNode( ICDBNode *newNode, std::string newName, CCDBNode
 						    std::vector<ICDBNode *> &nodes, std::vector<ICDBNode *> &nodesSorted,
 							xmlNodePtr &child, const string& bankName,
 							bool atomBranch, bool clientOnly,
-							NLMISC::IProgressCallback &progressCallBack,
-							bool mapBanks )
+							IProgressCallback &progressCallBack,
+							bool mapBanks, CCDBBankHandler *bankHandler = NULL )
 {
 	nodesSorted.push_back(newNode);
 	nodes.push_back(newNode);
@@ -149,7 +81,7 @@ static /*inline*/ void addNode( ICDBNode *newNode, std::string newName, CCDBNode
 	{
 		if ( ! bankName.empty() )
 		{
-			CCDBNodeBranch::mapNodeByBank( newNode, bankName, clientOnly, (uint)nodes.size()-1 );
+			bankHandler->mapNodeByBank( bankName );
 			//nldebug( "CDB: Mapping %s for %s (node %u)", newName.c_str(), bankName.c_str(), nodes.size()-1 );
 		}
 		else
@@ -159,7 +91,7 @@ static /*inline*/ void addNode( ICDBNode *newNode, std::string newName, CCDBNode
 	}
 }
 
-void CCDBNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &progressCallBack, bool mapBanks )
+void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks, CCDBBankHandler *bankHandler )
 {
 	xmlNodePtr child;
 
@@ -198,7 +130,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &progressC
 
 //				nlinfo("+ %s%d",name,i);
 				string newName = string(name.getDatas())+toString(i);
-				addNode( new CCDBNodeBranch(newName), newName, this, _Nodes, _NodesByName, child, sBank, sAtom=="1", sClientonly=="1", progressCallBack, mapBanks );
+				addNode( new CCDBNodeBranch(newName), newName, this, _Nodes, _NodesByName, child, sBank, sAtom=="1", sClientonly=="1", progressCallBack, mapBanks, bankHandler );
 //				nlinfo("-");
 
 				// Progress bar
@@ -210,7 +142,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &progressC
 			// dealing with a single entry
 //			nlinfo("+ %s",name);
 			string newName = string(name.getDatas());
-			addNode( new CCDBNodeBranch(newName), newName, this, _Nodes, _NodesByName, child, sBank, sAtom=="1", sClientonly=="1", progressCallBack, mapBanks );
+			addNode( new CCDBNodeBranch(newName), newName, this, _Nodes, _NodesByName, child, sBank, sAtom=="1", sClientonly=="1", progressCallBack, mapBanks, bankHandler );
 //			nlinfo("-");
 		}
 
@@ -247,7 +179,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &progressC
 
 //				nlinfo("  %s%d",name,i);
 				string newName = string(name.getDatas())+toString(i);
-				addNode( new CCDBNodeLeaf(newName), newName, this, _Nodes, _NodesByName, child, sBank, false, false, progressCallBack, mapBanks );
+				addNode( new CCDBNodeLeaf(newName), newName, this, _Nodes, _NodesByName, child, sBank, false, false, progressCallBack, mapBanks, bankHandler );
 
 				// Progress bar
 				progressCallBack.popCropedValues ();
@@ -257,7 +189,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &progressC
 		{
 //			nlinfo("  %s",name);
 			string newName = string(name.getDatas());
-			addNode( new CCDBNodeLeaf(newName), newName, this, _Nodes, _NodesByName, child, sBank, false, false, progressCallBack, mapBanks );
+			addNode( new CCDBNodeLeaf(newName), newName, this, _Nodes, _NodesByName, child, sBank, false, false, progressCallBack, mapBanks, bankHandler );
 		}
 
 		// Progress bar
@@ -267,18 +199,11 @@ void CCDBNodeBranch::init( xmlNodePtr node, NLMISC::IProgressCallback &progressC
 
 	// count number of bits required to store the id
 	if ( (mapBanks) && (getParent() == NULL) )
-	{
-		nlassertex( _UnifiedIndexToBank.size() == countNode, ("Mapped: %u Nodes: %u", _UnifiedIndexToBank.size(), countNode) );
-
+	{		
+		nlassert( bankHandler != NULL );
+		nlassertex( bankHandler->getUnifiedIndexToBankSize() == countNode, ("Mapped: %u Nodes: %u", bankHandler->getUnifiedIndexToBankSize(), countNode) );
+		bankHandler->calcIdBitsByBank();
 		_IdBits = 0;
-		for ( uint b=0; b!=NB_CDB_BANKS; ++b )
-		{
-			uint nbNodesOfBank = (uint)_CDBBankToUnifiedIndexMapping[b].size();
-			uint idb = 0;
-			if ( nbNodesOfBank > 0 )
-				for ( idb=1; nbNodesOfBank > unsigned(1<<idb) ; idb++ ) {}
-			_FirstLevelIdBitsByBank[b] = idb;
-		}
 	}
 	else
 	{
@@ -460,16 +385,16 @@ bool CCDBNodeBranch::setProp( CTextId& id, sint64 value )
 /*
  * Update the database from the delta, but map the first level with the bank mapping (see _CDBBankToUnifiedIndexMapping)
  */
-void CCDBNodeBranch::readAndMapDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, TCDBBank bank )
+void CCDBNodeBranch::readAndMapDelta( TGameCycle gc, CBitMemStream& s, uint bank, CCDBBankHandler *bankHandler )
 {
 	nlassert( ! isAtomic() ); // root node mustn't be atomic
 
 	// Read index
 	uint32 idx;
-	s.serial( idx, _FirstLevelIdBitsByBank[bank] );
+	s.serial( idx, bankHandler->getFirstLevelIdBits( bank ) );
 
 	// Translate bank index -> unified index
-	idx = _CDBBankToUnifiedIndexMapping[bank][idx];
+	idx = bankHandler->getServerToClientUIDMapping( bank, idx );
 	if (idx >= _Nodes.size())
 	{
 		throw Exception ("idx %d > _Nodes.size() %d ", idx, _Nodes.size());
@@ -492,7 +417,7 @@ void CCDBNodeBranch::readAndMapDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStre
 //	readDelta
 //
 //-----------------------------------------------
-void CCDBNodeBranch::readDelta( NLMISC::TGameCycle gc, CBitMemStream & f )
+void CCDBNodeBranch::readDelta( TGameCycle gc, CBitMemStream & f )
 {
 	if ( isAtomic() )
 	{
@@ -674,126 +599,14 @@ void CCDBNodeBranch::removeNode (const CTextId& id)
 	delete pNode;
 }
 
-
-
-
-//-----------------------------------------------
-void CCDBNodeBranch::flushObserversCalls()
+void CCDBNodeBranch::onLeafChanged( NLMISC::TStringId leafName )
 {
-	H_AUTO ( RZ_Interface_flushObserversCalls )
+	for( TObserverHandleList::iterator itr = observerHandles.begin(); itr != observerHandles.end(); ++itr )
+		if( (*itr)->observesLeaf( *leafName ) )
+			(*itr)->addToFlushableList();
 
-//	nlassert(_CrtCheckMemory());
-	_CurrNotifiedObs = _FirstNotifiedObs[_CurrNotifiedObsList];
-	while (_CurrNotifiedObs)
-	{
-		// modified node should now store them in other list when they're modified
-		_CurrNotifiedObsList = 1 - _CurrNotifiedObsList;
-		// switch list so that modified node are stored in the other list
-		while (_CurrNotifiedObs)
-		{
-			_NextNotifiedObs = _CurrNotifiedObs->NextNotifiedObserver[1 - _CurrNotifiedObsList];
-			nlassert(_CurrNotifiedObs->Owner);
-			if (_CurrNotifiedObs->Observer)
-				_CurrNotifiedObs->Observer->update(_CurrNotifiedObs->Owner);
-			if (_CurrNotifiedObs) // this may be modified by the call (if current observer is removed)
-			{
-				_CurrNotifiedObs->unlink(1 - _CurrNotifiedObsList);
-			}
-			_CurrNotifiedObs = _NextNotifiedObs;
-		}
-		nlassert(_FirstNotifiedObs[1 - _CurrNotifiedObsList] == NULL);
-		nlassert(_LastNotifiedObs[1 - _CurrNotifiedObsList] == NULL);
-		// update triggered link
-		CInterfaceLink::updateTrigeredLinks();
-		// examine other list to see if nodes have been registered
-		_CurrNotifiedObs = _FirstNotifiedObs[_CurrNotifiedObsList];
-	}
-	CInterfaceLink::updateTrigeredLinks(); // should call it at least once
-//	nlassert(_CrtCheckMemory());
-}
-
-//-----------------------------------------------
-void CCDBNodeBranch::CDBBranchObsInfo::link(uint list, NLMISC::TStringId modifiedLeafName)
-{
-	// If there a filter set?
-	if (!PositiveLeafNameFilter.empty())
-	{
-		// Don't link if modifiedLeafName is not in the filter
-		if (std::find(PositiveLeafNameFilter.begin(), PositiveLeafNameFilter.end(), modifiedLeafName) == PositiveLeafNameFilter.end())
-			return;
-	}
-
-//	nlassert(_CrtCheckMemory());
-	nlassert(list < 2);
-	if (Touched[list]) return; // already inserted in list
-	Touched[list] = true;
-	nlassert(!PrevNotifiedObserver[list]);
-	nlassert(!NextNotifiedObserver[list]);
-	if (!_FirstNotifiedObs[list])
-	{
-		_FirstNotifiedObs[list] = _LastNotifiedObs[list] = this;
-	}
-	else
-	{
-		nlassert(!_LastNotifiedObs[list]->NextNotifiedObserver[list]);
-		_LastNotifiedObs[list]->NextNotifiedObserver[list] = this;
-		PrevNotifiedObserver[list] = _LastNotifiedObs[list];
-		_LastNotifiedObs[list] = this;
-	}
-//	nlassert(_CrtCheckMemory());
-}
-
-//-----------------------------------------------
-void CCDBNodeBranch::CDBBranchObsInfo::unlink(uint list)
-{
-//	nlassert(_CrtCheckMemory());
-	nlassert(list < 2);
-	if (!Touched[list])
-	{
-		// not linked in this list
-		nlassert(PrevNotifiedObserver[list] == NULL);
-		nlassert(NextNotifiedObserver[list] == NULL);
-		return;
-	}
-	if (PrevNotifiedObserver[list])
-	{
-		PrevNotifiedObserver[list]->NextNotifiedObserver[list] = NextNotifiedObserver[list];
-	}
-	else
-	{
-		// this was the first node
-		_FirstNotifiedObs[list] = NextNotifiedObserver[list];
-	}
-	if (NextNotifiedObserver[list])
-	{
-		NextNotifiedObserver[list]->PrevNotifiedObserver[list] = PrevNotifiedObserver[list];
-	}
-	else
-	{
-		// this was the last node
-		_LastNotifiedObs[list] = PrevNotifiedObserver[list];
-	}
-	PrevNotifiedObserver[list] = NULL;
-	NextNotifiedObserver[list] = NULL;
-	Touched[list] = false;
-//	nlassert(_CrtCheckMemory());
-}
-
-//-----------------------------------------------
-void CCDBNodeBranch::linkInModifiedNodeList(NLMISC::TStringId modifiedLeafName)
-{
-//	nlassert(_CrtCheckMemory());
-	CCDBNodeBranch *curr = this;
-	do
-	{
-		for(TObsList::iterator it = curr->_Observers.begin(); it != curr->_Observers.end(); ++it)
-		{
-			it->link(_CurrNotifiedObsList, modifiedLeafName);
-		}
-		curr = curr->getParent();
-	}
-	while(curr);
-//	nlassert(_CrtCheckMemory());
+	if( _Parent != NULL )
+		_Parent->onLeafChanged( leafName );
 }
 
 
@@ -866,14 +679,21 @@ bool CCDBNodeBranch::removeObserver(IPropertyObserver* observer, CTextId& id)
 
 
 //-----------------------------------------------
-void CCDBNodeBranch::addBranchObserver(IPropertyObserver* observer, const std::vector<std::string>& positiveLeafNameFilter)
+void CCDBNodeBranch::addBranchObserver( ICDBDBBranchObserverHandle *handle, const std::vector<std::string>& positiveLeafNameFilter)
 {
-	CDBBranchObsInfo oi(observer, this, positiveLeafNameFilter);
-	_Observers.push_front(oi);
+	CCDBNodeBranch::TObserverHandleList::iterator itr
+		= std::find( observerHandles.begin(), observerHandles.end(), handle );
+
+	if( itr != observerHandles.end() ){
+		delete handle;
+		return;
+	}
+
+	observerHandles.push_back( handle );
 }
 
 //-----------------------------------------------
-void CCDBNodeBranch::addBranchObserver(const char *dbPathFromThisNode, ICDBNode::IPropertyObserver& observer, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize)
+void CCDBNodeBranch::addBranchObserver( ICDBDBBranchObserverHandle *handle, const char *dbPathFromThisNode, const char **positiveLeafNameFilter, uint positiveLeafNameFilterSize)
 {
 	CCDBNodeBranch *branchNode;
 	if (dbPathFromThisNode[0] == '\0') // empty string
@@ -883,21 +703,37 @@ void CCDBNodeBranch::addBranchObserver(const char *dbPathFromThisNode, ICDBNode:
 	else
 	{
 		branchNode = safe_cast<CCDBNodeBranch*>(getNode(ICDBNode::CTextId(dbPathFromThisNode), false));
-		BOMB_IF (!branchNode, (*getName()) << ":" << dbPathFromThisNode << " branch missing in DB", return);
+		if( branchNode == NULL ){
+			std::string msg = *getName();
+			msg += ":";
+			msg += dbPathFromThisNode;
+			msg += " branch missing in DB";
+
+			nlerror( msg.c_str() );
+			delete handle;
+			return;
+		}
 	}
 	std::vector<std::string> leavesToMonitor(positiveLeafNameFilterSize);
 	for (uint i=0; i!=positiveLeafNameFilterSize; ++i)
 	{
 		leavesToMonitor[i] = string(positiveLeafNameFilter[i]);
 	}
-	branchNode->addBranchObserver(&observer, leavesToMonitor);
+	branchNode->addBranchObserver(handle, leavesToMonitor);
 }
 
 //-----------------------------------------------
 void CCDBNodeBranch::removeBranchObserver(const char *dbPathFromThisNode, ICDBNode::IPropertyObserver& observer)
 {
 	CCDBNodeBranch *branchNode = safe_cast<CCDBNodeBranch*>(getNode(ICDBNode::CTextId(dbPathFromThisNode), false));
-	BOMB_IF (!branchNode, (*getName()) << ":" << dbPathFromThisNode << " branch missing in DB", return);
+	if( branchNode == NULL ){
+		std::string msg = *getName();
+		msg += ":";
+		msg += dbPathFromThisNode;
+		msg += " branch missing in DB";
+		nlerror( msg.c_str() );
+		return;
+	}
 	branchNode->removeBranchObserver(&observer);
 }
 
@@ -906,54 +742,37 @@ void CCDBNodeBranch::removeBranchObserver(const char *dbPathFromThisNode, ICDBNo
 bool CCDBNodeBranch::removeBranchObserver(IPropertyObserver* observer)
 {
 	bool found = false;
-	TObsList::iterator it = _Observers.begin();
-	while (it != _Observers.end())
+
+	TObserverHandleList::iterator itr = observerHandles.begin();
+	while( itr != observerHandles.end() )
 	{
-		if (it->Observer == observer)
+		if( (*itr)->observer() == observer )
 		{
-			removeBranchInfoIt(it);
-			it = _Observers.erase(it);
+			(*itr)->removeFromFlushableList();
+			delete *itr;
+			itr = observerHandles.erase( itr );
 			found = true;
 		}
 		else
 		{
-			++it;
+			++itr;
 		}
 	}
+
 	return found;
 }
 
 //-----------------------------------------------
 void CCDBNodeBranch::removeAllBranchObserver()
 {
-	TObsList::iterator it = _Observers.begin();
-	while (it != _Observers.end())
-	{
-		removeBranchInfoIt(it);
-		++it;
+	for( TObserverHandleList::iterator itr = observerHandles.begin();
+		itr != observerHandles.end(); ++itr ){
+		(*itr)->removeFromFlushableList();
+		delete *itr;
 	}
-	_Observers.clear();
-}
 
-//-----------------------------------------------
-void CCDBNodeBranch::removeBranchInfoIt(TObsList::iterator it)
-{
-	CDBBranchObsInfo *oi = &(*it);
-	// if this node is currenlty being notified, update iterators
-	if (oi == _CurrNotifiedObs)
-	{
-		_CurrNotifiedObs = NULL;
-	}
-	if (oi == _NextNotifiedObs)
-	{
-		nlassert(_CurrNotifiedObsList < 2);
-		_NextNotifiedObs = _NextNotifiedObs->NextNotifiedObserver[1 - _CurrNotifiedObsList];
-	}
-	// unlink observer from both update lists
-	oi->unlink(0);
-	oi->unlink(1);
+	observerHandles.clear();
 }
-
 
 //-----------------------------------------------
 // Useful for find
@@ -1012,4 +831,6 @@ ICDBNode *CCDBNodeBranch::find(const std::string &nodeName)
 #ifdef TRACE_SET_VALUE
 #undef TRACE_SET_VALUE
 #endif
+
+}
 

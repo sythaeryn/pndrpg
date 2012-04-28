@@ -22,12 +22,13 @@
 #include "interface_manager.h"
 #include "../string_manager_client.h"
 #include "view_text_id.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
 #include "nel/misc/algo.h"
 
 using namespace std;
 using namespace STRING_MANAGER;
+using NLMISC::CCDBNodeLeaf;
 
 NLMISC_REGISTER_OBJECT(CViewBase, CViewTextID, std::string, "text_id");
 
