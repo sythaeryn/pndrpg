@@ -23,6 +23,7 @@
 #include "nel/misc/command.h"
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
+#include "nel/misc/sheet_id.h"
 
 #include "nel/georges/u_form_loader.h"
 #include "nel/georges/u_form_elm.h"
@@ -1051,7 +1052,7 @@ public:
 				items->getArrayValue(soundName, i);
 				soundName = soundName.substr(0, soundName.find(".sound"));
 
-				cs.SoundNames.push_back(CStringMapper::map(soundName));
+				cs.SoundNames.push_back(CSheetId(soundName)/*CStringMapper::map(soundName)*/);
 			}
 
 			if (!cs.SoundNames.empty())
@@ -1101,7 +1102,7 @@ void CAudioMixerUser::initUserVar()
 		TUserVarControlsContainer::iterator first(_UserVarControls.begin()), last(_UserVarControls.end());
 		for(;  first != last; ++first)
 		{
-			std::vector<NLMISC::TStringId>::iterator first2(first->second.SoundNames.begin()), last2(first->second.SoundNames.end());
+			std::vector<NLMISC::CSheetId>::iterator first2(first->second.SoundNames.begin()), last2(first->second.SoundNames.end());
 			for (; first2 != last2; ++first2)
 			{
 				CSound *sound = getSoundId(*first2);
@@ -1132,7 +1133,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 		for (uint i=0; i<size; ++i)
 		{
 			s.serial(soundName);
-			SoundNames.push_back(CStringMapper::map(soundName));
+			SoundNames.push_back(CSheetId(soundName)/*CStringMapper::map(soundName)*/);
 		}
 	}
 	else
@@ -1146,7 +1147,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 
 		for (uint i=0; i<size; ++i)
 		{
-			soundName = CStringMapper::unmap(SoundNames[i]);
+			soundName = SoundNames[i].toString();/*CStringMapper::unmap(SoundNames[i])*/;
 			s.serial(soundName);
 		}
 	}
@@ -1780,7 +1781,7 @@ void				CAudioMixerUser::update()
 
 // ******************************************************************
 
-TSoundId			CAudioMixerUser::getSoundId( const NLMISC::TStringId &name )
+TSoundId			CAudioMixerUser::getSoundId( const NLMISC::CSheetId &name )
 {
 	return _SoundBank->getSound(name);
 }
@@ -1894,7 +1895,7 @@ retrySound:
 
 			if (invalid)
 			{
-				nlwarning("The sound %s contain an infinite recursion !", CStringMapper::unmap(id->getName()).c_str());
+				nlwarning("The sound %s contain an infinite recursion !", id->getName().toString()/*CStringMapper::unmap(id->getName()).c_str()*/);
 				return NULL;
 			}
 
@@ -2035,7 +2036,7 @@ retrySound:
 
 // ******************************************************************
 
-USource				*CAudioMixerUser::createSource( const NLMISC::TStringId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController)
+USource				*CAudioMixerUser::createSource( const NLMISC::CSheetId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController)
 {
 	return createSource( getSoundId( name ), spawn, cb, userParam, cluster, context, groupController);
 }
@@ -2162,7 +2163,7 @@ bool CAudioMixerUser::unloadSampleBank(const std::string &name)
 
 // ******************************************************************
 
-void			CAudioMixerUser::getSoundNames( std::vector<NLMISC::TStringId> &names ) const
+void			CAudioMixerUser::getSoundNames( std::vector<NLMISC::CSheetId> &names ) const
 {
 	_SoundBank->getNames(names);
 }
