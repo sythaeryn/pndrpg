@@ -62,12 +62,14 @@
 #include "ingame_database_manager.h"
 #include "client_chat_manager.h"
 #include "interface_v3/input_handler_manager.h"
+#include "interface_v3/interface_manager.h"
 //#include "crtdbg.h"
 #include "sound_manager.h"
 #include "net_manager.h"
 #include "sheet_manager.h"
 
 #include "interface_v3/sbrick_manager.h"
+#include "nel/gui/widget_manager.h"
 //
 #include "gabarit.h"
 #include "hair_set.h"
@@ -1076,13 +1078,22 @@ void prelogInit()
 		if(GenericMat.empty())
 			nlerror("init: Cannot Create the generic material.");
 
-		// Yoyo: initialize NOW the InputHandler for Event filtering.
-		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
-		InputHandlerManager->addToServer (&Driver->EventServer);
 
 		// Create a text context. We need to put the full path because we not already add search path
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
+
+		
+		CWidgetManager::getInstance();
+		CInterfaceManager::create( Driver, TextContext );
+
+		// Yoyo: initialize NOW the InputHandler for Event filtering.
+		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
+		InputHandlerManager->addToServer (&Driver->EventServer);
+
+		std::string filename = CPath::lookup( ClientCfg.XMLInputFile, false );
+		if( !filename.empty() )
+			InputHandlerManager->readInputConfigFile( filename );
 
 		ProgressBar.setFontFactor(0.85f);
 

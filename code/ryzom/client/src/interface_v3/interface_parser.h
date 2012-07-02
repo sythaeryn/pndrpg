@@ -22,32 +22,27 @@
 #include "nel/misc/types_nl.h"
 #include "nel/3d/u_texture.h"
 #include "ctrl_sheet_selection.h"
-#include "interface_link.h"
+#include "nel/gui/interface_link.h"
 #include "nel/misc/smart_ptr.h"
 #include "game_share/brick_types.h"
-#include "lua_helper.h"
+#include "nel/gui/lua_helper.h"
+#include "nel/gui/widget_manager.h"
+using namespace NLGUI;
 
-// ***************************************************************************
-class CInterfaceElement;
-class CInterfaceGroup;
-class CGroupContainer;
-class CGroupList;
-class CInterfaceOptions;
-class CInterfaceAnim;
-class CViewPointer;
-class CInterfaceLink;
+namespace NLGUI
+{
+	class CInterfaceElement;
+	class CInterfaceGroup;
+	class CInterfaceOptions;
+	class CInterfaceLink;
+	class CCtrlBase;
+	class CGroupList;
+	class CGroupContainer;
+	class CInterfaceAnim;
+	class CViewPointer;
+}
+
 class CBrickJob;
-class CCtrlBase;
-
-// ***************************************************************************
-
-#define WIN_PRIORITY_MAX	8
-#define WIN_PRIORITY_WORLD_SPACE	0
-#define WIN_PRIORITY_LOWEST		1
-#define WIN_PRIORITY_LOW		2
-#define WIN_PRIORITY_NORMAL		3
-#define WIN_PRIORITY_HIGH		4
-#define WIN_PRIORITY_HIGHEST	5
 
 // ***************************************************************************
 /**
@@ -58,40 +53,12 @@ class CCtrlBase;
  */
 
 // this is the base class for CInterfaceManager
-class CInterfaceParser
+class CInterfaceParser : public IParser
 {
 
 public:
 	CInterfaceParser();
 	virtual ~CInterfaceParser();
-
-	struct SMasterGroup
-	{
-		SMasterGroup()
-		{
-			Group= NULL;
-			LastTopWindowPriority= WIN_PRIORITY_NORMAL;
-		}
-
-		CInterfaceGroup *Group;
-		std::list<CInterfaceGroup*> PrioritizedWindows[WIN_PRIORITY_MAX];
-
-		void addWindow(CInterfaceGroup *pIG, uint8 nPrio = WIN_PRIORITY_NORMAL);
-		void delWindow(CInterfaceGroup *pIG);
-		CInterfaceGroup *getWindowFromId(const std::string &winID);
-		bool isWindowPresent(CInterfaceGroup *pIG);
-		// Set a window top in its priority queue
-		void setTopWindow(CInterfaceGroup *pIG);
-		void setBackWindow(CInterfaceGroup *pIG);
-		void deactiveAllContainers();
-		void centerAllContainers();
-		void unlockAllContainers();
-
-		// Sort the world space group
-		void sortWorldSpaceGroup ();
-
-		uint8		LastTopWindowPriority;
-	};
 
 public:
 
@@ -133,7 +100,7 @@ public:
 
 	bool parseTreeNode (xmlNodePtr cur, CGroupContainer *parentGroup);
 
-	bool parseTree (xmlNodePtr cur, SMasterGroup *parentGroup);
+	bool parseTree (xmlNodePtr cur, CWidgetManager::SMasterGroup *parentGroup);
 
 	bool parseDefine(xmlNodePtr cur);
 
@@ -165,7 +132,7 @@ public:
 
 	bool parseLUAScript (xmlNodePtr cur);
 
-	bool setupTree (xmlNodePtr cur, SMasterGroup *parentGroup);
+	bool setupTree (xmlNodePtr cur, CWidgetManager::SMasterGroup *parentGroup);
 	bool setupTreeNode (xmlNodePtr cur, CGroupContainer *parentGroup);
 
 	// Called by each parse in parseXMLDocument
@@ -196,13 +163,6 @@ public:
 	/**
 	 * Accessors
 	 */
-
-	CInterfaceGroup* getMasterGroupFromId (const std::string &MasterGroupName);
-	const std::vector<SMasterGroup> &getAllMasterGroup() { return _MasterGroups; }
-	SMasterGroup& getMasterGroup(uint8 i) { return _MasterGroups[i]; }
-	CInterfaceGroup* getWindowFromId (const std::string & groupId);
-	void addWindowToMasterGroup (const std::string &sMasterGroupName, CInterfaceGroup *pIG);
-	void removeWindowFromMasterGroup (const std::string &sMasterGroupName, CInterfaceGroup *pIG);
 	// access to control sheet selection
 	CCtrlSheetSelection	&getCtrlSheetSelection() { return _CtrlSheetSelection; }
 
@@ -212,16 +172,6 @@ public:
 	bool				isDefineExist(const std::string &id) const;
 	void				setDefine(const std::string &id, const std::string &value);
 	// @}
-
-	/** From a target name of a link, retrieve the target element and its target target property
-	  * \return true if the target is valid
-	  */
-	static bool splitLinkTarget(const std::string &target, CInterfaceGroup *parentGroup, std::string &propertyName, CInterfaceElement *&targetElm);
-
-	/** From several target names of a link (seprated by ','), retrieve the target elements and their target properties
-	  * \return true if all targets are valid
-	  */
-	static bool splitLinkTargets(const std::string &targets, CInterfaceGroup *parentGroup, std::vector<CInterfaceLink::CTargetInfo> &targetsVect);
 
 	/// \name Dynamic links mgt
 	// @{
@@ -271,14 +221,18 @@ public:
 	/// \name Clearing mgt
 	// @{
 		void removeAllLinks();
-		void removeAllOptions();
 		void removeAllProcedures();
 		void removeAllDefines();
 		void removeAllTemplates();
 		void removeAllAnims();
-		void removeAllMasterGroups();
 		void removeAll();
 	// @}
+
+	// get info on procedure. return 0 if procedure not found
+	uint getProcedureNumActions( const std::string &procName ) const;
+
+	// return false if procedure not found, or if bad action index. return false if has some param variable (@0...)
+	bool getProcedureAction( const std::string &procName, uint actionIndex, std::string &ah, std::string &params ) const;
 
 protected:
 
@@ -301,14 +255,6 @@ protected:
 	/**
 	 * Data of initialized interface
 	 */
-
-	CViewPointer *_Pointer;
-
-	// Master groups encapsulate all windows
-	std::vector<SMasterGroup> _MasterGroups;
-
-	// Options description
-	std::map<std::string, NLMISC::CSmartPtr<CInterfaceOptions> > _OptionsMap;
 
 	/// Define Variable list
 	typedef	std::map<std::string, std::string>		TVarMap;

@@ -21,15 +21,15 @@
 
 #include "group_skills.h"
 #include "interface_manager.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 
-#include "view_text.h"
-#include "view_bitmap.h"
-#include "dbview_number.h"
-#include "dbview_bar.h"
+#include "nel/gui/view_text.h"
+#include "nel/gui/view_bitmap.h"
+#include "nel/gui/dbview_number.h"
+#include "nel/gui/dbview_bar.h"
 
 #include "game_share/skills.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 #include "skill_manager.h"
 #include "nel/misc/i_xml.h"
@@ -89,7 +89,7 @@ bool CGroupSkills::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	for (uint k = 0; k < SKILLS::NUM_SKILLS; ++k)
 	{
 		sTmp = string(DB_SKILLS)+":"+NLMISC::toString((sint32)k)+":BaseSKILL";
-		pIM->addDBObserver (&_SkillsObs, sTmp);
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver (&_SkillsObs, ICDBNode::CTextId( sTmp ));
 	}
 
 	_MustRebuild = true;
@@ -124,7 +124,7 @@ void CGroupSkills::rebuild()
 	// **** first time bind?
 	if(!_Tree)
 	{
-		_Tree = dynamic_cast<CGroupTree*>(pIM->getElementFromId(getId(),WIN_TREE_LIST));
+		_Tree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(getId(),WIN_TREE_LIST));
 		if (_Tree == NULL)
 		{
 			nlwarning("cant find tree");
@@ -192,7 +192,7 @@ void CGroupSkills::CSkillsObs::update (ICDBNode *node)
 				uint skillId;
 				if (skillParent->getNodeIndex (skill, skillId))
 				{
-					pIM->runActionHandler("skill_popup", NULL, "skillId="+toString(skillId)+"|delta="+toString(leaf->getValue32()-leaf->getOldValue32()));
+					CAHManager::getInstance()->runActionHandler("skill_popup", NULL, "skillId="+toString(skillId)+"|delta="+toString(leaf->getValue32()-leaf->getOldValue32()));
 
 					// Context help
 					contextHelp ("skill");
@@ -283,7 +283,7 @@ CGroupSkills::~CGroupSkills()
 	for (uint k = 0; k < SKILLS::NUM_SKILLS; ++k)
 	{
 		sTmp = string(DB_SKILLS)+":"+NLMISC::toString((sint32)k)+":BaseSKILL";
-		pIM->removeDBObserver (&_SkillsObs, sTmp);
+		NLGUI::CDBManager::getInstance()->getDB()->removeObserver(&_SkillsObs, ICDBNode::CTextId( sTmp ) );
 	}
 
 	// first remove any nodes from the tree group
