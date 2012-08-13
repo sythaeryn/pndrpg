@@ -179,6 +179,10 @@ struct CClientConfig
 	/// Acceleration for the Fly.
 	float			FlyAccel;
 
+	/// Maximum speed for camera animation
+	float			MaxCameraAnimationSpeed;
+	float			CameraAnimMinEntityDistance;
+
 	/// Allow debug commands
 	bool			AllowDebugCommands;
 
