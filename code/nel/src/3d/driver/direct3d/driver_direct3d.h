@@ -30,7 +30,6 @@
 #include "nel/misc/event_emitter_multi.h"
 #include "nel/misc/time_nl.h"
 #include "nel/misc/hierarchical_timer.h"
-#include "nel/misc/win_event_emitter.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/driver.h"
@@ -739,8 +738,7 @@ public:
 	// ***************************************************************************
 
 	// Mode initialisation, requests
-	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0);
-	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
+	virtual bool			setDisplay(NLMISC::CWindow* window, const GfxMode& mode, bool show, bool resizable) throw(EBadDisplay);
 	virtual bool			release();
 	virtual bool			setMode(const GfxMode& mode);
 	virtual bool			getModes(std::vector<GfxMode> &modes);
@@ -748,28 +746,10 @@ public:
 	virtual void			beginDialogMode();
 	virtual void			endDialogMode();
 	virtual bool			activate();
-	virtual bool			isActive ();
 	virtual	bool			initVertexBufferHard(uint agpMem, uint vramMem);
 
-	// Windows interface
-	virtual nlWindow		getDisplay();
-	virtual emptyProc		getWindowProc();
-	virtual NLMISC::IEventEmitter	*getEventEmitter();
-	virtual void			getWindowSize (uint32 &width, uint32 &height);
-	virtual void			getWindowPos (sint32 &x, sint32 &y);
-	virtual uint8			getBitPerPixel ();
-
-	/// Set the title of the NeL window
-	virtual void			setWindowTitle(const ucstring &title);
-
-	/// Set icon(s) of the NeL window
-	virtual void			setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps);
-
-	/// Set the position of the NeL window
-	virtual void			setWindowPos(sint32 x, sint32 y);
-
-	/// Show or hide the NeL window
-	virtual void			showWindow(bool show);
+	// Return is the associated window information. (Implementation dependent)
+	virtual NLMISC::CWindow*		getDisplay() { return _Window; }
 
 	// Driver parameters
 	virtual void			disableHardwareVertexProgram();
@@ -912,30 +892,7 @@ public:
 	//virtual	void			profileIBAllocation(std::vector<std::string> &result);
 
 	// Misc
-	virtual TMessageBoxId	systemMessageBox (const char* message, const char* title, TMessageBoxType type=okType, TMessageBoxIcon icon=noIcon);
 	virtual uint64			getSwapBufferCounter() const { return _SwapBufferCounter; }
-
-	// Inputs
-	virtual void			showCursor (bool b);
-	virtual void			setMousePos(float x, float y);
-	virtual void			setCapture (bool b);
-
-	// see if system cursor is currently captured
-	virtual bool			isSystemCursorCaptured();
-
-	// Add a new cursor (name is case unsensitive)
-	virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap);
-
-	// Display a cursor from its name (case unsensitive)
-	virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false);
-
-	// Change default scale for all cursors
-	virtual void			setCursorScale(float scale);
-
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-	virtual uint							 getDoubleClickDelay(bool hardwareMouse);
 
 	// Lights
 	virtual uint			getMaxLight () const;
@@ -978,9 +935,6 @@ public:
 	virtual	bool			supportBlendConstantColor() const;
 	virtual	void			setBlendConstantColor(NLMISC::CRGBA col);
 	virtual	NLMISC::CRGBA	getBlendConstantColor() const;
-
-	// Monitor properties
-	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties);
 
 	// Polygon smoothing
 	virtual	void			enablePolygonSmoothing(bool smooth);
@@ -1346,7 +1300,6 @@ public:
 
 
 	// Friends
-	friend void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	friend class CTextureDrvInfosD3D;
 	friend class CVBDrvInfosD3D;
 	friend class CIBDrvInfosD3D;
@@ -2081,69 +2034,12 @@ private:
 	void findNearestFullscreenVideoMode();
 
 	// Windows
-	std::string				_WindowClass;
-	HWND					_HWnd;
-	sint32					_WindowX;
-	sint32					_WindowY;
 	bool					_DestroyWindow;
 	bool					_Maximized;
 	bool					_HandlePossibleSizeChangeNextSize;
-	GfxMode					_CurrentMode;
 	uint					_Interval;
 	bool					_FullScreen;
-
-	// cursors
-	enum TColorDepth { ColorDepth16 = 0, ColorDepth32, ColorDepthCount };
-
-	TColorDepth				_ColorDepth;
-	std::string				_CurrName;
-	NLMISC::CRGBA			_CurrCol;
-	uint8					_CurrRot;
-	uint					_CurrHotSpotX;
-	uint					_CurrHotSpotY;
-	float					_CursorScale;
-
-	nlCursor				_DefaultCursor;
-
-	bool					_AlphaBlendedCursorSupported;
-	bool					_AlphaBlendedCursorSupportRetrieved;
-
-	class CCursor
-	{
-	public:
-		NLMISC::CBitmap Src;
-		TColorDepth		ColorDepth;
-		uint			OrigHeight;
-		float			HotspotScale;
-		uint			HotspotOffsetX;
-		uint			HotspotOffsetY;
-		sint			HotSpotX;
-		sint			HotSpotY;
-		nlCursor		Cursor;
-		NLMISC::CRGBA	Col;
-		uint8			Rot;
-#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-		Display			*Dpy;
-#endif
-	public:
-		CCursor();
-		~CCursor();
-		CCursor& operator= (const CCursor& from);
-
-		void reset();
-	};
-
-	struct CStrCaseUnsensitiveCmp
-	{
-		bool operator()(const std::string &lhs, const std::string &rhs) const
-		{
-			return NLMISC::nlstricmp(lhs, rhs) < 0;
-		}
-	};
-
-	typedef std::map<std::string, CCursor, CStrCaseUnsensitiveCmp> TCursorMap;
-
-	TCursorMap					_Cursors;
+	NLMISC::CWindow*		_Window;
 
 	// Directx
 	uint32					_Adapter;
@@ -2455,9 +2351,6 @@ public:
 	bool			_Lost;
 	bool			_SceneBegun;
 
-	WORD            _DesktopGammaRamp[256 * 3];
-	bool			_DesktopGammaRampValid;
-
 	// for debug only
 	static bool		_CacheTest[CacheTest_Count];
 
@@ -2467,37 +2360,6 @@ public:
 	void deleteIndexBuffer(CIBDrvInfosD3D *ib);
 	// Build 16 bit index buffer for quad
 	bool buildQuadIndexBuffer();
-
-	// Test if cursor is in the client area. always true when software cursor is used and window visible
-	// (displayed in software when DirectInput is used)
-	bool isSystemCursorInClientArea();
-
-	// Check if RGBA cursors are supported
-	bool isAlphaBlendedCursorSupported();
-
-	// Update cursor appearance
-	void updateCursor(bool forceRebuild = false);
-
-	// Create default cursors
-	void createCursors();
-
-	// Release all cursors
-	void releaseCursors();
-
-	// Convert a NLMISC::CBitmap to nlCursor
-	bool convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY);
-
-	// build a cursor from src, src should have the same size that the hardware cursor
-	// or a assertion is thrown
-	nlCursor buildCursor(const NLMISC::CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY);
-
-	// reset the cursor shape to the system arrow
-	void setSystemArrow();
-
-	bool convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col = NLMISC::CRGBA::White, sint hotSpotX = 0, sint hotSpotY = 0, bool cursor = false);
-
-	virtual bool copyTextToClipboard(const ucstring &text);
-	virtual bool pasteTextFromClipboard(ucstring &text);
 
 public:
 	#ifdef 	NL_DEBUG
