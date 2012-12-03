@@ -23,6 +23,7 @@
 
 #include "nel/misc/display.h"
 #include "nel/misc/ucstring.h"
+#include "nel/misc/rect.h"
 
 namespace NLMISC {
 
@@ -31,7 +32,7 @@ class CWin32System;
 class CWin32Display : public IDisplay
 {
 public:
-	CWin32Display(CWin32System *system, const ucstring &name);
+	CWin32Display(CWin32System *system, const std::string &name, const NLMISC::CRect &rect, const std::string &device);
 	virtual ~CWin32Display();
 
 	// from IDisplay
@@ -51,10 +52,12 @@ public:
 	friend class CWin32System;
 
 private:
-	bool setMode(DEVMODEW *mode, DWORD flags);
+	bool setMode(DEVMODEA *mode, DWORD flags);
 
 	CWin32System* _System;
-	ucstring _Name;
+	std::string _Name;
+	NLMISC::CRect _Rect;
+	std::string _Device;
 };
 
 }

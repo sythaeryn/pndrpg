@@ -28,7 +28,8 @@
 
 namespace NLMISC {
 
-CWin32Display::CWin32Display(CWin32System *system, const ucstring &name):IDisplay(), _System(system), _Name(name)
+CWin32Display::CWin32Display(CWin32System *system, const std::string &name, const NLMISC::CRect &rect, const std::string &device):IDisplay(),
+	_System(system), _Name(name), _Rect(rect), _Device(device)
 {
 }
 
@@ -49,11 +50,11 @@ IWindow* CWin32Display::createWindow()
 
 bool CWin32Display::getCurrentMode(SDisplayMode &mode)
 {
-	DEVMODEW devmode;
-	devmode.dmSize = sizeof(DEVMODEW);
+	DEVMODEA devmode;
+	devmode.dmSize = sizeof(DEVMODEA);
 	devmode.dmDriverExtra = 0;
 
-	if (EnumDisplaySettingsW((wchar_t*)_Name.c_str(), ENUM_CURRENT_SETTINGS, &devmode) == 0)
+	if (EnumDisplaySettingsA(_Name.c_str(), ENUM_CURRENT_SETTINGS, &devmode) == 0)
 	{
 		CWin32System::printError();
 		return false;
@@ -68,9 +69,9 @@ bool CWin32Display::getCurrentMode(SDisplayMode &mode)
 	return true;
 }
 
-bool CWin32Display::setMode(DEVMODEW *mode, DWORD flags)
+bool CWin32Display::setMode(DEVMODEA *mode, DWORD flags)
 {
-	LONG res = ChangeDisplaySettingsExW((wchar_t*)_Name.c_str(), mode, NULL, flags, NULL);
+	LONG res = ChangeDisplaySettingsExA(_Name.c_str(), mode, NULL, flags, NULL);
 
 	if (res == DISP_CHANGE_SUCCESSFUL) return true;
 
@@ -119,9 +120,9 @@ bool CWin32Display::setMode(DEVMODEW *mode, DWORD flags)
 
 bool CWin32Display::setCurrentMode(const SDisplayMode &mode)
 {
-	DEVMODEW devMode;
-	memset(&devMode, 0, sizeof(DEVMODEW));
-	devMode.dmSize        = sizeof(DEVMODEW);
+	DEVMODEA devMode;
+	memset(&devMode, 0, sizeof(DEVMODEA));
+	devMode.dmSize        = sizeof(DEVMODEA);
 	devMode.dmDriverExtra = 0;
 	devMode.dmFields      = DM_PELSWIDTH | DM_PELSHEIGHT;
 	devMode.dmPelsWidth   = mode.Width;
@@ -149,11 +150,11 @@ bool CWin32Display::getModes(std::vector<SDisplayMode> &modes)
 {
 	sint modeIndex = 0;
 
-	DEVMODEW devMode;
-	devMode.dmSize = sizeof(DEVMODEW);
+	DEVMODEA devMode;
+	devMode.dmSize = sizeof(DEVMODEA);
 	devMode.dmDriverExtra = 0;
 
-	while (EnumDisplaySettingsW((wchar_t*)_Name.c_str(), modeIndex, &devMode))
+	while (EnumDisplaySettingsA(_Name.c_str(), modeIndex, &devMode))
 	{
 		// Keep only 16 and 32 bits
 		if ((devMode.dmBitsPerPel == 16) || (devMode.dmBitsPerPel == 32))

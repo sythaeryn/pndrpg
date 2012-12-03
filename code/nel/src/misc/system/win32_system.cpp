@@ -161,37 +161,66 @@ bool CWin32System::uninit()
 	return true;
 }
 
+struct SDisplay
+{
+	NLMISC::CRect Rect;
+	std::string device;
+};
+
 static BOOL CALLBACK DisplayMonitorEnumProc(HMONITOR hMonitor, HDC hDC, LPRECT lprcMonitor, LPARAM data)
 {
-    RECT rc = *lprcMonitor;
-    // you have the rect which has coordinates of the monitor
+	MONITORINFOEXA mi;
+	mi.cbSize = sizeof(MONITORINFOEXA);
+
+	if (GetMonitorInfo(hMonitor, &mi))
+	{
+		std::vector<SDisplay> *tmp = (std::vector<SDisplay>*)data;
+
+		SDisplay display;
+		display.Rect.set(mi.rcMonitor.left, mi.rcMonitor.top, mi.rcMonitor.right, mi.rcMonitor.bottom);
+		display.device = mi.szDevice;
+		tmp->push_back(display);
+	}
 
     return TRUE;
 }
 
 bool CWin32System::getDisplays(std::vector<IDisplay*> &displays)
 {
+	std::vector<SDisplay> tmp;
+	EnumDisplayMonitors(NULL, NULL, DisplayMonitorEnumProc, (LPARAM)&tmp);
+
+	std::map<std::string, std::string> devices;
+
 	DWORD iDevNum = 0;
-	DISPLAY_DEVICEW device;
-	device.cb = sizeof(DISPLAY_DEVICEW);
+	DISPLAY_DEVICEA device;
+	device.cb = sizeof(DISPLAY_DEVICEA);
 
-	EnumDisplayMonitors(NULL, NULL, DisplayMonitorEnumProc, (LONG_PTR)this);
-
-/*
-	while (EnumDisplayDevicesW(NULL, iDevNum, &device, 0))
+	while (EnumDisplayDevicesA(NULL, iDevNum, &device, 0))
 	{
 		if (device.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)
 		{
-			CWin32Display *display = new CWin32Display(this, ucstring((ucchar*)device.DeviceName));
+			devices[device.DeviceName] = device.DeviceString;
 
-			nldebug("Found %s", ucstring((ucchar*)device.DeviceString).toString().c_str());
+			DWORD iMonNum = 0;
+			DISPLAY_DEVICEA monitor;
+			monitor.cb = sizeof(DISPLAY_DEVICEA);
 
-			displays.push_back(display);
+			while (EnumDisplayDevicesA(device.DeviceName, iMonNum, &monitor, 0))
+			{
+				++iMonNum;
+			}
 		}
 
 		++iDevNum;
 	}
-*/
+
+	for(size_t i = 0; i < tmp.size(); ++i)
+	{
+		CWin32Display *display = new CWin32Display(this, tmp[i].device, tmp[i].Rect, devices[tmp[i].device]);
+
+		displays.push_back(display);
+	}
 
 	return true;
 }
