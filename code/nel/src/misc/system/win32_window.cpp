@@ -390,9 +390,13 @@ bool CWin32Window::setStyle(sint windowStyle)
 		SetWindowLong(_Handle, GWL_STYLE, dwNewStyle);
 
 	if (windowStyle & EWSMaximized /* && isVisible */ && !isMaximized)
+	{
 		ShowWindow(_Handle, SW_SHOWMAXIMIZED);
+	}
 	else if (isMaximized && isVisible)
+	{
 		ShowWindow(_Handle, SW_RESTORE);
+	}
 
 	return true;
 }
