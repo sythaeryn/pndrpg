@@ -1,7 +1,14 @@
-FILE(GLOB SRC *.cpp *.h config_file/*.cpp config_file/*.h)
+FILE(GLOB SRC *.cpp *.h config_file/*.cpp config_file/*.h system/*.cpp system/*.h)
+FILE(GLOB SRC_CONFIG config_file/*.cpp config_file/*.h)
+FILE(GLOB SRC_SYSTEM system/*.cpp system/*.h)
 FILE(GLOB HEADERS ../../include/nel/misc/*.h)
 
-NL_TARGET_LIB(nelmisc ${HEADERS} ${SRC})
+NL_TARGET_LIB(nelmisc ${HEADERS} ${SRC} ${SRC_CONFIG} ${SRC_SYSTEM})
+
+SOURCE_GROUP(include FILES ${HEADERS})
+SOURCE_GROUP(src FILES ${SRC})
+SOURCE_GROUP(src_config_file FILES ${SRC_CONFIG})
+SOURCE_GROUP(src_system FILES ${SRC_SYSTEM})
 
 IF(WITH_GTK)
   IF(GTK2_FOUND)
@@ -31,9 +38,12 @@ IF(WIN32)
 ENDIF(WIN32)
 
 IF(UNIX)
-  TARGET_LINK_LIBRARIES(nelmisc -lc -ldl)
+  FIND_LIBRARY(C_LIBRARY c)
+  FIND_LIBRARY(DL_LIBRARY dl)
+  TARGET_LINK_LIBRARIES(nelmisc ${C_LIBRARY} ${DL_LIBRARY})
   IF(NOT APPLE)
-    TARGET_LINK_LIBRARIES(nelmisc -lrt)
+    FIND_LIBRARY(RT_LIBRARY rt)
+    TARGET_LINK_LIBRARIES(nelmisc ${RT_LIBRARY})
   ENDIF(NOT APPLE)
 ENDIF(UNIX)
 
