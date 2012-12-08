@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "../stdmisc.h"
+#ifdef NL_OS_MAC
 #include "cocoa_event_emitter.h"
 
 namespace NLMISC
@@ -506,3 +508,5 @@ void CCocoaEventEmitter::emulateMouseRawMode(bool enable)
 }
 
 }
+
+#endif

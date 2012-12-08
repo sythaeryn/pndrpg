@@ -2305,8 +2305,8 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 
 		if(tex->isBloomTexture() && supportBloomEffect())
 		{
-			uint32 w, h;
-			getWindowSize(w, h);
+			uint w, h;
+			_Window->getSize(w, h);
 
 			getViewport(_OldViewport);
 
@@ -2394,7 +2394,7 @@ bool CDriverGL::getRenderTargetSize (uint32 &width, uint32 &height)
 	}
 	else
 	{
-		getWindowSize(width, height);
+		_Window->getSize(width, height);
 	}
 
 	return false;

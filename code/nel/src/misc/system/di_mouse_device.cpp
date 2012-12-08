@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdmisc.h"
+#include "../stdmisc.h"
 
 #include "di_mouse_device.h"
 #include "nel/misc/game_device_events.h"
-#include "nel/misc/win_event_emitter.h"
+#include "win_event_emitter.h"
 
 
 #ifdef NL_OS_WINDOWS

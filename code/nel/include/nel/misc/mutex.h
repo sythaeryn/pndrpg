@@ -740,6 +740,22 @@ public:
 
 };
 
+struct CSynchronizedEventPrivate;
+
+class CSynchronizedEvent
+{
+public:
+	CSynchronizedEvent();
+	~CSynchronizedEvent();
+
+	bool wait(uint ms = 0);
+	void notify();
+	void reset();
+
+protected:
+	CSynchronizedEventPrivate* _Private;
+};
+
 } // NLMISC
 
 

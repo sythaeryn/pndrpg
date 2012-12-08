@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "stdmisc.h"
+#include "../stdmisc.h"
 #include "di_game_device.h"
 #include "nel/misc/game_device_events.h"
 

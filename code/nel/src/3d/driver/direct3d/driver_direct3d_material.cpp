@@ -21,7 +21,6 @@
 #include "nel/3d/index_buffer.h"
 #include "nel/3d/texture_bump.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
 #include "nel/misc/mouse_device.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"

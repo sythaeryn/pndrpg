@@ -25,7 +25,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
 #include "nel/misc/mouse_device.h"
 #include "nel/misc/dynloadlib.h"
 #include "nel/3d/viewport.h"
@@ -39,9 +38,6 @@ using namespace NLMISC;
 
 #define RASTERIZER D3DDEVTYPE_HAL
 //#define RASTERIZER D3DDEVTYPE_REF
-
-#define D3D_WINDOWED_STYLE (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_THICKFRAME|WS_MINIMIZEBOX|WS_MAXIMIZEBOX)
-#define D3D_FULLSCREEN_STYLE (WS_POPUP)
 
 // ***************************************************************************
 
@@ -154,26 +150,9 @@ CDriverD3D::CDriverD3D()
 	_SwapBufferCounter = 0;
 	_CurrentOcclusionQuery = NULL;
 	_D3D = NULL;
-	_HWnd = NULL;
 	_DeviceInterface = NULL;
 	_DestroyWindow = false;
-	_CurrentMode.Width = 640;
-	_CurrentMode.Height = 480;
-	_WindowX = 0;
-	_WindowY = 0;
 	_FullScreen = false;
-
-	_ColorDepth = ColorDepth32;
-
-	_DefaultCursor = EmptyCursor;
-
-	_AlphaBlendedCursorSupported = false;
-	_AlphaBlendedCursorSupportRetrieved = false;
-	_CurrCol = CRGBA::White;
-	_CurrRot = 0;
-	_CurrHotSpotX = 0;
-	_CurrHotSpotY = 0;
-	_CursorScale = 1.f;
 
 	_UserViewMtx.identity();
 	_UserModelMtx.identity();
@@ -309,9 +288,6 @@ CDriverD3D::CDriverD3D()
 	_FogEnd = 1;
 
 	_SumTextureMemoryUsed = false;
-
-
-	_DesktopGammaRampValid = false;
 }
 
 // ***************************************************************************
@@ -1058,6 +1034,7 @@ void CDriverD3D::updateRenderVariablesInternal()
 
 // ***************************************************************************
 
+/*
 static void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	H_AUTO_D3D(D3DWndProc);
@@ -1119,16 +1096,6 @@ static void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wPara
 						driver->handlePossibleSizeChange();
 					}
 				}
-				else if(message == WM_MOVE)
-				{
-					if (driver != NULL)
-					{
-						RECT rect;
-						GetWindowRect (hWnd, &rect);
-						driver->_WindowX = rect.left;
-						driver->_WindowY = rect.top;
-					}
-				}
 			}
 			// This is the window itself
 			else if (sameWindow)
@@ -1145,15 +1112,9 @@ static void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wPara
 
 		}
 	}
-
-	if (driver->_EventEmitter.getNumEmitters() > 0)
-	{
-		CWinEventEmitter *we = NLMISC::safe_cast<CWinEventEmitter *>(driver->_EventEmitter.getEmitter(0));
-		// Process the message by the emitter
-		we->setHWnd(hWnd);
-		we->processMessage (hWnd, message, wParam, lParam);
-	}
 }
+
+*/
 
 // ***************************************************************************
 
@@ -1161,6 +1122,7 @@ bool CDriverD3D::handlePossibleSizeChange()
 {
 	//DUMP_AUTO(handlePossibleSizeChange);
 	H_AUTO_D3D(CDriver3D_handlePossibleSizeChange);
+/*
 	// If windowed, check if the size as changed
 	if (_CurrentMode.Windowed)
 	{
@@ -1183,86 +1145,11 @@ bool CDriverD3D::handlePossibleSizeChange()
 			return reset (mode);
 		}
 	}
+*/
 	return false;
 }
 
-// ***************************************************************************
 
-static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	H_AUTO_D3D(WndProc);
-	// Get the driver pointer..
-	CDriverD3D *pDriver=(CDriverD3D*)GetWindowLongPtrW (hWnd, GWLP_USERDATA);
-	if (pDriver != NULL)
-	{
-		D3DWndProc (pDriver, hWnd, message, wParam, lParam);
-	}
-
-#ifdef NL_DISABLE_MENU
-	// disable menu (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
-	if(message == WM_SYSCOMMAND && wParam == SC_KEYMENU)
-		return 0;
-#endif // NL_DISABLE_MENU
-
-	// ace: if we receive close, exit now or it'll assert after
-	if(message == WM_CLOSE)
-	{
-		if(pDriver && pDriver->ExitFunc)
-		{
-			pDriver->ExitFunc();
-		}
-		else
-		{
-#ifndef NL_DISABLE_MENU
-			// if we don't disable menu, alt F4 make a direct exit else we discard the message
-			exit(0);
-#endif // NL_DISABLE_MENU
-		}
-		return 0;
-	}
-
-	return DefWindowProcW(hWnd, message, wParam, lParam);
-}
-
-// ***************************************************************************
-
-bool CDriverD3D::init (uint windowIcon, emptyProc exitFunc)
-{
-	H_AUTO_D3D(CDriver3D_init );
-
-	ExitFunc = exitFunc;
-
-	createCursors();
-
-	// Register a window class
-	WNDCLASSW		wc;
-
-	memset(&wc,0,sizeof(wc));
-	wc.style			= 0; // CS_HREDRAW | CS_VREDRAW ;//| CS_DBLCLKS;
-	wc.lpfnWndProc		= (WNDPROC)WndProc;
-	wc.cbClsExtra		= 0;
-	wc.cbWndExtra		= 0;
-	wc.hInstance		= GetModuleHandleW(NULL);
-	wc.hIcon			= (HICON)windowIcon;
-	wc.hCursor			= _DefaultCursor;
-	wc.hbrBackground	= WHITE_BRUSH;
-	_WindowClass = "NLD3D" + toString(windowIcon);
-	ucstring us = _WindowClass;
-	wc.lpszClassName	= (LPCWSTR)us.c_str();
-	wc.lpszMenuName		= NULL;
-	if (!RegisterClassW(&wc))
-	{
-		DWORD error = GetLastError();
-		if (error != ERROR_CLASS_ALREADY_EXISTS)
-		{
-			nlwarning("CDriverD3D::init: Can't register window class %s (error code %i)", _WindowClass.c_str(), (sint)error);
-			_WindowClass = "";
-			return false;
-		}
-	}
-
-	return true;
-}
 
 // ***************************************************************************
 
@@ -1315,7 +1202,7 @@ const D3DFORMAT FinalPixelFormat[ITexture::UploadFormatCount][CDriverD3D::FinalP
 
 // ***************************************************************************
 
-bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay)
+bool CDriverD3D::setDisplay(NLMISC::CWindow *window, const GfxMode& mode, bool show, bool resizable) throw(EBadDisplay)
 {
 	H_AUTO_D3D(CDriver3D_setDisplay);
 	if (!_D3D)
@@ -1326,96 +1213,12 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 	// Release the driver if already setuped
 	release ();
 
-	// Should be initialized
-	nlassert (!_WindowClass.empty());
-
 	// Should be released
 	nlassert (_DeviceInterface == NULL);
-	nlassert (_HWnd == NULL);
-
-	// memorize desktop gamma ramp
-	HDC dc = CreateDCW (L"DISPLAY", NULL, NULL, NULL);
-	if (dc)
-	{
-		_DesktopGammaRampValid = GetDeviceGammaRamp (dc, _DesktopGammaRamp) != FALSE;
-		// Release the DC
-		ReleaseDC (NULL, dc);
-	}
-
-	// Create a window
-	_HWnd = wnd;
 
 	// Reset window state
 	_Maximized = false;
 	_HandlePossibleSizeChangeNextSize = false;
-
-	if (_HWnd)
-	{
-		// We don't have to destroy this window
-		_DestroyWindow = false;
-
-		// Init Window Width and Height
-		RECT clientRect;
-		GetClientRect (_HWnd, &clientRect);
-		_CurrentMode.OffScreen = false;
-		_CurrentMode.Width = (uint16)(clientRect.right-clientRect.left);
-		_CurrentMode.Height = (uint16)(clientRect.bottom-clientRect.top);
-		_CurrentMode.Frequency = 0;
-		_CurrentMode.Windowed = true;
-		_CurrentMode.Depth = 32;
-	}
-	else
-	{
-		_CurrentMode = mode;
-
-		// We have to destroy this window
-		_DestroyWindow = true;
-
-		// Window flags
-		//ULONG WndFlags=(mode.Windowed?D3D_WINDOWED_STYLE:D3D_FULLSCREEN_STYLE)&~WS_VISIBLE;
-		ULONG WndFlags;
-		if(mode.Windowed)
-		{
-			WndFlags = D3D_WINDOWED_STYLE;
-			if(!resizeable)
-			{
-				WndFlags &= ~(WS_THICKFRAME|WS_MAXIMIZEBOX);
-			}
-		}
-		else
-		{
-			WndFlags = D3D_FULLSCREEN_STYLE;
-			findNearestFullscreenVideoMode();
-		}
-
-		WndFlags &= ~WS_VISIBLE;
-
-		// Window rect
-		RECT	WndRect;
-		WndRect.left=0;
-		WndRect.top=0;
-		WndRect.right=_CurrentMode.Width;
-		WndRect.bottom=_CurrentMode.Height;
-		AdjustWindowRect(&WndRect,WndFlags,FALSE);
-
-		// Create
-		ucstring ustr(_WindowClass);
-		_HWnd = CreateWindowW((LPCWSTR)ustr.c_str(), L"", WndFlags, CW_USEDEFAULT,CW_USEDEFAULT, WndRect.right-WndRect.left,WndRect.bottom-WndRect.top, NULL, NULL,
-			GetModuleHandleW(NULL), NULL);
-		if (!_HWnd)
-		{
-			nlwarning ("CreateWindowW failed");
-			release();
-			return false;
-		}
-
-		// Set the window long integer
-		SetWindowLongPtrW (_HWnd, GWLP_USERDATA, (LONG_PTR)this);
-
-		// Show the window
-		if (show || !_CurrentMode.Windowed)
-			showWindow(true);
-	}
 
 	// Choose an adapter
 	UINT adapter = (_Adapter==0xffffffff)?D3DADAPTER_DEFAULT:(UINT)_Adapter;
@@ -1453,26 +1256,28 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 	// Create device options
 	D3DPRESENT_PARAMETERS parameters;
 	D3DFORMAT adapterFormat;
-	if (!fillPresentParameter (parameters, adapterFormat, _CurrentMode, adapterMode))
+	if (!fillPresentParameter (parameters, adapterFormat, mode /* _CurrentMode */, adapterMode))
 	{
 		release();
 		return false;
 	}
 
+	HWND hWnd = (HWND)CSystem::instance()->getDisplay()->getWindow()->getNativePointer();
+
 	// Create the D3D device
-	HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_PUREDEVICE, &parameters, &_DeviceInterface);
+	HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_PUREDEVICE, &parameters, &_DeviceInterface);
 	if (result != D3D_OK)
 	{
 		nlwarning ("Can't create device hr:0x%x adap:0x%x rast:0x%x", result, adapter, _Rasterizer);
 
 		// Create the D3D device without puredevice
-		HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
+		HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, hWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
 		if (result != D3D_OK)
 		{
 			nlwarning ("Can't create device without puredevice hr:0x%x adap:0x%x rast:0x%x", result, adapter, _Rasterizer);
 
 			// Create the D3D device without puredevice and hardware
-			HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
+			HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, hWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
 			if (result != D3D_OK)
 			{
 				nlwarning ("Can't create device without puredevice and hardware hr:0x%x adap:0x%x rast:0x%x", result, adapter, _Rasterizer);
@@ -1593,32 +1398,6 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 
 	// Reset render state cache
 	initRenderVariables();
-
-	// *** Event init
-
-	// Release old emitter
-	while (_EventEmitter.getNumEmitters() != 0)
-	{
-		_EventEmitter.removeEmitter(_EventEmitter.getEmitter(_EventEmitter.getNumEmitters() - 1));
-	}
-	NLMISC::CWinEventEmitter *we = new NLMISC::CWinEventEmitter;
-
-	// Setup the event emitter, and try to retrieve a direct input interface
-	_EventEmitter.addEmitter(we, true /*must delete*/); // the main emitter
-
-	// Try to get direct input
-	try
-	{
-		NLMISC::CDIEventEmitter *diee = NLMISC::CDIEventEmitter::create(GetModuleHandle(NULL), _HWnd, we);
-		if (diee)
-		{
-			_EventEmitter.addEmitter(diee, true);
-		}
-	}
-	catch(const EDirectInput &e)
-	{
-		nlinfo(e.what());
-	}
 
 	// Init some variables
 	_ForceDXTCCompression = false;
@@ -1741,119 +1520,16 @@ bool CDriverD3D::release()
 		_DeviceInterface = NULL;
 	}
 
-	if (_HWnd)
-	{
-		releaseCursors();
-
-		// make sure window icons are deleted
-		std::vector<NLMISC::CBitmap> bitmaps;
-		setWindowIcon(bitmaps);
-
-		if (_DestroyWindow)
-			DestroyWindow (_HWnd);
-		_HWnd = NULL;
-	}
-
-
 	nlassert (indexCount == 0);
 	nlassert (vertexCount == 0);
 
-	// restore desktop gamma ramp
-	if (_DesktopGammaRampValid)
-	{
-		HDC dc = CreateDCW (L"DISPLAY", NULL, NULL, NULL);
-		if (dc)
-		{
-			SetDeviceGammaRamp (dc, _DesktopGammaRamp);
-		}
-		_DesktopGammaRampValid = false;
-	}
 	return true;
 };
-
-// ***************************************************************************
-
-emptyProc CDriverD3D::getWindowProc()
-{
-	return (emptyProc)D3DWndProc;
-};
-
-// ***************************************************************************
-
-IDriver::TMessageBoxId CDriverD3D::systemMessageBox (const char* message, const char* title, TMessageBoxType type, TMessageBoxIcon icon)
-{
-	switch (::MessageBox (_HWnd, message, title, ((type==retryCancelType)?MB_RETRYCANCEL:
-		(type==yesNoCancelType)?MB_YESNOCANCEL:
-		(type==okCancelType)?MB_OKCANCEL:
-		(type==abortRetryIgnoreType)?MB_ABORTRETRYIGNORE:
-		(type==yesNoType)?MB_YESNO|MB_ICONQUESTION:MB_OK)|
-
-		((icon==handIcon)?MB_ICONHAND:
-		(icon==questionIcon)?MB_ICONQUESTION:
-		(icon==exclamationIcon)?MB_ICONEXCLAMATION:
-		(icon==asteriskIcon)?MB_ICONASTERISK:
-		(icon==warningIcon)?MB_ICONWARNING:
-		(icon==errorIcon)?MB_ICONERROR:
-		(icon==informationIcon)?MB_ICONINFORMATION:
-		(icon==stopIcon)?MB_ICONSTOP:0)))
-	{
-		case IDOK:
-			return okId;
-		case IDCANCEL:
-			return cancelId;
-		case IDABORT:
-			return abortId;
-		case IDRETRY:
-			return retryId;
-		case IDIGNORE:
-			return ignoreId;
-		case IDYES:
-			return yesId;
-		case IDNO:
-			return noId;
-	}
-	return okId;
-}
 
 // ***************************************************************************
 bool CDriverD3D::activate()
 {
 	return true;
-}
-
-// ***************************************************************************
-bool CDriverD3D::isActive ()
-{
-	return (IsWindow(_HWnd) != 0);
-}
-
-// ***************************************************************************
-nlWindow CDriverD3D::getDisplay()
-{
-	return _HWnd;
-}
-
-// ***************************************************************************
-NLMISC::IEventEmitter	*CDriverD3D::getEventEmitter()
-{
-	return &_EventEmitter;
-}
-
-// ***************************************************************************
-void CDriverD3D::getWindowSize (uint32 &width, uint32 &height)
-{
-	H_AUTO_D3D(CDriverD3D_getWindowSize);
-	width = _CurrentMode.Width;
-	height = _CurrentMode.Height;
-}
-
-// ***************************************************************************
-
-void CDriverD3D::getWindowPos (sint32 &x, sint32 &y)
-{
-	H_AUTO_D3D(CDriverD3D_getWindowPos);
-	x = _WindowX;
-	y = _WindowY;
 }
 
 // ***************************************************************************
@@ -1867,12 +1543,6 @@ uint32 CDriverD3D::getImplementationVersion () const
 const char *CDriverD3D::getDriverInformation ()
 {
 	return "Directx 9 NeL Driver";
-}
-
-// ***************************************************************************
-uint8 CDriverD3D::getBitPerPixel ()
-{
-	return _CurrentMode.Depth;
 }
 
 // ***************************************************************************
@@ -1973,11 +1643,11 @@ bool CDriverD3D::swapBuffers()
 	//_DeviceInterface->SetStreamSource(0, _VolatileVertexBufferRAM[1]->VertexBuffer, 0, 12);
 
 	// Is direct input running ?
-	if (_EventEmitter.getNumEmitters() > 1)
-	{
+//	if (_EventEmitter.getNumEmitters() > 1)
+//	{
 		// flush direct input messages if any
-		NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1))->poll();
-	}
+//		NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1))->poll();
+//	}
 
 	// End now
 	if (!endScene())
@@ -1997,7 +1667,7 @@ bool CDriverD3D::swapBuffers()
 			if (_DeviceInterface->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
 			{
 				// Reset the driver
-				reset (_CurrentMode);
+//				reset (_CurrentMode);
 			}
 		}
 	}
@@ -2228,93 +1898,6 @@ bool CDriverD3D::getCurrentScreenMode(GfxMode &gfxMode)
 }
 
 // ***************************************************************************
-void CDriverD3D::setWindowTitle(const ucstring &title)
-{
-	SetWindowTextW(_HWnd,(WCHAR*)title.c_str());
-}
-
-// ***************************************************************************
-void CDriverD3D::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
-{
-	if (!_HWnd)
-		return;
-
-	static HICON winIconBig = NULL;
-	static HICON winIconSmall = NULL;
-
-	if (winIconBig)
-	{
-		DestroyIcon(winIconBig);
-		winIconBig = NULL;
-	}
-
-	if (winIconSmall)
-	{
-		DestroyIcon(winIconSmall);
-		winIconSmall = NULL;
-	}
-
-	sint smallIndex = -1;
-	uint smallWidth = GetSystemMetrics(SM_CXSMICON);
-	uint smallHeight = GetSystemMetrics(SM_CYSMICON);
-
-	sint bigIndex = -1;
-	uint bigWidth = GetSystemMetrics(SM_CXICON);
-	uint bigHeight = GetSystemMetrics(SM_CYICON);
-
-	// find icons with the exact size
-	for(uint i = 0; i < bitmaps.size(); ++i)
-	{
-		if (smallIndex == -1 &&	bitmaps[i].getWidth() == smallWidth &&	bitmaps[i].getHeight() == smallHeight)
-			smallIndex = i;
-
-		if (bigIndex == -1 && bitmaps[i].getWidth() == bigWidth && bitmaps[i].getHeight() == bigHeight)
-			bigIndex = i;
-	}
-
-	// find icons with taller size (we will resize them)
-	for(uint i = 0; i < bitmaps.size(); ++i)
-	{
-		if (smallIndex == -1 && bitmaps[i].getWidth() >= smallWidth && bitmaps[i].getHeight() >= smallHeight)
-			smallIndex = i;
-
-		if (bigIndex == -1 && bitmaps[i].getWidth() >= bigWidth && bitmaps[i].getHeight() >= bigHeight)
-			bigIndex = i;
-	}
-
-	if (smallIndex > -1)
-		convertBitmapToIcon(bitmaps[smallIndex], winIconSmall, smallWidth, smallHeight, 32);
-
-	if (bigIndex > -1)
-		convertBitmapToIcon(bitmaps[bigIndex], winIconBig, bigWidth, bigHeight, 32);
-
-	if (winIconBig)
-	{
-		SendMessage(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
-	}
-	else
-	{
-		SendMessage(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
-	}
-}
-
-// ***************************************************************************
-void CDriverD3D::setWindowPos(sint32 x, sint32 y)
-{
-	_WindowX = x;
-	_WindowY = y;
-	SetWindowPos(_HWnd, NULL, _WindowX, _WindowY, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
-}
-
-// ***************************************************************************
-void CDriverD3D::showWindow(bool show)
-{
-	ShowWindow (_HWnd, show ? SW_SHOW:SW_HIDE);
-}
-
-// ***************************************************************************
 
 uint CDriverD3D::getNumAdapter() const
 {
@@ -2418,25 +2001,10 @@ bool CDriverD3D::setMode (const GfxMode& mode)
 			return false;
 	}
 
-	// set the mode
-	if( mode.Windowed )
-	{
-		// Set windowed-mode style
-		SetWindowLongW( _HWnd, GWL_STYLE, D3D_WINDOWED_STYLE|WS_VISIBLE);
-		_FullScreen = false;
-	}
-	else
-	{
-		// Set fullscreen-mode style
-		SetWindowLongW( _HWnd, GWL_STYLE, D3D_FULLSCREEN_STYLE|WS_VISIBLE);
-		_FullScreen = true;
-	}
-
-	SetWindowLongPtrW(_HWnd, GWLP_WNDPROC, GetWindowLongPtr(_HWnd, GWLP_WNDPROC));
-
 	// Reset the driver
 	if (reset (mode))
 	{
+/*
 		// Reajust window
 		if( _CurrentMode.Windowed )
 		{
@@ -2454,6 +2022,7 @@ bool CDriverD3D::setMode (const GfxMode& mode)
 						  ( WndRect.bottom - WndRect.top ),
 						  SWP_NOMOVE | SWP_SHOWWINDOW );
 		}
+*/
 		return true;
 	}
 	return false;
@@ -2503,7 +2072,7 @@ bool CDriverD3D::reset (const GfxMode& mode)
 		return false;
 
 	// Current mode
-	_CurrentMode = mode;
+//	_CurrentMode = mode;
 	_CurrentMaterial = NULL;
 	_CurrentMaterialInfo = NULL;
 
@@ -2837,8 +2406,8 @@ const char *CDriverD3D::getVideocardInformation ()
 void CDriverD3D::getBuffer (CBitmap &bitmap)
 {
 	H_AUTO_D3D(CDriverD3D_getBuffer);
-	NLMISC::CRect rect;
-	rect.setWH (0, 0, _CurrentMode.Width, _CurrentMode.Height);
+	NLMISC::CRect rect(0, 0);
+	CSystem::instance()->getDisplay()->getWindow()->getSize(rect.Width, rect.Height);
 	getBufferPart (bitmap, rect);
 }
 
@@ -2942,7 +2511,7 @@ void CDriverD3D::getDirect3DRect(NLMISC::CRect &rect, RECT & d3dRect)
 	d3dRect.bottom = rect.bottom();
 
 	uint32 w, h;
-	getWindowSize(w, h);
+	CSystem::instance()->getDisplay()->getWindow()->getSize(w, h);
 
 	if(d3dRect.top>(sint32)h)
 		d3dRect.top = h;
@@ -3006,8 +2575,8 @@ bool CDriverD3D::fillBuffer (NLMISC::CBitmap &bitmap)
 	if (_DeviceInterface)
 	{
 		// Resize the bitmap
-		const uint lineCount = _CurrentMode.Height;
-		const uint width = _CurrentMode.Width;
+		uint lineCount, width;
+		CSystem::instance()->getDisplay()->getWindow()->getSize(width, lineCount);
 		if ((bitmap.getWidth() == width) && (bitmap.getHeight() == lineCount))
 		{
 			// Lock the back buffer
@@ -3071,8 +2640,8 @@ void CDriverD3D::setSwapVBLInterval(uint interval)
 		_Interval = interval;
 
 		// Must do a reset because the vsync parameter is choosed in the D3DPRESENT structure
-		if (_DeviceInterface)
-			reset (_CurrentMode);
+//		if (_DeviceInterface)
+//			reset (_CurrentMode);
 	}
 }
 
@@ -3106,93 +2675,6 @@ void CDriverD3D::flush()
 	//nldebug("BeginScene");
 	beginScene();
 }
-
-// ***************************************************************************
-
-bool CDriverD3D::setMonitorColorProperties (const CMonitorColorProperties &properties)
-{
-	/*
-	H_AUTO_D3D(CDriverD3D_setMonitorColorProperties);
-	// The ramp
-	D3DGAMMARAMP ramp;
-
-	// For each composant
-	uint c;
-	for( c=0; c<3; c++ )
-	{
-		WORD *table = (c==0)?ramp.red:(c==1)?ramp.green:ramp.blue;
-		uint i;
-		for( i=0; i<256; i++ )
-		{
-			// Floating value
-			float value = (float)i / 256;
-
-			// Contrast
-			value = (float) max (0.0f, (value-0.5f) * (float) pow (3.f, properties.Contrast[c]) + 0.5f );
-
-			// Gamma
-			value = (float) pow (value, (properties.Gamma[c]>0) ? 1 - 3 * properties.Gamma[c] / 4 : 1 - properties.Gamma[c] );
-
-			// Luminosity
-			value = value + properties.Luminosity[c] / 2.f;
-			table[i] = min (65535, max (0, (int)(value * 65535)));
-		}
-	}
-
-	// Set the ramp
-	_DeviceInterface->SetGammaRamp (0, D3DSGR_NO_CALIBRATION, &ramp);
-	return true;
-	*/
-
-	// TODO nico
-	// It would be better to apply the gamma ramp only to the window and not to the whole desktop when playing in windowed mode.
-	// This require to switch to D3D 9.0c which has a flag for that purpose in the 'Present' function.
-	// Currently the SetGammaRamp only works in fullscreen mode, so we rely to the classic 'SetDeviceGammaRamp' instead.
-	HDC dc = CreateDCW (L"DISPLAY", NULL, NULL, NULL);
-	if (dc)
-	{
-		// The ramp
-		WORD ramp[256*3];
-
-		// For each composant
-		uint c;
-		for( c=0; c<3; c++ )
-		{
-			uint i;
-			for( i=0; i<256; i++ )
-			{
-				// Floating value
-				float value = (float)i / 256;
-
-				// Contrast
-				value = (float) max (0.0f, (value-0.5f) * (float) pow (3.f, properties.Contrast[c]) + 0.5f );
-
-				// Gamma
-				value = (float) pow (value, (properties.Gamma[c]>0) ? 1 - 3 * properties.Gamma[c] / 4 : 1 - properties.Gamma[c] );
-
-				// Luminosity
-				value = value + properties.Luminosity[c] / 2.f;
-				ramp[i+(c<<8)] = (WORD)min (65535, max (0, (int)(value * 65535)));
-			}
-		}
-
-		// Set the ramp
-		bool result = SetDeviceGammaRamp (dc, ramp) != FALSE;
-
-		// Release the DC
-		ReleaseDC (NULL, dc);
-
-		// Returns result
-		return result;
-	}
-	else
-	{
-		nlwarning ("(CDriverD3D::setMonitorColorProperties): can't create DC");
-		return false;
-	}
-
-}
-// ***************************************************************************
 
 // ****************************************************************************
 bool CDriverD3D::supportEMBM() const
@@ -3772,22 +3254,23 @@ void CDriverD3D::CMaterialState::apply(CDriverD3D *driver)
 // ***************************************************************************
 void CDriverD3D::beginDialogMode()
 {
-	if (_FullScreen && _HWnd)
-		ShowWindow(_HWnd, SW_MINIMIZE);
+//	if (_FullScreen)
+//		CSystem::instance()->getDisplay()->getWindow()->getSize(rect.Width, rect.Height);
+//		ShowWindow(_HWnd, SW_MINIMIZE);
 }
 
 // ***************************************************************************
 void CDriverD3D::endDialogMode()
 {
-	if (_FullScreen && _HWnd)
-		ShowWindow(_HWnd, SW_MAXIMIZE);
+//	if (_FullScreen && _HWnd)
+//		ShowWindow(_HWnd, SW_MAXIMIZE);
 }
 
 bool CDriverD3D::clipRect(NLMISC::CRect &rect)
 {
 	// Clip the wanted rectangle with window.
 	uint32 width, height;
-	getWindowSize(width, height);
+	CSystem::instance()->getDisplay()->getWindow()->getSize(width, height);
 
 	sint32	xr=rect.right() ,yr=rect.bottom();
 
@@ -3806,7 +3289,7 @@ void CDriverD3D::getZBuffer(std::vector<float>  &zbuffer)
 	H_AUTO_D3D(CDriverD3D_getZBuffer);
 
 	CRect rect(0, 0);
-	getWindowSize(rect.Width, rect.Height);
+	CSystem::instance()->getDisplay()->getWindow()->getSize(rect.Width, rect.Height);
 	getZBufferPart(zbuffer, rect);
 }
 
@@ -3881,13 +3364,13 @@ void CDriverD3D::getZBufferPart (std::vector<float> &zbuffer, NLMISC::CRect &rec
 
 void CDriverD3D::findNearestFullscreenVideoMode()
 {
-	if(_CurrentMode.Windowed)
-		return;
-
+//	if(_CurrentMode.Windowed)
+//		return;
+/*
 	std::vector<GfxMode> modes;
 	if(getModes(modes))
 	{
-		sint32 nbPixels = _CurrentMode.Width * _CurrentMode.Height;
+		sint32 nbPixels = 0; // _CurrentMode.Width * _CurrentMode.Height;
 		sint32 minError = nbPixels;
 		uint bestMode = (uint)modes.size();
 		for(uint i=0; i < modes.size(); i++)
@@ -3915,89 +3398,7 @@ void CDriverD3D::findNearestFullscreenVideoMode()
 			_CurrentMode.Height = modes[bestMode].Height;
 		}
 	}
-}
-bool CDriverD3D::copyTextToClipboard(const ucstring &text)
-{
-	return _EventEmitter.copyTextToClipboard(text);
-}
-
-bool CDriverD3D::pasteTextFromClipboard(ucstring &text)
-{
-	return _EventEmitter.pasteTextFromClipboard(text);
-}
-
-bool CDriverD3D::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY, bool cursor)
-{
-	CBitmap src = bitmap;
-	// resample bitmap if necessary
-	if (src.getWidth() != iconWidth || src.getHeight() != iconHeight)
-	{
-		src.resample(iconWidth, iconHeight);
-	}
-	CBitmap colorBm;
-	colorBm.resize(iconWidth, iconHeight, CBitmap::RGBA);
-	const CRGBA *srcColorPtr = (CRGBA *) &(src.getPixels()[0]);
-	const CRGBA *srcColorPtrLast = srcColorPtr + (iconWidth * iconHeight);
-	CRGBA *destColorPtr = (CRGBA *) &(colorBm.getPixels()[0]);
-	static volatile uint8 alphaThreshold = 127;
-	do
-	{
-		destColorPtr->modulateFromColor(*srcColorPtr, col);
-		std::swap(destColorPtr->R, destColorPtr->B);
-		++ srcColorPtr;
-		++ destColorPtr;
-	}
-	while (srcColorPtr != srcColorPtrLast);
-	//
-	HBITMAP colorHbm = NULL;
-	HBITMAP maskHbm = NULL;
-	//
-	if (iconDepth == 16)
-	{
-		std::vector<uint16> colorBm16(iconWidth * iconHeight);
-		const CRGBA *src32 = (const CRGBA *) &colorBm.getPixels(0)[0];
-
-		for (uint k = 0; k < colorBm16.size(); ++k)
-		{
-			colorBm16[k] = ((uint16)(src32[k].R&0xf8)>>3) | ((uint16)(src32[k].G&0xfc)<<3) | ((uint16)(src32[k].B & 0xf8)<<8);
-		}
-
-		colorHbm = CreateBitmap(iconWidth, iconHeight, 1, 16, &colorBm16[0]);
-		std::vector<uint8> bitMask((iconWidth * iconHeight + 7) / 8, 0);
-
-		for (uint k = 0;k < colorBm16.size(); ++k)
-		{
-			if (src32[k].A <= 120)
-			{
-				bitMask[k / 8] |= (0x80 >> (k & 7));
-			}
-		}
-
-		maskHbm = CreateBitmap(iconWidth, iconHeight, 1, 1, &bitMask[0]);
-	}
-	else
-	{
-		colorHbm = CreateBitmap(iconWidth, iconHeight, 1, 32, &colorBm.getPixels(0)[0]);
-		maskHbm = CreateBitmap(iconWidth, iconHeight, 1, 32, &colorBm.getPixels(0)[0]);
-	}
-
-	ICONINFO iconInfo;
-	iconInfo.fIcon = cursor ? FALSE:TRUE;
-	iconInfo.xHotspot = (DWORD) hotSpotX;
-	iconInfo.yHotspot = (DWORD) hotSpotY;
-	iconInfo.hbmMask = maskHbm;
-	iconInfo.hbmColor = colorHbm;
-
-	if (colorHbm && maskHbm)
-	{
-		icon = CreateIconIndirect(&iconInfo);
-	}
-
-	//
-	if (colorHbm) DeleteObject(colorHbm);
-	if (maskHbm) DeleteObject(maskHbm);
-
-	return true;
+*/
 }
 
 } // NL3D

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdopengl.h"
+#include "../stdmisc.h"
 #include "unix_event_emitter.h"
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
@@ -89,11 +89,69 @@ void CUnixEventEmitter::createIM()
 
 	if (_im)
 	{
-		_ic = XCreateIC(_im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, _win, XNFocusWindow, _win, NULL);
-//		XSetICFocus(_ic);
-	}
-	else
-	{
+//		_ic = XCreateIC(_im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, _win, XNFocusWindow, _win, NULL);
+
+		// find the appropriate style.  synergy supports XIMPreeditNothing
+		// only at the moment.
+		XIMStyles* styles = NULL;
+		if (XGetIMValues(_im, XNQueryInputStyle, &styles, NULL) != NULL || styles == NULL)
+		{
+			printf("cannot get IM styles\n");
+			XCloseIM(_im);
+			return;
+		}
+
+		XIMStyle style = 0;
+		for (unsigned short i = 0; i < styles->count_styles; ++i)
+		{
+			style = styles->supported_styles[i];
+			if ((style & XIMPreeditNothing) != 0)
+			{
+				if ((style & (XIMStatusNothing | XIMStatusNone)) != 0)
+				{
+					break;
+				}
+			}
+		}
+
+		XFree(styles);
+
+		if (style == 0)
+		{
+			printf("no supported IM styles\n");
+			XCloseIM(_im);
+			return;
+		}
+
+		// create an input context for the style and tell it about our window
+		_ic = XCreateIC(_im, XNInputStyle, style, XNClientWindow, _win, NULL);
+
+		if (_ic == NULL)
+		{
+			printf("cannot create IC\n");
+			XCloseIM(_im);
+			return;
+		}
+
+		XSetICFocus(_ic);
+
+		// find out the events we must select for and do so
+		unsigned long mask;
+		if (XGetICValues(_ic, XNFilterEvents, &mask, NULL) != NULL)
+		{
+			printf("cannot get IC filter events\n");
+			XDestroyIC(_ic);
+			XCloseIM(_im);
+			return;
+		}
+
+		// select events on our window that IM requires
+		XWindowAttributes attr;
+		XGetWindowAttributes(_dpy, _win, &attr);
+		XSelectInput(_dpy, _win, attr.your_event_mask | mask);
+ 	}
+ 	else
+ 	{
 		_ic = 0;
 		nlwarning("XCreateIM failed");
 	}
@@ -784,6 +842,17 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 
 		break;
 	}
+	case EnterNotify:
+		server->postEvent(new CEventSetFocus(true, this));
+		break;
+	case LeaveNotify:
+		if (event.xcrossing.mode != NotifyGrab &&
+			event.xcrossing.mode != NotifyUngrab &&
+			event.xcrossing.detail != NotifyInferior)
+		{
+			server->postEvent(new CEventSetFocus(false, this));
+		}
+		break;
 	case FocusIn:
 		// keyboard focus
 #ifdef X_HAVE_UTF8_STRING
@@ -823,45 +892,6 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	}
 
 	return true;
-}
-
-bool CUnixEventEmitter::copyTextToClipboard(const ucstring &text)
-{
-	_CopiedString = text;
-
-	// NeL window is the owner of clipboard
-	XSetSelectionOwner(_dpy,  XA_CLIPBOARD, _win, CurrentTime);
-
-	// check we are owning the clipboard
-	if (XGetSelectionOwner(_dpy, XA_CLIPBOARD) != _win)
-	{
-		nlwarning("Can't aquire selection");
-		return false;
-	}
-
-	_SelectionOwned = true;
-
-	return true;
-}
-
-bool CUnixEventEmitter::pasteTextFromClipboard(ucstring &text)
-{
-	// check if we own the selection
-	if (_SelectionOwned)
-	{
-		text = _CopiedString;
-		return true;
-	}
-
-	// check if there is a data in clipboard
-	if (XGetSelectionOwner(_dpy, XA_CLIPBOARD) == None)
-		return false;
-
-	// request supported methods
-	XConvertSelection(_dpy, XA_CLIPBOARD, XA_TARGETS, XA_NEL_SEL, _win, CurrentTime);
-
-	// don't return result now
-	return false;
 }
 
 } // NLMISC
