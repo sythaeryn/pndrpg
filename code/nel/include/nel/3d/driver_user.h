@@ -137,35 +137,22 @@ public:
 	virtual void			disableHardwareTextureShader();
 
 	/// create the window.
-	virtual	bool			setDisplay(const CMode &mode, bool show, bool resizeable);
-	virtual	bool			setDisplay(nlWindow wnd, const CMode &mode, bool show, bool resizeable);
+	virtual	bool			setDisplay(const CMode &mode, bool show, bool resizable);
+	virtual	bool			setDisplay(NLMISC::CWindow* window, const CMode &mode, bool show, bool resizable);
 	virtual bool			setMode(const CMode& mode);
 	virtual bool			getModes(std::vector<CMode> &modes);
 	virtual bool			getCurrentScreenMode(CMode &mode);
 	virtual void			beginDialogMode();
 	virtual void			endDialogMode();
 
-	/// Set the title of the NeL window
-	virtual void			setWindowTitle(const ucstring &title);
-
-	/// Set icon(s) of the NeL window
-	virtual void			setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps);
-
-	/// Set the position of the NeL window
-	virtual void			setWindowPos(sint32 x, sint32 y);
-
-	/// Show or hide the NeL window
-	virtual void			showWindow(bool show);
 
 	/// Release the window.
 	virtual	void			release();
 
 	/// Before rendering via a driver in a thread, must activate() (per thread).
 	virtual bool			activate(void);
-	/// Return true if driver is still active. Return false else. If he user close the window, must return false.
-	virtual bool			isActive();
 	/// Return an OS dependent window handle. Under Win32, it is a HWND.
-	virtual nlWindow		getDisplay ();
+	virtual NLMISC::CWindow*		getDisplay ();
 
 	// @}
 
@@ -396,10 +383,6 @@ public:
 	virtual const char*		getDriverInformation ();
 	virtual const char*		getVideocardInformation ();
 	virtual	uint			getNbTextureStages();
-	virtual void			getWindowSize (uint32 &width, uint32 &height);
-	virtual uint			getWindowWidth ();
-	virtual uint			getWindowHeight ();
-	virtual void			getWindowPos (sint32 &x, sint32 &y);
 	virtual uint32			getAvailableVertexAGPMemory ();
 	virtual uint32			getAvailableVertexVRAMMemory ();
 	virtual void			getBuffer (CBitmap &bitmap);
@@ -410,55 +393,8 @@ public:
 	// @}
 
 
-	/// \name Mouse / Keyboards / Game devices
-	// @{
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-	//
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-
-	/**
-	 * wrapper for IEventEmitter::emulateMouseRawMode()
-	 */
-	virtual void emulateMouseRawMode(bool enable);
-
-	virtual uint	getDoubleClickDelay(bool hardwareMouse);
-
-	/// show cursor if b is true, or hide it if b is false
-	virtual void			showCursor (bool b);
-	/// x and y must be between 0.0 and 1.0
-	virtual void			setMousePos (float x, float y);
-	/// If true, capture the mouse to force it to stay under the window.
-	virtual void			setCapture (bool b);
-
-	// see if system cursor is currently captured
-	virtual bool			isSystemCursorCaptured();
-
-	// Add a new cursor (name is case unsensitive)
-	virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap);
-
-	// Display a cursor from its name (case unsensitive)
-	virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false);
-
-	// Change default scale for all cursors
-	virtual void			setCursorScale(float scale);
-	// @}
-
-
 	/// \name Misc.
 	// @{
-
-	/** Output a system message box and print a message with an icon. This method can be call even if the driver is not initialized.
-	  * This method is used to return internal driver problem when string can't be displayed in the driver window.
-	  * If the driver can't open a messageBox, it should not override this method and let the IDriver class manage it with the ASCII console.
-	  *
-	  * \param message This is the message to display in the message box.
-	  * \param title This is the title of the message box.
-	  * \param type This is the type of the message box, ie number of button and label of buttons.
-	  * \param icon This is the icon of the message box should use like warning, error etc...
-	  */
-	virtual TMessageBoxId	systemMessageBox (const char* message, const char* title, TMessageBoxType type=okType, TMessageBoxIcon icon=noIcon);
-
 
 	/** Set the global polygon mode. Can be filled, line or point. The implementation driver must
 	  * call IDriver::setPolygonMode and active this mode.
@@ -474,7 +410,6 @@ public:
 	virtual void			setAnisotropicFilter(sint filter);
 	virtual void			forceTextureResize(uint divisor);
 	virtual void			forceNativeFragmentPrograms(bool nativeOnly);
-	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties);
 	// @}
 
 	/// \name Shape Bank
@@ -547,12 +482,6 @@ public:
 	virtual UWaterEnvMap *createWaterEnvMap();
 	virtual void		  deleteWaterEnvMap(UWaterEnvMap *map);
 	// @}
-
-	// Copy a string to system clipboard.
-	virtual bool copyTextToClipboard(const ucstring &text);
-
-	// Paste a string from system clipboard.
-	virtual bool pasteTextFromClipboard(ucstring &text);
 
 	virtual uint64	getSwapBufferCounter();
 
