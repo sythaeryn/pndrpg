@@ -31,6 +31,7 @@
 #include "nel/gui/proc.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/reflect_register.h"
+#include "nel/gui/editor_selection_watcher.h"
 #include "nel/misc/events.h"
 
 namespace NLGUI
@@ -1031,6 +1032,7 @@ namespace NLGUI
 		_OldCaptureKeyboard = NULL;
 		setCapturePointerLeft(NULL);
 		setCapturePointerRight(NULL);
+		_CapturedView = NULL;
 		
 		resetColorProps();
 
@@ -2054,6 +2056,16 @@ namespace NLGUI
 				getPointer()->draw ();
 		}
 
+		if( CInterfaceElement::getEditorMode() )
+		{
+			if( !currentEditorSelection.empty() )
+			{
+				CInterfaceElement *e = getElementFromId( currentEditorSelection );
+				if( e != NULL )
+					e->drawHighlight();
+			}
+		}
+
 		// flush layers
 		CViewRenderer::getInstance()->flush();
 
@@ -2085,6 +2097,12 @@ namespace NLGUI
 				{
 					getCapturePointerRight()->handleEvent( evnt );
 					setCapturePointerRight( NULL );
+				}
+
+				if( _CapturedView != NULL )
+				{
+					_CapturedView->handleEvent( evnt );
+					_CapturedView = NULL;
 				}
 			}
 		}
@@ -2249,6 +2267,9 @@ namespace NLGUI
 					getCapturePointerLeft() != getCapturePointerRight() )
 					handled|= getCapturePointerRight()->handleEvent(evnt);
 
+				if( _CapturedView != NULL )
+					_CapturedView->handleEvent( evnt );
+
 				CInterfaceGroup *ptr = getWindowUnder (eventDesc.getX(), eventDesc.getY());
 				setCurrentWindowUnder( ptr );
 
@@ -2326,6 +2347,8 @@ namespace NLGUI
 						}
 					}
 
+					bool captured = false;
+
 					// must not capture a new element if a sheet is currentlty being dragged.
 					// This may happen when alt-tab has been used => the sheet is dragged but the left button is up
 					if (!CCtrlDraggable::getDraggedSheet())
@@ -2343,9 +2366,25 @@ namespace NLGUI
 								{
 									nMaxDepth = d;
 									setCapturePointerLeft( ctrl );
+									captured = true;
 								}
 							}
 						}
+
+						if( CInterfaceElement::getEditorMode() && !captured )
+						{
+							for( sint32 i = _ViewsUnderPointer.size()-1; i >= 0; i-- )
+							{
+								CViewBase *v = _ViewsUnderPointer[i];
+								if( ( v != NULL ) && v->isInGroup( pNewCurrentWnd ) )
+								{
+									_CapturedView = v;
+									captured = true;
+									break;
+								}
+							}
+						}
+
 						notifyElementCaptured( getCapturePointerLeft() );
 						if (clickedOutModalWindow && !clickedOutModalWindow->OnPostClickOut.empty())
 						{
@@ -2353,13 +2392,16 @@ namespace NLGUI
 						}
 					}
 					//if found
-					if ( getCapturePointerLeft() != NULL)
+					if ( captured )
 					{
 						// consider clicking on a control implies handling of the event.
 						handled= true;
 
 						// handle the capture
-						getCapturePointerLeft()->handleEvent(evnt);
+						if( getCapturePointerLeft() != NULL )
+							getCapturePointerLeft()->handleEvent(evnt);
+						else
+							_CapturedView->handleEvent( evnt );
 					}
 				}
 
@@ -2588,6 +2630,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void CWidgetManager::setCapturePointerLeft(CCtrlBase *c)
 	{
+		_CapturedView = NULL;
+
 		// additionally, abort any dragging
 		if( CCtrlDraggable::getDraggedSheet() != NULL )
 			CCtrlDraggable::getDraggedSheet()->abortDragging();
@@ -3147,8 +3191,47 @@ namespace NLGUI
 					prev->setEditorSelected( false );
 			}
 			e->setEditorSelected( true );
-			currentEditorSelection = name;
 		}
+		else
+		if( !name.empty() )
+			return;
+		
+		currentEditorSelection = name;
+		notifySelectionWatchers();
+	}
+
+	void CWidgetManager::notifySelectionWatchers()
+	{
+		std::vector< IEditorSelectionWatcher* >::iterator itr = selectionWatchers.begin();
+		while( itr != selectionWatchers.end() )
+		{
+			(*itr)->selectionChanged( currentEditorSelection );
+			++itr;
+		}
+	}
+
+	void CWidgetManager::registerSelectionWatcher( IEditorSelectionWatcher *watcher )
+	{
+		std::vector< IEditorSelectionWatcher* >::iterator itr =
+			std::find( selectionWatchers.begin(), selectionWatchers.end(), watcher );
+		
+		// We already have this watcher
+		if( itr != selectionWatchers.end() )
+			return;
+
+		selectionWatchers.push_back( watcher );
+	}
+
+	void CWidgetManager::unregisterSelectionWatcher( IEditorSelectionWatcher *watcher )
+	{
+		std::vector< IEditorSelectionWatcher* >::iterator itr =
+			std::find( selectionWatchers.begin(), selectionWatchers.end(), watcher );
+		
+		// We don't have this watcher
+		if( itr == selectionWatchers.end() )
+			return;
+
+		selectionWatchers.erase( itr );
 	}
 
 

@@ -60,6 +60,8 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	nelgui_widget.h
 	new_property_widget.h
 	new_widget_widget.h
+	editor_selection_watcher.h
+	editor_message_processor.h
 	)
 	
 SET(OVQT_PLUGIN_GUI_EDITOR_UIS
