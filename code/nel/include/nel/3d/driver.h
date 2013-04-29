@@ -45,6 +45,7 @@ struct IKeyboardDevice;
 struct IInputDeviceManager;
 class CRect;
 class CLog;
+class CWindow;
 }
 
 namespace NL3D
@@ -160,8 +161,6 @@ public:
 							IDriver(void);
 	virtual					~IDriver(void);
 
-	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0)=0;
-
 	// Test if the device is lost. Can only happen with D3D.
 	// The calling application may skip some part of its rendering when it is the case (this is not a requirement, but may save cpu for other applications)
 	virtual	bool			isLost() const = 0;
@@ -178,22 +177,10 @@ public:
 
 	// first param is the associated window.
 	// Must be a HWND for Windows (WIN32).
-	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show = true, bool resizeable = true) throw(EBadDisplay)=0;
+	virtual bool			setDisplay(NLMISC::CWindow* window, const GfxMode& mode, bool show = true, bool resizable = true) throw(EBadDisplay)=0;
 	// Must be called after a setDisplay that initialize the mode
 	virtual bool			setMode(const GfxMode& mode)=0;
 	virtual bool			getModes(std::vector<GfxMode> &modes)=0;
-
-	/// Set the title of the NeL window
-	virtual void			setWindowTitle(const ucstring &title)=0;
-
-	/// Set icon(s) of the NeL window
-	virtual void			setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)=0;
-
-	/// Set the position of the NeL window
-	virtual void			setWindowPos(sint32 x, sint32 y)=0;
-
-	/// Show or hide the NeL window
-	virtual void			showWindow(bool show)=0;
 
 	/// return the current screen mode (if we are in windowed, return the screen mode behind the window)
 	virtual bool			getCurrentScreenMode(GfxMode &mode)=0;
@@ -203,19 +190,7 @@ public:
 	virtual void			endDialogMode() =0;
 
 	// Return is the associated window information. (Implementation dependent)
-	// Must be a HWND for Windows (WIN32).
-	virtual nlWindow		getDisplay() =0;
-
-	/**
-	  * Setup monitor color properties.
-	  *
-	  * Return false if setup failed.
-	  */
-	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties) = 0;
-
-	// Return is the associated default window proc for the driver. (Implementation dependent)
-	// Must be a void GlWndProc(IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) for Windows (WIN32).
-	virtual emptyProc		getWindowProc() = 0;
+	virtual NLMISC::CWindow*		getDisplay() =0;
 
 	/// Before rendering via a driver in a thread, must activate() (per thread).
 	virtual bool			activate(void) = 0;
@@ -227,8 +202,6 @@ public:
 	 *	NB: this method is thread safe.
 	 */
 	virtual bool			isTextureExist(const ITexture&tex)=0;
-
-	virtual NLMISC::IEventEmitter*	getEventEmitter(void) = 0;
 
 	/* Clear the current target surface pixels. The function ignores the viewport settings but uses the scissor. */
 	virtual bool			clear2D(CRGBA rgba) = 0;
@@ -563,12 +536,6 @@ public:
 	/// Swap the back and front buffers.
 	virtual bool			swapBuffers(void)=0;
 
-	/// Copy a string to system clipboard.
-	virtual bool			copyTextToClipboard(const ucstring &text) =0;
-
-	/// Paste a string from system clipboard.
-	virtual bool			pasteTextFromClipboard(ucstring &text) =0;
-
 	/** set the number of VBL wait when a swapBuffers() is issued. 0 means no synchronisation to the VBL
 	 *	Default is 1. Values >1 may be clamped to 1 by the driver.
 	 */
@@ -662,23 +629,6 @@ public:
 	/// Deriver should calls IDriver::release() first, to destroy all driver components (textures, shaders, VBuffers).
 	virtual bool			release(void);
 
-	/// Return true if driver is still active. Return false else. If he user close the window, must return false.
-	virtual bool			isActive()=0;
-
-	/// Return the depth of the driver after init().
-	virtual uint8			getBitPerPixel ()=0;
-
-	/** Output a system message box and print a message with an icon. This method can be call even if the driver is not initialized.
-	  * This method is used to return internal driver problem when string can't be displayed in the driver window.
-	  * If the driver can't open a messageBox, it should not override this method and let the IDriver class manage it with the ASCII console.
-	  *
-	  * \param message This is the message to display in the message box.
-	  * \param title This is the title of the message box.
-	  * \param type This is the type of the message box, ie number of button and label of buttons.
-	  * \param icon This is the icon of the message box should use like warning, error etc...
-	  */
-	virtual TMessageBoxId	systemMessageBox (const char* message, const char* title, TMessageBoxType type=okType, TMessageBoxIcon icon=noIcon);
-
 	/** Set the current viewport
 	  *
 	  * \param viewport is a viewport to setup as current viewport.
@@ -714,66 +664,6 @@ public:
 	  * get the official name of the driver
 	  */
 	virtual const char*		getVideocardInformation () = 0;
-
-	/// \name Mouse / Keyboard / Game devices
-	// @{
-		/// show cursor if b is true, or hide it if b is false
-		virtual void			showCursor (bool b) = 0;
-
-		/// x and y must be between 0.0 and 1.0
-		virtual void			setMousePos (float x, float y) = 0;
-
-		/** Enable / disable  low level mouse. This allow to take advantage of some options (speed of the mouse, automatic wrapping)
-		  * It returns a interface to these parameters when it is supported, or NULL otherwise
-		  * The interface pointer is valid as long as the low level mouse is enabled.
-		  * A call to disable the mouse returns NULL, and restore the default mouse behavior
-		  * NB : - In this mode the mouse cursor isn't drawn.
-	      *      - Calls to showCursor have no effects
-		  *      - Calls to setCapture have no effects
-		  */
-		virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive) = 0;
-
-		/** Enable / disable  a low level keyboard.
-		  * Such a keyboard can only send KeyDown and KeyUp event. It just consider the keyboard as a
-		  * gamepad with lots of buttons...
-		  * This returns a interface to some parameters when it is supported, or NULL otherwise.
-		  * The interface pointer is valid as long as the low level keyboard is enabled.
-		  * A call to disable the keyboard returns NULL, and restore the default keyboard behavior
-		  */
-		virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable) = 0;
-
-		/** Get the delay in ms for mouse double clicks.
-		  */
-		virtual uint	getDoubleClickDelay(bool hardwareMouse) = 0;
-
-		/** If true, capture the mouse to force it to stay under the window.
-		  * NB : this has no effects if a low level mouse is used
-		  */
-		virtual void			setCapture (bool b) = 0;
-
-		// see if system cursor is currently captured
-		virtual bool			isSystemCursorCaptured() = 0;
-
-		// Add a new cursor (name is case unsensitive)
-		virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap) = 0;
-
-		// Display a cursor from its name (case unsensitive)
-		virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false) = 0;
-
-		// Change default scale for all cursors
-		virtual void			setCursorScale(float scale) = 0;
-
-		/** Check whether there is a low level device manager available, and get its interface. Return NULL if not available
-		  * From this interface you can deal with mouse and keyboard as above, but you can also manage game device (joysticks, joypads ...)
-		  */
-		virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager() = 0;
-	// @}
-
-	/// Get the width and the height of the window
-	virtual void			getWindowSize (uint32 &width, uint32 &height) = 0;
-
-	/// Get the position of the window always (0,0) in fullscreen
-	virtual void			getWindowPos (sint32 &x, sint32 &y) = 0;
 
 	/** get the RGBA back buffer. After swapBuffers(), the content of the back buffer is undefined.
 	  *

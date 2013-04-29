@@ -14,47 +14,58 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// Default NeL includes
+#ifndef NL_SYSTEM_H
+#define NL_SYSTEM_H
+
 #include "nel/misc/types_nl.h"
 
-#ifdef NL_OS_WINDOWS
-#	define WIN32_LEAN_AND_MEAN
-#	define NOMINMAX
-#	include <windows.h>
+#include "display.h"
+#include "window.h"
+
+namespace NLMISC {
+
+class ISystem;
+class IDisplay;
+class IWindow;
+
+class CDisplay;
+
+class CSystem
+{
+public:
+	static bool setSystem(ISystem *system);
+
+	CDisplay* getDisplay(sint display = -1);
+
+	bool isAlphaBlendedCursorSupported() const;
+
+	static CSystem* instance();
+	static void release();
+
+protected:
+	CSystem(ISystem *system = NULL);
+	virtual ~CSystem();
+
+	ISystem* _System;
+	std::vector<CDisplay*> _Displays;
+};
+
+class ISystem
+{
+protected:
+	ISystem();
+	virtual ~ISystem();
+
+	virtual bool init() =0;
+	virtual bool uninit() =0;
+
+//	virtual IDisplay* getDisplay(sint display) =0;
+	virtual bool getDisplays(std::vector<IDisplay*> &displays) =0;
+	virtual bool isAlphaBlendedCursorSupported() const =0;
+
+	friend CSystem;
+};
+
+}
+
 #endif
-
-// System includes
-#include <cstdlib>
-#include <cstdio>
-#include <cmath>
-#include <ctime>
-#include <string>
-#include <vector>
-#include <list>
-#include <map>
-#include <set>
-#include <algorithm>
-#include <sstream>
-#include <exception>
-#include <utility>
-#include <deque>
-#include <limits>
-
-
-#ifdef NL_DEBUG
-	// add Direct3D debug infos
-	#define D3D_DEBUG_INFO
-#endif
-
-// Directx includes
-#include <d3d9.h>
-#include <d3dx9math.h>
-
-// NeL includes
-#include "nel/misc/common.h"
-#include "nel/misc/debug.h"
-#include "nel/misc/stream.h"
-#include "nel/misc/mem_stream.h"
-#include "nel/misc/time_nl.h"
-#include "nel/misc/command.h"
-#include "nel/misc/system.h"

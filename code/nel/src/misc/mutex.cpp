@@ -712,4 +712,107 @@ void CFairMutex::debugLeave()
 
 #endif // MUTEX_DEBUG
 
+struct CSynchronizedEventPrivate
+{
+#ifdef NL_OS_WINDOWS
+	HANDLE Event;
+#else
+	bool			Signaled;
+	pthread_cond_t	Condition;
+	pthread_mutex_t	Mutex;
+#endif
+};
+
+CSynchronizedEvent::CSynchronizedEvent()
+{
+	_Private = new CSynchronizedEventPrivate();
+
+#ifdef NL_OS_WINDOWS
+	_Private->Event = CreateEvent(NULL,FALSE,FALSE,NULL);
+#else
+	_Private->Signaled = false;
+	pthread_mutex_init(&_Private->Mutex, NULL);
+	pthread_cond_init (&_Private->Condition, NULL);
+#endif
+}
+
+CSynchronizedEvent::~CSynchronizedEvent()
+{
+#ifdef NL_OS_WINDOWS
+	CloseHandle(_Private->Event);
+#else
+	pthread_mutex_destroy(&_Private->Mutex);
+	pthread_cond_destroy(&_Private->Condition);
+#endif
+
+	delete _Private;
+}
+
+bool CSynchronizedEvent::wait(uint ms)
+{
+#ifdef NL_OS_WINDOWS
+	DWORD result = WaitForSingleObject(_Private->Event, ms == 0 ? INFINITE:ms);
+	if (result != WAIT_OBJECT_0) return false;
+#else
+	pthread_mutex_lock(&_Private->Mutex);
+
+	sint result = 0;
+
+	if (ms == 0)
+	{
+		while(!_Private->Signaled)
+		{
+			result = pthread_cond_wait(&_Private->Condition, &_Private->Mutex);
+		}
+	}
+	else
+	{
+		struct timeval now;
+		struct timezone zone;
+		gettimeofday(&now, &zone);
+		timeout.tv_sec = now.tv_sec+(ms/1000);
+		timeout.tv_nsec = now.tv_usec * 1000 + (ms%1000) * 1000*1000;
+
+		struct timespec timeout;
+
+		while(!_Signaled && (result != ETIMEDOUT))
+		{
+			result = pthread_cond_timedwait(&_Private->Condition, &_Private->Mutex, &timeout);
+		}
+	}
+
+	_Signaled = false;
+
+	pthread_mutex_unlock(&_Private->Mutex);
+
+	if (result == ETIMEDOUT) return false;
+#endif
+
+	return true;
+}
+
+void CSynchronizedEvent::notify()
+{
+#ifdef NL_OS_WINDOWS
+	SetEvent(_Private->Event);
+#else
+	pthread_mutex_lock(&_Private->Mutex);
+	_Private->Signaled = true;
+	pthread_mutex_unlock(&_Private->Mutex);
+
+	pthread_cond_signal(&_Private->Condition);
+#endif
+}
+
+void CSynchronizedEvent::reset()
+{
+#ifdef NL_OS_WINDOWS
+	ResetEvent(_Private->Event);
+#else
+	pthread_mutex_lock(&_Mutex);
+	_Private->Signaled = false;
+	pthread_mutex_unlock(&_Private->Mutex);
+#endif
+}
+
 } // NLMISC

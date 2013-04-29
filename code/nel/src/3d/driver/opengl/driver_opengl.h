@@ -35,42 +35,8 @@
 #	endif //XF86VIDMODE
 #endif // NL_OS_UNIX
 
-#include "nel/misc/matrix.h"
-#include "nel/misc/smart_ptr.h"
-#include "nel/misc/rgba.h"
-#include "nel/misc/event_emitter.h"
-#include "nel/misc/bit_set.h"
-#include "nel/misc/hierarchical_timer.h"
-#include "nel/misc/bitmap.h"
-#include "nel/misc/common.h"
-#include "nel/misc/heap_memory.h"
-#include "nel/misc/event_emitter_multi.h"
-#include "nel/misc/time_nl.h"
-
-#include "nel/3d/driver.h"
-#include "nel/3d/material.h"
-#include "nel/3d/shader.h"
-#include "nel/3d/vertex_buffer.h"
-#include "nel/3d/ptr_set.h"
-#include "nel/3d/texture_cube.h"
-#include "nel/3d/vertex_program_parse.h"
-#include "nel/3d/viewport.h"
-#include "nel/3d/scissor.h"
-#include "nel/3d/light.h"
-#include "nel/3d/occlusion_query.h"
-
 #include "driver_opengl_states.h"
 #include "driver_opengl_extension.h"
-
-
-#ifdef NL_OS_WINDOWS
-#include "nel/misc/win_event_emitter.h"
-#elif defined(NL_OS_MAC)
-#include "mac/cocoa_event_emitter.h"
-#elif defined (NL_OS_UNIX)
-#include "unix_event_emitter.h"
-#endif // NL_OS_UNIX
-
 
 // For optimisation consideration, allow 256 lightmaps at max.
 #define	NL3D_DRV_MAX_LIGHTMAP		256
@@ -110,10 +76,6 @@ class   COcclusionQueryGL;
 void displayGLError(GLenum error);
 
 #ifdef NL_OS_WINDOWS
-
-bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-typedef HCURSOR nlCursor;
-#define EmptyCursor (nlCursor)NULL
 
 #elif defined (NL_OS_MAC)
 
@@ -196,6 +158,7 @@ public:
 
 	bool					initFrameBufferObject(ITexture * tex);
 	bool					activeFrameBufferObject(ITexture * tex);
+	bool					copyFrameBufferObject(ITexture * tex);
 };
 
 
@@ -303,51 +266,30 @@ public:
 
 	virtual	bool			isLost() const { return false; } // there's no notion of 'lost device" in OpenGL
 
-	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0);
-
 	virtual void			disableHardwareVertexProgram();
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 
-	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
+	virtual bool			setDisplay(NLMISC::CWindow* window, const GfxMode& mode, bool show, bool resizable) throw(EBadDisplay);
 	virtual bool			setMode(const GfxMode& mode);
 	virtual bool			getModes(std::vector<GfxMode> &modes);
 	virtual bool			getCurrentScreenMode(GfxMode &mode);
 	virtual void			beginDialogMode();
 	virtual void			endDialogMode();
 
-	/// Set title of the NeL window
-	virtual void			setWindowTitle(const ucstring &title);
-
-	/// Set icon(s) of the NeL window
-	virtual void			setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps);
-
-	/// Set position of the NeL window
-	virtual void			setWindowPos(sint32 x, sint32 y);
-
-	/// Show or hide the NeL window
-	virtual void			showWindow(bool show);
-
-	virtual nlWindow		getDisplay()
+	virtual NLMISC::CWindow*		getDisplay()
 	{
-		return _win;
+		return _Window;
 	}
-
-	virtual bool			copyTextToClipboard(const ucstring &text);
-	virtual bool			pasteTextFromClipboard(ucstring &text);
 
 	virtual uint32			getAvailableVertexAGPMemory ();
 	virtual uint32			getAvailableVertexVRAMMemory ();
-
-	virtual emptyProc		getWindowProc();
 
 	virtual bool			activate();
 
 	virtual	uint			getNbTextureStages() const;
 
 	virtual bool			isTextureExist(const ITexture&tex);
-
-	virtual NLMISC::IEventEmitter	*getEventEmitter() { return&_EventEmitter; };
 
 	virtual bool			clear2D(CRGBA rgba);
 
@@ -485,8 +427,6 @@ public:
 
 	virtual bool			release();
 
-	virtual TMessageBoxId	systemMessageBox (const char* message, const char* title, TMessageBoxType type=okType, TMessageBoxIcon icon=noIcon);
-
 	virtual void			setupScissor (const class CScissor& scissor);
 
 	virtual void			setupViewport (const class CViewport& viewport);
@@ -505,41 +445,6 @@ public:
 	}
 
 	virtual const char*		getVideocardInformation ();
-
-	virtual bool			isActive ();
-
-	virtual uint8			getBitPerPixel ();
-
-	virtual void			showCursor (bool b);
-
-	// between 0.0 and 1.0
-	virtual void			setMousePos(float x, float y);
-
-	virtual void			setCapture (bool b);
-
-	// see if system cursor is currently captured
-	virtual bool			isSystemCursorCaptured();
-
-	// Add a new cursor (name is case unsensitive)
-	virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap);
-
-	// Display a cursor from its name (case unsensitive)
-	virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false);
-
-	// Change default scale for all cursors
-	virtual void			setCursorScale(float scale);
-
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-
-	virtual uint							 getDoubleClickDelay(bool hardwareMouse);
-
-	virtual void			getWindowSize (uint32 &width, uint32 &height);
-
-	virtual void			getWindowPos (sint32 &x, sint32 &y);
 
 	virtual void			getBuffer (CBitmap &bitmap);
 
@@ -622,7 +527,6 @@ public:
 	virtual	bool			supportBlendConstantColor() const;
 	virtual	void			setBlendConstantColor(NLMISC::CRGBA col);
 	virtual	NLMISC::CRGBA	getBlendConstantColor() const;
-	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties);
 	virtual	void			finish();
 	virtual	void			flush();
 	virtual	void			enablePolygonSmoothing(bool smooth);
@@ -680,14 +584,6 @@ public:
 	virtual void			stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass);
 	virtual void			stencilMask(uint mask);
 
-	GfxMode						_CurrentMode;
-	sint32						_WindowX;
-	sint32						_WindowY;
-
-#ifdef NL_OS_MAC
-	NLMISC::CCocoaEventEmitter _EventEmitter;
-#endif
-
 private:
 	virtual class IVertexBufferHardGL	*createVertexBufferHard(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb);
 	friend class					CTextureDrvInfosGL;
@@ -697,71 +593,11 @@ private:
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
 	static const uint32			ReleaseVersion;
 
-	// Windows
-	nlWindow					_win;
-	bool						_WindowVisible;
-	bool						_DestroyWindow;
-	bool						_Maximized;
 	uint						_Interval;
+	NLMISC::CDisplay*			_Display;
+	NLMISC::CWindow*			_Window;
+	GfxMode						_CurrentMode;
 	bool						_Resizable;
-
-	sint32						_DecorationWidth;
-	sint32						_DecorationHeight;
-
-	// cursors
-	enum TColorDepth { ColorDepth16 = 0, ColorDepth32, ColorDepthCount };
-
-	TColorDepth					_ColorDepth;
-	std::string					_CurrName;
-	NLMISC::CRGBA				_CurrCol;
-	uint8						_CurrRot;
-	uint						_CurrHotSpotX;
-	uint						_CurrHotSpotY;
-	float						_CursorScale;
-	bool						_MouseCaptured;
-
-	nlCursor					_DefaultCursor;
-	nlCursor					_BlankCursor;
-
-	bool						_AlphaBlendedCursorSupported;
-	bool						_AlphaBlendedCursorSupportRetrieved;
-
-	class CCursor
-	{
-	public:
-		NLMISC::CBitmap Src;
-		TColorDepth		ColorDepth;
-		uint			OrigHeight;
-		float			HotspotScale;
-		uint			HotspotOffsetX;
-		uint			HotspotOffsetY;
-		sint			HotSpotX;
-		sint			HotSpotY;
-		nlCursor		Cursor;
-		NLMISC::CRGBA	Col;
-		uint8			Rot;
-#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-		Display			*Dpy;
-#endif
-	public:
-		CCursor();
-		~CCursor();
-		CCursor& operator= (const CCursor& from);
-
-		void reset();
-	};
-
-	struct CStrCaseUnsensitiveCmp
-	{
-		bool operator()(const std::string &lhs, const std::string &rhs) const
-		{
-			return NLMISC::nlstricmp(lhs, rhs) < 0;
-		}
-	};
-
-	typedef std::map<std::string, CCursor, CStrCaseUnsensitiveCmp> TCursorMap;
-
-	TCursorMap					_Cursors;
 
 #ifdef USE_OPENGLES
 	EGLDisplay					_EglDisplay;
@@ -781,14 +617,6 @@ private:
 #endif
 
 #ifdef NL_OS_WINDOWS
-
-	bool						convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col = NLMISC::CRGBA::White, sint hotSpotX = 0, sint hotSpotY = 0, bool cursor = false);
-
-	friend bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-	static uint					_Registered;
-	DEVMODE						_OldScreenMode;
-	NLMISC::CEventEmitterMulti	_EventEmitter; // this can contains a win emitter and eventually a direct input emitter
 
 #elif defined(NL_OS_MAC)
 
@@ -828,6 +656,7 @@ private:
 #endif // NL_OS_UNIX
 
 	bool					_Initialized;
+	sint					_AntiAlias;
 
 	/// \name Driver Caps.
 	// @{
@@ -970,52 +799,15 @@ private:
 
 private:
 	bool					createContext();
+	bool					destroyContext();
+
 	bool					setupDisplay();
 	bool					unInit();
 
-	bool					createWindow(const GfxMode& mode);
-	bool					destroyWindow();
-
-	enum EWindowStyle { EWSWindowed, EWSFullscreen };
-
-	void					setWindowSize(uint32 width, uint32 height);
-
-	EWindowStyle			getWindowStyle() const;
-	bool					setWindowStyle(EWindowStyle windowStyle);
-
-	// Methods to manage screen resolutions
-	bool					restoreScreenMode();
-	bool					saveScreenMode();
-	bool					setScreenMode(const GfxMode &mode);
-
-	// Test if cursor is in the client area. always true when software cursor is used and window visible
-	// (displayed in software when DirectInput is used)
-	bool					isSystemCursorInClientArea();
-
-	// Check if RGBA cursors are supported
-	bool					isAlphaBlendedCursorSupported();
-
-	// Update cursor appearance
-	void					updateCursor(bool forceRebuild = false);
-
-	// Create default cursors
-	void					createCursors();
-
-	// Release all cursors
-	void					releaseCursors();
-
-	// Convert a NLMISC::CBitmap to nlCursor
-	bool					convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY);
-
-	// Return the best cursor size depending on specified width and height
-	bool					getBestCursorSize(uint srcWidth, uint srcHeight, uint &dstWidth, uint &dstHeight);
-
-	// build a cursor from src, src should have the same size that the hardware cursor
-	// or a assertion is thrown
-	nlCursor				buildCursor(const NLMISC::CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY);
-
-	// reset the cursor shape to the system arrow
-	void					setSystemArrow();
+	bool					setPixelFormat();
+	bool					useWindow(nlWindow window);
+	void					registerExtensions();
+	bool					choosePixelFormat(sint &pf, sint antiAlias = 0);
 
 	// Get the proj matrix setupped in GL
 	void					refreshProjMatrixFromGL();
@@ -1410,11 +1202,6 @@ private:
 	// init EMBM settings (set each stage to modify the next)
 	void	initEMBM();
 
-
-
-	// Monitor color parameters backup
-	bool							_NeedToRestaureGammaRamp;
-	uint16							_GammaRampBackuped[3*256];
 
 
 	/// \fragment shaders
