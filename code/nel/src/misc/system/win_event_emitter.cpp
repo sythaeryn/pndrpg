@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdmisc.h"
+#include "../stdmisc.h"
+#include "win_event_emitter.h"
 
 #include "nel/misc/events.h"
 #include "nel/misc/event_emitter.h"
-#include "nel/misc/win_event_emitter.h"
 #include "nel/misc/event_server.h"
 
 #ifdef NL_OS_WINDOWS
@@ -281,6 +281,9 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 	case WM_DESTROY:
 		server->postEvent (new CEventDestroyWindow (this));
 		break;
+	case WM_CLOSE:
+		server->postEvent (new CEventCloseWindow (this));
+		return true;
 	case WM_DISPLAYCHANGE:
 		server->postEvent (new CEventDisplayChange (LOWORD(lParam), HIWORD(lParam), (uint)wParam, this));
 		break;
@@ -335,9 +338,6 @@ void CWinEventEmitter::resetButtonFlagState ()
 	_MouseButtons[0]=( (GetAsyncKeyState(VK_LBUTTON)&0x8000) != 0);
 	_MouseButtons[1]=( (GetAsyncKeyState(VK_RBUTTON)&0x8000) != 0);
 	_MouseButtons[2]=( (GetAsyncKeyState(VK_MBUTTON)&0x8000) != 0);
-
-
-
 }
 
 //==========================================================

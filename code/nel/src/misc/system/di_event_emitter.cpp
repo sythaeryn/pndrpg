@@ -15,18 +15,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "stdmisc.h"
-
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/events.h"
-#include "nel/misc/win_event_emitter.h"
-//
+#include "../stdmisc.h"
+#include "di_event_emitter.h"
 #include "di_mouse_device.h"
 #include "di_keyboard_device.h"
 #include "di_game_device.h"
+#include "win_event_emitter.h"
+
+#include "nel/misc/events.h"
 
 
 #ifdef NL_OS_WINDOWS
+
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW

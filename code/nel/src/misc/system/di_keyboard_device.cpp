@@ -16,12 +16,12 @@
 
 
 
-#include "stdmisc.h"
+#include "../stdmisc.h"
 #include "di_keyboard_device.h"
 
 #ifdef NL_OS_WINDOWS
 
-#include "nel/misc/win_event_emitter.h"
+#include "win_event_emitter.h"
 #include <dinput.h>
 #include <Winuser.h>
 

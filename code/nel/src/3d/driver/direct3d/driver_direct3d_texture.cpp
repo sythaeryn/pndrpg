@@ -20,7 +20,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
 #include "nel/misc/mouse_device.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
@@ -1211,7 +1210,7 @@ bool CDriverD3D::getRenderTargetSize (uint32 &width, uint32 &height)
 	}
 	else
 	{
-		getWindowSize (width, height);
+		CSystem::instance()->getDisplay()->getWindow()->getSize (width, height);
 		return true;
 	}
 }

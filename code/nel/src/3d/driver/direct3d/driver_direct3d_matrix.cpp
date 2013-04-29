@@ -20,7 +20,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
 #include "nel/misc/mouse_device.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
@@ -293,7 +292,7 @@ void CDriverD3D::setupScissor (const class CScissor& scissor)
 
 		float y= scissor.Y;
 
-		if (_HWnd)
+//		if (_HWnd)
 		{
 			// Get the render target size
 			uint32 clientWidth;
@@ -337,8 +336,8 @@ void CDriverD3D::setupScissor (const class CScissor& scissor)
 void CDriverD3D::setupViewport (const class CViewport& viewport)
 {
 	H_AUTO_D3D(CDriverD3D_setupViewport )
-	if (_HWnd == NULL)
-		return;
+//	if (_HWnd == NULL)
+//		return;
 
 	// Get the render target size
 	uint32 clientWidth;
@@ -386,8 +385,8 @@ void CDriverD3D::setDepthRange(float znear, float zfar)
 {
 	H_AUTO_D3D(CDriverD3D_setDepthRange)
 	nlassert(znear != zfar);
-	if (_HWnd == NULL)
-		return;
+//	if (_HWnd == NULL)
+//		return;
 #ifdef NL_D3D_USE_RENDER_STATE_CACHE
 	NL_D3D_CACHE_TEST(CacheTest_DepthRange, znear != _DepthRangeNear || zfar != _DepthRangeFar)
 #endif
