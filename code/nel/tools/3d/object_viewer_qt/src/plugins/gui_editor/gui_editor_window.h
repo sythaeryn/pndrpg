@@ -36,6 +36,7 @@ namespace GUIEditor
 	class ProjectWindow;
 	class NelGUIWidget;
 	class CWidgetInfoTree;
+	class CEditorMessageProcessor;
 
 	class GUIEditorWindow: public QMainWindow
 	{
@@ -58,6 +59,7 @@ public Q_SLOTS:
 
 private Q_SLOTS:
 		void onProjectFilesChanged();
+		void onGUILoaded();
 
 private:
 		void createMenus();
@@ -76,8 +78,8 @@ private:
 		ProcList *procList;
 		ProjectWindow *projectWindow;
 		NelGUIWidget *viewPort;
-
 		CWidgetInfoTree *widgetInfoTree;
+		CEditorMessageProcessor *messageProcessor;
 
 		CPropBrowserCtrl browserCtrl;
 		QString currentProject;

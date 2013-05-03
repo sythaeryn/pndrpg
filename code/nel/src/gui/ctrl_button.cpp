@@ -359,7 +359,7 @@ namespace NLGUI
 
 
 
-		if ( ( _Over && !editorMode ) || editorSelected )
+		if ( ( _Over && !editorMode ) )
 		{
 
 			if( !editorMode && (lastOver == false) && (_AHOnOver != NULL))
