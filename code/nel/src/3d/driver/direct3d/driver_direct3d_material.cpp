@@ -567,7 +567,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 								normalShaderDesc.TexEnvMode[stage] = mat.getTexEnvMode(uint8(stage));
 							}
 
-							if (_PixelShader)
+							if (_PixelProgram)
 							{
 								#ifdef NL_DEBUG_D3D
 									// Check, should not occured
@@ -648,7 +648,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 		// Must separate texture setup and texture activation in 2 "for"...
 		// because setupTexture() may disable all stage.
 
-		if (matShader == CMaterial::Normal)
+		if (matShader == CMaterial::Normal || matShader == CMaterial::PostProcessing)
 		{
 			uint stage;
 			for(stage=0 ; stage<maxTexture; ++stage)
@@ -668,7 +668,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 	// Don't do it also for Specular because the EnvFunction and the TexGen may be special.
 	{
 		H_AUTO_D3D(CDriverD3D_setupMaterial_normalShaderActivateTextures)
-		if(matShader == CMaterial::Normal)
+		if (matShader == CMaterial::Normal || matShader == CMaterial::PostProcessing)
 		{
 			uint stage;
 			for(stage=0 ; stage<maxTexture; ++stage)
@@ -933,7 +933,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 				activeShader (NULL);
 
 				/* If unlighted trick is needed, set the shader later */
-				if (!pShader->NeedsConstantForDiffuse && _PixelShader)
+				if (!pShader->NeedsConstantForDiffuse && _PixelProgram)
 					setPixelShader (pShader->PixelShader);
 			}
 			break;
@@ -2019,7 +2019,7 @@ void CDriverD3D::endMaterialMultiPass()
 bool CDriverD3D::supportCloudRenderSinglePass () const
 {
 	H_AUTO_D3D(CDriver3D_supportCloudRenderSinglePass);
-	return _PixelShader;
+	return _PixelProgram;
 }
 
 // ***************************************************************************

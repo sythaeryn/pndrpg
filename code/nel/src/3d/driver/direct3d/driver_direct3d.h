@@ -240,6 +240,19 @@ public:
 	CVertexProgamDrvInfosD3D(IDriver *drv, ItVtxPrgDrvInfoPtrList it);
 	~CVertexProgamDrvInfosD3D();
 };
+ 
+
+// ***************************************************************************
+class CPixelProgramDrvInfosD3D : public IPixelProgramDrvInfos
+{
+public:
+ 
+	// The shader
+	IDirect3DPixelShader9	*Shader;
+
+	CPixelProgramDrvInfosD3D(IDriver *drv, ItPixelPrgDrvInfoPtrList it);
+	~CPixelProgramDrvInfosD3D();
+};
 
 
 // ***************************************************************************
@@ -773,6 +786,7 @@ public:
 
 	// Driver parameters
 	virtual void			disableHardwareVertexProgram();
+	virtual void			disableHardwarePixelProgram();
 	virtual void			disableHardwareIndexArrayAGP();
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
@@ -841,6 +855,7 @@ public:
 	// todo hulud d3d buffers
 	virtual void			getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rect);
 	virtual bool			setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width, uint32 height, uint32 mipmapLevel, uint32 cubeFace);
+	virtual ITexture		*getRenderTarget() const;
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y, uint32 width,
 													uint32 height, uint32 mipmapLevel);
 	virtual bool			getRenderTargetSize (uint32 &width, uint32 &height);
@@ -959,9 +974,9 @@ public:
 	virtual bool			supportTextureShaders() const {return false;};
 	virtual	bool			supportMADOperator() const;
 	// todo hulud d3d adressing mode
-	virtual bool			isWaterShaderSupported() const;
+	virtual bool			supportWaterShader() const;
 	// todo hulud d3d adressing mode
-	virtual bool			isTextureAddrModeSupported(CMaterial::TTexAddressingMode /* mode */) const {return false;};
+	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode /* mode */) const {return false;};
 	// todo hulud d3d adressing mode
 	virtual void			setMatrix2DForTextureOffsetAddrMode(const uint /* stage */, const float /* mat */[4]) {}
 
@@ -992,9 +1007,12 @@ public:
 	virtual void			endMaterialMultiPass();
 
 	// Vertex program
-	virtual bool			isVertexProgramSupported () const;
+	virtual bool			supportVertexProgram () const;
+	virtual bool			supportPixelProgram () const;
+	virtual bool			supportPixelProgram (CPixelProgram::TProfile profile) const;
 	virtual bool			isVertexProgramEmulated () const;
 	virtual bool			activeVertexProgram (CVertexProgram *program);
+	virtual bool			activePixelProgram (CPixelProgram *program);
 	virtual void			setConstant (uint index, float, float, float, float);
 	virtual void			setConstant (uint index, double, double, double, double);
 	virtual void			setConstant (uint index, const NLMISC::CVector& value);
@@ -1005,6 +1023,15 @@ public:
 	virtual void			setConstantFog (uint index);
 	virtual void			enableVertexProgramDoubleSidedColor(bool doubleSided);
 	virtual bool		    supportVertexProgramDoubleSidedColor() const;
+
+	// Pixel program
+	virtual void			setPixelProgramConstant (uint index, float, float, float, float);
+	virtual void			setPixelProgramConstant (uint index, double, double, double, double);
+	virtual void			setPixelProgramConstant (uint index, const NLMISC::CVector& value);
+	virtual void			setPixelProgramConstant (uint index, const NLMISC::CVectorD& value);
+	virtual void			setPixelProgramConstant (uint index, uint num, const float *src);
+	virtual void			setPixelProgramConstant (uint index, uint num, const double *src);
+	virtual void			setPixelProgramConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform);
 
 	// Occlusion query
 	virtual bool			supportOcclusionQuery() const;
@@ -1039,8 +1066,6 @@ public:
 	virtual void			stencilMask(uint mask);
 
 	uint32					getMaxVertexIndex() const { return _MaxVertexIndex; }
-
-	bool					supportPixelShaders() const { return _PixelShader; }
 
 		// *** Inline info
 	uint					inlGetNumTextStages() const { return _NbNeLTextureStages; }
@@ -1892,6 +1917,15 @@ public:
 		return d3dtex;
 	}
 
+	// Get the d3dtext mirror of an existing setuped pixel program.
+	static	inline CPixelProgramDrvInfosD3D*	getPixelProgramD3D(CPixelProgram& pixelProgram)
+	{
+		H_AUTO_D3D(CDriverD3D_getPixelProgramD3D);
+		CPixelProgramDrvInfosD3D*	d3dPixelProgram;
+		d3dPixelProgram = (CPixelProgramDrvInfosD3D*)(IPixelProgramDrvInfos*)(pixelProgram._DrvInfo);
+		return d3dPixelProgram;
+	}
+
 	// Get the d3dtext mirror of an existing setuped vertex program.
 	static	inline CVertexProgamDrvInfosD3D*	getVertexProgramD3D(CVertexProgram& vertexProgram)
 	{
@@ -2197,8 +2231,10 @@ private:
 	bool					_ForceDXTCCompression:1;
 	bool					_TextureCubeSupported;
 	bool					_VertexProgram;
-	bool					_PixelShader;
+	bool					_PixelProgram;
+	uint16					_PixelProgramVersion;
 	bool					_DisableHardwareVertexProgram;
+	bool					_DisableHardwarePixelProgram;
 	bool					_DisableHardwareVertexArrayAGP;
 	bool					_DisableHardwareIndexArrayAGP;
 	bool					_DisableHardwarePixelShader;
