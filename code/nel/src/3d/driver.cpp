@@ -33,7 +33,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x6b; // added anisotropic filter
+const uint32 IDriver::InterfaceVersion = 0x6c; // pixel program interface
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )
@@ -257,6 +257,11 @@ void			IDriver::removeShaderDrvInfoPtr(ItShaderDrvInfoPtrList shaderIt)
 void			IDriver::removeVtxPrgDrvInfoPtr(ItVtxPrgDrvInfoPtrList vtxPrgDrvInfoIt)
 {
 	_VtxPrgDrvInfos.erase(vtxPrgDrvInfoIt);
+}
+// ***************************************************************************
+void			IDriver::removePixelPrgDrvInfoPtr(ItPixelPrgDrvInfoPtrList pixelPrgDrvInfoIt)
+{
+	_PixelPrgDrvInfos.erase(pixelPrgDrvInfoIt);
 }
 
 // ***************************************************************************
