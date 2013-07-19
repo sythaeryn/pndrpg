@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision$" State="modified">
+  <ELEMENT Name="BNP" Type="Dfn" Filename="pipeline_process_package_bnp.dfn"/>
+  <LOG></LOG>
+</DFN>
