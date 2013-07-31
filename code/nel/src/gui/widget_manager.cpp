@@ -3183,6 +3183,7 @@ namespace NLGUI
 
 	CWidgetManager::CWidgetManager()
 	{
+		LinkHack();
 		CStringShared::createStringMapper();
 
 		CReflectableRegister::registerClasses();

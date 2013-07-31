@@ -146,7 +146,7 @@ external_stlport
 .svn
 thumbs.db
 Thumbs.db
-.Sync*
+*.tpl.php
 
 # build
 code/nel/build/*
@@ -212,3 +212,4 @@ code/ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
 code/ryzom/server/src/tick_service/tick_service
 # WebTT temp dir
 code/ryzom/tools/server/www/webtt/app/tmp
+code\ryzom\tools\server\ryzom_ams\old
