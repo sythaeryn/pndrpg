@@ -30,6 +30,7 @@
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/3d/vertex_program.h"
+#include "nel/3d/pixel_program.h"
 #include "nel/3d/material.h"
 #include "nel/misc/mutex.h"
 #include "nel/3d/primitive_profile.h"
@@ -141,7 +142,6 @@ public:
 	  */
 	enum TMatrixCount { MaxModelMatrix= 16 };
 
-
 protected:
 
 	CSynchronized<TTexDrvInfoPtrMap> _SyncTexDrvInfos;
@@ -152,6 +152,7 @@ protected:
 	TIBDrvInfoPtrList		_IBDrvInfos;
 	TPolygonMode			_PolygonMode;
 	TVtxPrgDrvInfoPtrList	_VtxPrgDrvInfos;
+	TPixelPrgDrvInfoPtrList	_PixelPrgDrvInfos;
 	TShaderDrvInfoPtrList	_ShaderDrvInfos;
 
 	uint					_ResetCounter;
@@ -172,6 +173,7 @@ public:
 	 */
 	// @{
 	virtual void			disableHardwareVertexProgram()=0;
+	virtual void			disableHardwarePixelProgram()=0;
 	virtual void			disableHardwareVertexArrayAGP()=0;
 	virtual void			disableHardwareTextureShader()=0;
 	// @}
@@ -857,6 +859,8 @@ public:
 													uint32 cubeFace = 0
 													) = 0 ;
 
+	virtual ITexture		*getRenderTarget() const = 0;
+
 	/** Trick method : copy the current texture target into another texture without updating the current texture.
 	  *
 	  * This method copies the current texture into another texture.
@@ -1002,12 +1006,18 @@ public:
 	/**
 	  * Does the driver supports vertex programs ?
 	  */
-	virtual bool			isVertexProgramSupported () const =0;
+	virtual bool			supportVertexProgram () const =0;
 
 	/**
 	  * Does the driver supports vertex program, but emulated by CPU ?
 	  */
 	virtual bool			isVertexProgramEmulated () const =0;
+
+	/**
+	  * Does the driver supports pixel programs ?
+	  */
+	virtual bool			supportPixelProgram() const =0;
+	virtual bool			supportPixelProgram(CPixelProgram::TProfile profile) const =0;
 
 
 
@@ -1021,7 +1031,16 @@ public:
 	virtual bool			activeVertexProgram (CVertexProgram *program) =0;
 
 	/**
-	  * Setup constant values.
+	  * Activate / disactivate a pixel program
+	  *
+	  * \param program is a pointer on a pixel program. Can be NULL to disable the current pixel program.
+	  *
+	  * \return true if setup/unsetup successed, false else.
+ 	  */
+	virtual bool			activePixelProgram (CPixelProgram *program) =0;
+
+	/**
+	  * Setup vertex program constant (uniform) values.
 	  */
 	virtual void			setConstant (uint index, float, float, float, float) =0;
 	virtual void			setConstant (uint index, double, double, double, double) =0;
@@ -1031,7 +1050,34 @@ public:
 	virtual void			setConstant (uint index, uint num, const float *src) =0;
 	/// setup several 4 double csts taken from the given tab
 	virtual void			setConstant (uint index, uint num, const double *src) =0;
+	// TODO: rename to setVertexProgramConstant
+	
+	/**
+	  * Setup pixel program constant (uniform) values.
+	  */
+	virtual void			setPixelProgramConstant (uint index, float, float, float, float) =0;
+	virtual void			setPixelProgramConstant (uint index, double, double, double, double) =0;
+	virtual void			setPixelProgramConstant (uint index, const NLMISC::CVector& value) =0;
+	virtual void			setPixelProgramConstant (uint index, const NLMISC::CVectorD& value) =0;
+	/// setup several 4 float csts taken from the given tab
+	virtual void			setPixelProgramConstant (uint index, uint num, const float *src) =0;
+	/// setup several 4 double csts taken from the given tab
+	virtual void			setPixelProgramConstant (uint index, uint num, const double *src) =0;
+	// TODO: uint32 and sint32 uniform types supported in opengl from gp4fp and gp5fp and sint32 in d3d
 
+	/**
+	  * Setup constants with a current matrix.
+	  *
+	  *	This call must be done after setFrustum(), setupViewMatrix() or setupModelMatrix() to get correct
+	  *	results.
+	  *
+	  * \param index is the base constant index where to store the matrix. This index must be a multiple of 4.
+	  * \param matrix is the matrix id to store in the constants
+	  * \param transform is the transformation to apply to the matrix before store it in the constants.
+	  *
+	  */
+	virtual void			setPixelProgramConstantMatrix (uint index, TMatrix matrix, TTransform transform) =0;
+	
 	/**
 	  * Setup constants with a current matrix.
 	  *
@@ -1080,10 +1126,10 @@ public:
 		/// test whether the device supports some form of texture shader. (could be limited to DX6 EMBM for example)
 		virtual bool supportTextureShaders() const = 0;
 		// Is the shader water supported ? If not, the driver caller should implement its own version
-		virtual bool isWaterShaderSupported() const = 0;
+		virtual bool supportWaterShader() const = 0;
 		//
 		/// test whether a texture addressing mode is supported
-		virtual bool isTextureAddrModeSupported(CMaterial::TTexAddressingMode mode) const = 0;
+		virtual bool supportTextureAddrMode(CMaterial::TTexAddressingMode mode) const = 0;
 		/** setup the 2D matrix for the OffsetTexture, OffsetTextureScale and OffsetTexture addressing mode
 		  * It should be stored as the following
 		  * [a0 a1]
@@ -1258,6 +1304,7 @@ protected:
 	friend	class	ITextureDrvInfos;
 	friend	class	IMaterialDrvInfos;
 	friend	class	IVertexProgramDrvInfos;
+	friend	class	IPixelProgramDrvInfos;
 	friend	class	IShaderDrvInfos;
 
 	/// remove ptr from the lists in the driver.
@@ -1268,6 +1315,7 @@ protected:
 	void			removeMatDrvInfoPtr(ItMatDrvInfoPtrList shaderIt);
 	void			removeShaderDrvInfoPtr(ItShaderDrvInfoPtrList shaderIt);
 	void			removeVtxPrgDrvInfoPtr(ItVtxPrgDrvInfoPtrList vtxPrgDrvInfoIt);
+	void			removePixelPrgDrvInfoPtr(ItPixelPrgDrvInfoPtrList pixelPrgDrvInfoIt);
 
 private:
 	bool			_StaticMemoryToVRAM;
