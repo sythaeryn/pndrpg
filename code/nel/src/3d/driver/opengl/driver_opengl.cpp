@@ -263,8 +263,6 @@ CDriverGL::CDriverGL()
 	_CurrentFogColor[2]= 0;
 	_CurrentFogColor[3]= 0;
 
-	_RenderTargetFBO = false;
-
 	_LightSetupDirty= false;
 	_ModelViewMatrixDirty= false;
 	_RenderSetupDirty= false;
@@ -482,6 +480,7 @@ bool CDriverGL::setupDisplay()
 	}
 
 	_VertexProgramEnabled= false;
+	_PixelProgramEnabled= false;
 	_LastSetupGLArrayVertexProgram= false;
 
 	// Init VertexArrayRange according to supported extenstion.
@@ -690,7 +689,7 @@ bool CDriverGL::stretchRect(ITexture * /* srcText */, NLMISC::CRect &/* srcRect 
 // ***************************************************************************
 bool CDriverGL::supportBloomEffect() const
 {
-	return (isVertexProgramSupported() && supportFrameBufferObject() && supportPackedDepthStencil() && supportTextureRectangle());
+	return (supportVertexProgram() && supportFrameBufferObject() && supportPackedDepthStencil() && supportTextureRectangle());
 }
 
 // ***************************************************************************
@@ -702,7 +701,7 @@ bool CDriverGL::supportNonPowerOfTwoTextures() const
 // ***************************************************************************
 bool CDriverGL::isTextureRectangle(ITexture * tex) const
 {
-	return (supportTextureRectangle() && tex->isBloomTexture() && tex->mipMapOff()
+	return (!supportNonPowerOfTwoTextures() && supportTextureRectangle() && tex->isBloomTexture() && tex->mipMapOff()
 			&& (!isPowerOf2(tex->getWidth()) || !isPowerOf2(tex->getHeight())));
 }
 
@@ -735,6 +734,12 @@ void CDriverGL::disableHardwareVertexProgram()
 {
 	H_AUTO_OGL(CDriverGL_disableHardwareVertexProgram)
 	_Extensions.DisableHardwareVertexProgram= true;
+}
+
+void CDriverGL::disableHardwarePixelProgram()
+{
+	H_AUTO_OGL(CDriverGL_disableHardwarePixelProgram)
+	_Extensions.DisableHardwarePixelProgram= true;
 }
 
 // ***************************************************************************
@@ -854,6 +859,7 @@ bool CDriverGL::swapBuffers()
 	// Reset texture shaders
 	//resetTextureShaders();
 	activeVertexProgram(NULL);
+	activePixelProgram(NULL);
 
 #ifndef USE_OPENGLES
 	/* Yoyo: must do this (GeForce bug ??) else weird results if end render with a VBHard.
@@ -1535,9 +1541,9 @@ bool CDriverGL::supportTextureShaders() const
 }
 
 // ***************************************************************************
-bool CDriverGL::isWaterShaderSupported() const
+bool CDriverGL::supportWaterShader() const
 {
-	H_AUTO_OGL(CDriverGL_isWaterShaderSupported);
+	H_AUTO_OGL(CDriverGL_supportWaterShader);
 
 	if(_Extensions.ARBFragmentProgram && ARBWaterShader[0] != 0) return true;
 
@@ -1547,9 +1553,9 @@ bool CDriverGL::isWaterShaderSupported() const
 }
 
 // ***************************************************************************
-bool CDriverGL::isTextureAddrModeSupported(CMaterial::TTexAddressingMode /* mode */) const
+bool CDriverGL::supportTextureAddrMode(CMaterial::TTexAddressingMode /* mode */) const
 {
-	H_AUTO_OGL(CDriverGL_isTextureAddrModeSupported)
+	H_AUTO_OGL(CDriverGL_supportTextureAddrMode)
 
 	if (_Extensions.NVTextureShader)
 	{

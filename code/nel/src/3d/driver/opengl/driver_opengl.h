@@ -308,6 +308,7 @@ public:
 	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0);
 
 	virtual void			disableHardwareVertexProgram();
+	virtual void			disableHardwarePixelProgram();
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 
@@ -565,6 +566,8 @@ public:
 	virtual bool			setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width, uint32 height,
 												uint32 mipmapLevel, uint32 cubeFace);
 
+	virtual ITexture		*getRenderTarget() const;
+
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y,
 													uint32 width, uint32 height, uint32 mipmapLevel);
 
@@ -602,9 +605,9 @@ public:
 	// @{
 	virtual bool			supportTextureShaders() const;
 
-	virtual bool			isWaterShaderSupported() const;
+	virtual bool			supportWaterShader() const;
 
-	virtual bool			isTextureAddrModeSupported(CMaterial::TTexAddressingMode mode) const;
+	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode mode) const;
 
 	virtual void			setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4]);
 	// @}
@@ -694,6 +697,7 @@ private:
 	virtual class IVertexBufferHardGL	*createVertexBufferHard(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb);
 	friend class					CTextureDrvInfosGL;
 	friend class					CVertexProgamDrvInfosGL;
+	friend class					CPixelProgamDrvInfosGL;
 
 private:
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
@@ -889,7 +893,7 @@ private:
 	// viewport before call to setRenderTarget, if BFO extension is supported
 	CViewport				_OldViewport;
 
-	bool					_RenderTargetFBO;
+	CSmartPtr<ITexture>		_RenderTargetFBO;
 
 
 	// Num lights return by GL_MAX_LIGHTS
@@ -1303,9 +1307,12 @@ private:
 	/// \name Vertex program interface
 	// @{
 
-	bool			isVertexProgramSupported () const;
+	bool			supportVertexProgram () const;
+	bool			supportPixelProgram () const;
+	bool			supportPixelProgram (CPixelProgram::TProfile profile) const;
 	bool			isVertexProgramEmulated () const;
 	bool			activeVertexProgram (CVertexProgram *program);
+	bool			activePixelProgram (CPixelProgram *program);
 	void			setConstant (uint index, float, float, float, float);
 	void			setConstant (uint index, double, double, double, double);
 	void			setConstant (uint indexStart, const NLMISC::CVector& value);
@@ -1316,6 +1323,15 @@ private:
 	void			setConstantFog (uint index);
 	void			enableVertexProgramDoubleSidedColor(bool doubleSided);
 	bool		    supportVertexProgramDoubleSidedColor() const;
+ 
+	// Pixel program
+	virtual void			setPixelProgramConstant (uint index, float, float, float, float);
+	virtual void			setPixelProgramConstant (uint index, double, double, double, double);
+	virtual void			setPixelProgramConstant (uint index, const NLMISC::CVector& value);
+	virtual void			setPixelProgramConstant (uint index, const NLMISC::CVectorD& value);
+	virtual void			setPixelProgramConstant (uint index, uint num, const float *src);
+	virtual void			setPixelProgramConstant (uint index, uint num, const double *src);
+	virtual void			setPixelProgramConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform);
 
 	virtual	bool			supportMADOperator() const ;
 
@@ -1330,6 +1346,12 @@ private:
 	//@}
 
 
+	/// \name Pixel program implementation
+	// @{
+		bool activeARBPixelProgram (CPixelProgram *program);
+		bool setupARBPixelProgram (const CPixelProgram *program, GLuint id/*, bool &specularWritten*/);
+	//@}
+ 
 
 	/// \fallback for material shaders
 	// @{
@@ -1342,14 +1364,26 @@ private:
 		// Don't use glIsEnabled, too slow.
 		return _VertexProgramEnabled;
 	}
+ 
+	bool			isPixelProgramEnabled () const
+	{
+		// Don't use glIsEnabled, too slow.
+		return _PixelProgramEnabled;
+	}
 
 	// Track state of activeVertexProgram()
 	bool							_VertexProgramEnabled;
+	// Track state of activePixelProgram()
+	bool							_PixelProgramEnabled;
+
 	// Say if last setupGlArrays() was a VertexProgram setup.
 	bool							_LastSetupGLArrayVertexProgram;
 
 	// The last vertex program that was setupped
 	NLMISC::CRefPtr<CVertexProgram> _LastSetuppedVP;
+
+	// The last pixel program that was setupped
+	NLMISC::CRefPtr<CPixelProgram> _LastSetuppedPP;
 
 	bool							_ForceDXTCCompression;
 	/// Divisor for textureResize (power).
@@ -1518,6 +1552,17 @@ public:
 
 	// The gl id is auto created here.
 	CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it);
+};
+
+// ***************************************************************************
+class CPixelProgamDrvInfosGL : public IPixelProgramDrvInfos
+{
+public:
+	// The GL Id.
+	GLuint					ID;
+ 
+	// The gl id is auto created here.
+	CPixelProgamDrvInfosGL (CDriverGL *drv, ItPixelPrgDrvInfoPtrList it);
 };
 
 #ifdef NL_STATIC
