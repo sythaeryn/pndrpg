@@ -104,6 +104,9 @@ struct EBadDisplay : public NLMISC::Exception
 // ****************************************************************************
 typedef void (*emptyProc)(void);
 
+class IProgram;
+class IProgramObject;
+
 // ****************************************************************************
 // *** IMPORTANT ********************
 // *** IF YOU MODIFY THE STRUCTURE OF THIS CLASS, PLEASE INCREMENT IDriver::InterfaceVersion TO INVALIDATE OLD DRIVER DLL
@@ -464,7 +467,6 @@ public:
 	 */
 	virtual bool			activeVertexBuffer(CVertexBuffer& VB)=0;
 
-
 	/** active a current IB, for future render().
 	 *
 	 * Don't change the index buffer format/size after having activated it.
@@ -521,6 +523,7 @@ public:
 	 *  \param numTri is the number of triangle to render.
 	 */
 	virtual bool			renderRawTriangles(CMaterial& mat, uint32 startVertex, uint32 numTri)=0;
+	virtual bool			renderRawTriangles2( CMaterial &mat, uint32 startVertex, uint32 numTri ){ return false; }
 
 	/** If the driver support it, primitive can be rendered with an offset added to each index
       * These are the offseted version of the 'render' functions
@@ -1019,6 +1022,31 @@ public:
 	  * \return true if setup/unsetup succeeded, false else.
 	  */
 	virtual bool			activeVertexProgram (CVertexProgram *program) =0;
+
+
+	/// Activates the specified GPU program object
+	virtual bool			activeProgramObject( IProgramObject *program ){ return false; };
+
+	/// Creates a new GPU program object
+	virtual IProgramObject* createProgramObject() const { return NULL; }
+
+	/// Creates a new Vertex program
+	virtual IProgram*		createVertexProgram() const { return NULL; }
+
+	/// Creates a new Pixel program
+	virtual IProgram*		createPixelProgram() const { return NULL; }
+
+	virtual int getUniformLocation( const char *name ){ return -1; }
+
+	virtual void setUniform1f( uint index, float f ){}
+	virtual void setUniform4f( uint index, float f1, float f2, float f3, float f4  ){}
+	virtual void setUniform1i( uint index, int i ){}
+	virtual void setUniform4i( uint index, int i1, int i2, int i3, int i4 ){}
+	virtual void setUniform1u( uint index, uint u ){}
+	virtual void setUniform4u( uint index, uint u1, uint u2, uint u3, uint u4 ){}
+	virtual void setUniformMatrix2fv( uint index, uint count, bool transpose, const float *values ){}
+	virtual void setUniformMatrix3fv( uint index, uint count, bool transpose, const float *values ){}
+	virtual void setUniformMatrix4fv( uint index, uint count, bool transpose, const float *values ){}
 
 	/**
 	  * Setup constant values.
