@@ -32,6 +32,8 @@ using NLMISC::CRGBA;
 using NLMISC::CSmartPtr;
 using NLMISC::CRefPtr;
 
+class CDynMaterial;
+
 // --------------------------------------------------
 
 const uint32 IDRV_MAT_MAXTEXTURES	=	4;
@@ -261,7 +263,7 @@ public:
 	 */
 	CMaterial();
 	/// see operator=.
-	CMaterial(const CMaterial &mat) : CRefCount() {_Touched= 0;_Flags=0; operator=(mat);}
+	CMaterial(const CMaterial &mat);
 	/// dtor.
 	~CMaterial();
 	/// Do not copy DrvInfos, copy all infos and set IDRV_TOUCHED_ALL.
@@ -618,7 +620,7 @@ public:
 		}
 
 		// helpers
-		inline uint getColorArg(uint index)
+		inline uint getColorArg(uint index) const
 		{
 			switch(index)
 			{
@@ -631,7 +633,7 @@ public:
 			}
 			return 0;
 		}
-		inline uint getAlphaArg(uint index)
+		inline uint getAlphaArg(uint index) const
 		{
 			switch(index)
 			{
@@ -644,7 +646,7 @@ public:
 			}
 			return 0;
 		}
-		inline uint getColorOperand(uint index)
+		inline uint getColorOperand(uint index) const
 		{
 			switch(index)
 			{
@@ -657,7 +659,7 @@ public:
 			}
 			return 0;
 		}
-		inline uint getAlphaOperand(uint index)
+		inline uint getAlphaOperand(uint index) const
 		{
 			switch(index)
 			{
@@ -694,7 +696,20 @@ private:
 	};
 	std::auto_ptr<CUserTexMat>	_TexUserMat;		 // user texture matrix
 
+	/// Dynamic material for the new driver
+	CDynMaterial *dynMat;
+
 public:
+
+	CDynMaterial* getDynMat() const{ return dynMat; }
+	void setDynMat( CDynMaterial *newDynMat ){ dynMat = newDynMat; }
+
+	/// Create the dynamic material from the current material parameters
+	void createDynMat();
+
+	/// Creates a clean dynamic material instance
+	void createCleanDynMat();
+
 	// Private. For Driver only.
 	CSmartPtr<ITexture>		_Textures[IDRV_MAT_MAXTEXTURES];
 	uint8				    _TexAddrMode[IDRV_MAT_MAXTEXTURES]; // texture addressing enum packed as bytes

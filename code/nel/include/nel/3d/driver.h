@@ -106,6 +106,8 @@ struct EBadDisplay : public NLMISC::Exception
 // ****************************************************************************
 typedef void (*emptyProc)(void);
 
+class IProgram;
+
 // ****************************************************************************
 // *** IMPORTANT ********************
 // *** IF YOU MODIFY THE STRUCTURE OF THIS CLASS, PLEASE INCREMENT IDriver::InterfaceVersion TO INVALIDATE OLD DRIVER DLL
@@ -1449,6 +1451,10 @@ protected:
 
 private:
 	bool					_StaticMemoryToVRAM;
+
+public:
+	/// Reloads the user shaders
+	virtual void reloadUserShaders(){}
 
 };
 
