@@ -39,6 +39,7 @@
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
 #include "nel/3d/u_shape_bank.h"
+#include "nel/3d/stereo_hmd.h"
 // Net.
 #include "nel/net/email.h"
 // Ligo.
@@ -46,6 +47,7 @@
 
 // Std.
 #include <fstream>
+#include <sstream>
 // Game Share
 #include "game_share/ryzom_version.h"
 // Client
@@ -62,12 +64,14 @@
 #include "ingame_database_manager.h"
 #include "client_chat_manager.h"
 #include "interface_v3/input_handler_manager.h"
+#include "interface_v3/interface_manager.h"
 //#include "crtdbg.h"
 #include "sound_manager.h"
 #include "net_manager.h"
 #include "sheet_manager.h"
 
 #include "interface_v3/sbrick_manager.h"
+#include "nel/gui/widget_manager.h"
 //
 #include "gabarit.h"
 #include "hair_set.h"
@@ -661,12 +665,12 @@ void prelogInit()
 #ifdef NL_OS_WINDOWS
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
-
+		
 		CTime::CTimerInfo timerInfo;
 		NLMISC::CTime::probeTimerInfo(timerInfo);
 		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
 			setCPUMask();
-
+		
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
@@ -790,6 +794,59 @@ void prelogInit()
 		// Check driver version
 		checkDriverVersion();
 
+		// Initialize the VR devices (even more important than the most important part of the client)
+		nmsg = "Initializing VR devices...";
+		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
+		if (ClientCfg.VREnable)
+		{
+			nldebug("VR [C]: Enabled");
+			std::vector<NL3D::CStereoDeviceInfo> devices;
+			IStereoDisplay::listDevices(devices);
+			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+			{
+				std::stringstream name;
+				name << std::string("[") << it->Serial << "] [" << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName << "]";
+				nlinfo("VR [C]: Stereo Display: %s", name.str().c_str());
+			}
+			CStereoDeviceInfo *deviceInfo = NULL;
+			if (ClientCfg.VRDisplayDevice == std::string("Auto")
+				&& devices.begin() != devices.end())
+			{
+				deviceInfo = &devices[0];
+			}
+			else
+			{
+				for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+				{
+					std::stringstream name;
+					name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
+					if (name.str() == ClientCfg.VRDisplayDevice)
+						deviceInfo = &(*it);
+					if (ClientCfg.VRDisplayDeviceId == it->Serial)
+						break;
+				}
+			}
+			if (deviceInfo)
+			{
+				nlinfo("VR [C]: Create VR stereo display device");
+				StereoDisplay = IStereoDisplay::createDevice(*deviceInfo);
+				if (StereoDisplay)
+				{
+					if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD)
+					{
+						nlinfo("VR [C]: Stereo display device is a HMD");
+						StereoHMD = static_cast<IStereoHMD *>(StereoDisplay);
+					}
+				}
+			}
+		}
+		else
+		{
+			nldebug("VR [C]: NOT Enabled");
+		}
+		IStereoDisplay::releaseUnusedLibraries();
+
+
 		// Create the driver (most important part of the client).
 		nmsg = "Creating 3d driver...";
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
@@ -805,6 +862,7 @@ void prelogInit()
 		switch(ClientCfg.Driver3D)
 		{
 #ifdef NL_OS_WINDOWS
+
 			case CClientConfig::Direct3D:
 				driver = UDriver::Direct3d;
 			break;
@@ -857,6 +915,11 @@ void prelogInit()
 			Driver->setSwapVBLInterval(1);
 		else
 			Driver->setSwapVBLInterval(0);
+		
+		if (StereoDisplay)
+		{
+			// override mode TODO
+		}
 
 		// Set the mode of the window.
 		if (!Driver->setDisplay (mode, false))
@@ -1008,7 +1071,7 @@ void prelogInit()
 
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
-		for (uint i=0; i<3; i++)
+		for ( uint i=0; i<3; i++)
 		{
 			monitorColor.Contrast[i] = ClientCfg.Contrast;
 			monitorColor.Luminosity[i] = ClientCfg.Luminosity;
@@ -1045,13 +1108,21 @@ void prelogInit()
 		if(GenericMat.empty())
 			nlerror("init: Cannot Create the generic material.");
 
-		// Yoyo: initialize NOW the InputHandler for Event filtering.
-		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
-		InputHandlerManager->addToServer (&Driver->EventServer);
 
 		// Create a text context. We need to put the full path because we not already add search path
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
+
+		
+		CInterfaceManager::getInstance();
+
+		// Yoyo: initialize NOW the InputHandler for Event filtering.
+		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
+		InputHandlerManager->addToServer (&Driver->EventServer);
+
+		std::string filename = CPath::lookup( ClientCfg.XMLInputFile, false );
+		if( !filename.empty() )
+			InputHandlerManager->readInputConfigFile( filename );
 
 		ProgressBar.setFontFactor(0.85f);
 
@@ -1091,6 +1162,12 @@ void prelogInit()
 
 		// init bloom effect
 		CBloomEffect::getInstance().init(driver != UDriver::Direct3d);
+		
+		if (StereoDisplay)
+		{
+			// Init stereo display resources
+			StereoDisplay->setDriver(Driver);
+		}
 
 		nlinfo ("PROFILE: %d seconds for prelogInit", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
