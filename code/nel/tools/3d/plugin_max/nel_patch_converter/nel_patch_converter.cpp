@@ -35,6 +35,9 @@ enum { po2rpo_params };
 //TODO: Add enums for various parameters
 enum {	pb_spin,};
 
+#if MAX_VERSION_MAJOR >= 15
+#	define end p_end
+#endif
 static ParamBlockDesc2 po2rpo_param_blk ( po2rpo_params, _T("params"),  0, &PO2RPODesc, 
 	P_AUTO_CONSTRUCT + P_AUTO_UI, PBLOCK_REF, 
 	//rollout
@@ -47,6 +50,9 @@ static ParamBlockDesc2 po2rpo_param_blk ( po2rpo_params, _T("params"),  0, &PO2R
 		end,
 	end
 	);
+#if MAX_VERSION_MAJOR >= 15
+#	undef end
+#endif
 
 IObjParam *PO2RPO::ip			= NULL;
 

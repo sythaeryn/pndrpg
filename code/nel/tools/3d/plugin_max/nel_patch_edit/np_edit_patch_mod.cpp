@@ -339,7 +339,11 @@ static INT_PTR CALLBACK PickSetDlgProc(
 			for (int i = 0; i < names.Count(); i++)
 			{
 				int pos  = SendDlgItemMessage(hWnd, IDC_NS_LIST, LB_ADDSTRING, 0,
+#if MAX_VERSION_MAJOR < 15
 					(LPARAM)(TCHAR*)*names[i]);
+#else
+					(LPARAM)(TCHAR*)(*names[i]).data());
+#endif
 				SendDlgItemMessage(hWnd, IDC_NS_LIST, LB_SETITEMDATA, pos, i);
 			}
 			break;

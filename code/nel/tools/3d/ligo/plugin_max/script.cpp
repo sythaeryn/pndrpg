@@ -137,7 +137,7 @@ Value* export_material_cf (Value** arg_list, int count)
 	check_arg_count(export_material, 4, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NeLLigoExportMaterial [Object] [Filename] [CheckOnly] [Error in dialog]";
+	TCHAR *message = TEXT("NeLLigoExportMaterial [Object] [Filename] [CheckOnly] [Error in dialog]");
 	type_check(arg_list[0], MAXNode, message);
 	type_check(arg_list[1], String, message);
 	type_check(arg_list[2], Boolean, message);
@@ -306,7 +306,7 @@ Value* export_transition_cf (Value** arg_list, int count)
 	check_arg_count(export_transition, 6, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NeLLigoExportTransition [Object array (count=9)] [Output filename] [First material filename] [Second material filename] [CheckOnly] [Error in dialog]";
+	TCHAR *message = TEXT("NeLLigoExportTransition [Object array (count=9)] [Output filename] [First material filename] [Second material filename] [CheckOnly] [Error in dialog]");
 	type_check(arg_list[0], Array, message);
 	type_check(arg_list[1], String, message);
 	type_check(arg_list[2], String, message);

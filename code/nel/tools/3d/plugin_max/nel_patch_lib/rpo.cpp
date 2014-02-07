@@ -45,7 +45,7 @@ class RPOClassDesc:public ClassDesc
 	}
 	const TCHAR *	ClassName() 
 	{
-		return "RklPatch";
+		return TEXT("RklPatch");
 	}
 	SClass_ID		SuperClassID() 
 	{
@@ -57,7 +57,7 @@ class RPOClassDesc:public ClassDesc
 	}
 	const TCHAR* 	Category() 
 	{
-		return "Rykol Tools";
+		return TEXT("Rykol Tools");
 	}
 };
 
@@ -381,7 +381,7 @@ void RPO::GetCollapseTypes(Tab<Class_ID> &clist,Tab<TSTR*> &nlist)
 	//TODO: Append any any other collapse type the plugin supports
 	
     Class_ID id = RYKOLPATCHOBJ_CLASS_ID;
-    TSTR *name = new TSTR("Rykol Patch Mesh");
+    TSTR *name = new TSTR(TEXT("Rykol Patch Mesh"));
     clist.Append(1,&id);
     nlist.Append(1,&name);
 }

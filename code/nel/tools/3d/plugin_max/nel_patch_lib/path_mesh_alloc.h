@@ -22,6 +22,12 @@
 #include <vector>
 #include <list>
 
+#if MAX_VERSION_MAJOR < 15
+#	define NLMAXCONSTCHAR TCHAR
+#else
+#	define NLMAXCONSTCHAR const MCHAR
+#endif
+
 template <class T>
 class CArrayElement : public NLMISC::CRefCount
 {

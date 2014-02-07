@@ -128,7 +128,9 @@ enum
 	RGBAdd_type,
 };
 
-
+#if MAX_VERSION_MAJOR >= 15
+#	define end p_end
+#endif
 static ParamBlockDesc2 RGBAdd_param_blk ( RGBAdd_params, _T("parameters"),  0, &maskCD, P_AUTO_CONSTRUCT + P_AUTO_UI, 0, 
 	//rollout
 	IDD_RGBMULT, "RGB Additif Parameters", 0, 0, NULL, 
@@ -167,6 +169,9 @@ static ParamBlockDesc2 RGBAdd_param_blk ( RGBAdd_params, _T("parameters"),  0, &
 
 	end
 );
+#if MAX_VERSION_MAJOR >= 15
+#	undef end
+#endif
 
 
 //-----------------------------------------------------------------------------

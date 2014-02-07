@@ -101,12 +101,12 @@ NL3D::CTileBank bank;
 std::string GetBankPathName ()
 {
 	HKEY hKey;
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, REGKEY_TILEDIT, 0, KEY_READ, &hKey)==ERROR_SUCCESS)
+	if (RegOpenKeyExA(HKEY_CURRENT_USER, REGKEY_TILEDIT, 0, KEY_READ, &hKey)==ERROR_SUCCESS)
 	{
 		char path[256];
 		DWORD len=256;
 		DWORD type;
-		if (RegQueryValueEx(hKey, "Bank Path", 0, &type, (LPBYTE)path, &len)==ERROR_SUCCESS)
+		if (RegQueryValueExA(hKey, "Bank Path", 0, &type, (LPBYTE)path, &len)==ERROR_SUCCESS)
 			return std::string (path);
 		RegCloseKey (hKey);
 	}
@@ -116,12 +116,12 @@ std::string GetBankPathName ()
 int GetBankTileSetSet ()
 {
 	HKEY hKey;
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, REGKEY_TILEDIT, 0, KEY_READ, &hKey)==ERROR_SUCCESS)
+	if (RegOpenKeyExA(HKEY_CURRENT_USER, REGKEY_TILEDIT, 0, KEY_READ, &hKey)==ERROR_SUCCESS)
 	{
 		int tileSetSet;
 		DWORD len=256;
 		DWORD type;
-		if (RegQueryValueEx(hKey, "Tileset Set", 0, &type, (LPBYTE)&tileSetSet, &len)==ERROR_SUCCESS)
+		if (RegQueryValueExA(hKey, "Tileset Set", 0, &type, (LPBYTE)&tileSetSet, &len)==ERROR_SUCCESS)
 			return tileSetSet;
 		RegCloseKey (hKey);
 	}
@@ -131,9 +131,9 @@ int GetBankTileSetSet ()
 void SetBankPathName (const std::string& path)
 {
 	HKEY hKey;
-	if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_TILEDIT, &hKey)==ERROR_SUCCESS)
+	if (RegCreateKeyA(HKEY_CURRENT_USER, REGKEY_TILEDIT, &hKey)==ERROR_SUCCESS)
 	{
-		RegSetValueEx(hKey, "Bank Path", 0, REG_SZ, (LPBYTE)path.c_str(), path.length()+1);
+		RegSetValueExA(hKey, "Bank Path", 0, REG_SZ, (LPBYTE)path.c_str(), path.length()+1);
 		RegCloseKey (hKey);
 	}
 }
@@ -141,9 +141,9 @@ void SetBankPathName (const std::string& path)
 void SetBankTileSetSet (int tileSetSet)
 {
 	HKEY hKey;
-	if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_TILEDIT, &hKey)==ERROR_SUCCESS)
+	if (RegCreateKeyA(HKEY_CURRENT_USER, REGKEY_TILEDIT, &hKey)==ERROR_SUCCESS)
 	{
-		RegSetValueEx(hKey, "Tileset Set", 0, REG_DWORD, (LPBYTE)&tileSetSet, 4);
+		RegSetValueExA(hKey, "Tileset Set", 0, REG_DWORD, (LPBYTE)&tileSetSet, 4);
 		RegCloseKey (hKey);
 	}
 }
@@ -1983,7 +1983,7 @@ IOResult RPatchMesh::Load(ILoad *iload)
 				uint nPrimVert;
 				
 				iload->Read(&bBinded, sizeof (bool), &nb);
-				iload->Read(&nType, sizeof (typeBind), &nb);
+				iload->Read((uint *)&nType, sizeof (typeBind), &nb); // FIXME
 				iload->Read(&nEdge, sizeof (uint), &nb);
 				iload->Read(&nPatch, sizeof (uint), &nb);
 				iload->Read(&nBefore, sizeof (uint), &nb);
@@ -1991,7 +1991,7 @@ IOResult RPatchMesh::Load(ILoad *iload)
 				iload->Read(&nAfter, sizeof (uint), &nb);
 				iload->Read(&nAfter2, sizeof (uint), &nb);
 				iload->Read(&nT, sizeof (uint), &nb);
-				iload->Read(&nType, sizeof (typeBind), &nb);
+				iload->Read((uint *)&nType, sizeof (typeBind), &nb); // FIXME
 				iload->Read(&nPrimVert, sizeof (uint), &nb);
 				
 				getUIVertex (i).Binding.bBinded=bBinded;
@@ -2117,7 +2117,7 @@ IOResult RPatchMesh::Save(ISave *isave)
 		uint nPrimVert=getUIVertex (i).Binding.nPrimVert;
 
 		isave->Write(&bBinded, sizeof (bool), &nb);
-		isave->Write(&nType, sizeof (typeBind), &nb);
+		isave->Write((uint *)&nType, sizeof (typeBind), &nb); // FIXME
 		isave->Write(&nEdge, sizeof (uint), &nb);
 		isave->Write(&nPatch, sizeof (uint), &nb);
 		isave->Write(&nBefore, sizeof (uint), &nb);
@@ -2125,7 +2125,7 @@ IOResult RPatchMesh::Save(ISave *isave)
 		isave->Write(&nAfter, sizeof (uint), &nb);
 		isave->Write(&nAfter2, sizeof (uint), &nb);
 		isave->Write(&nT, sizeof (uint), &nb);
-		isave->Write(&nType, sizeof (typeBind), &nb);
+		isave->Write((uint *)&nType, sizeof (typeBind), &nb); // FIXME
 		isave->Write(&nPrimVert, sizeof (uint), &nb);
 	}
 	

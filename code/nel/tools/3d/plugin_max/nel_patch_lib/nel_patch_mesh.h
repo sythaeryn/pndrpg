@@ -451,7 +451,7 @@ public:
 			}
 			catch (NLMISC::EStream& excp)
 			{
-				MessageBox (NULL, excp.what(), "Load error", MB_OK|MB_ICONEXCLAMATION);
+				MessageBoxA (NULL, excp.what(), "Load error", MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 		return _bank;

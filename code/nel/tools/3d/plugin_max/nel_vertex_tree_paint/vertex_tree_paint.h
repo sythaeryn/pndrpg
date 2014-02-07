@@ -28,7 +28,11 @@
 #endif
 #define NL_MAP_ASSERT
 #include <nel/misc/debug.h>
-
+#if MAX_VERSION_MAJOR < 15
+#	define NLMAXCONSTCHAR TCHAR
+#else
+#	define NLMAXCONSTCHAR const MCHAR
+#endif
 
 #define VERTEX_TREE_PAINT_CLASS_ID	Class_ID(0x40c7005e, 0x2a95082c)
 #define CID_PAINT				(CID_USER+0x439c)
@@ -131,7 +135,7 @@ public:
 		void GetClassName(TSTR& s) { s= TSTR(GetString(IDS_CLASS_NAME)); }  
 		virtual Class_ID ClassID() { return VERTEX_TREE_PAINT_CLASS_ID;}		
 		RefTargetHandle Clone(RemapDir& remap = DefaultRemapDir());
-		TCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
+		NLMAXCONSTCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
 		IOResult Load(ILoad *iload);
 		IOResult Save(ISave *isave);
 		IOResult LoadLocalData(ILoad *iload, LocalModData **pld);

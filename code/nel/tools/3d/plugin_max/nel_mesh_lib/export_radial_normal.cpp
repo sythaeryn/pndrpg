@@ -54,6 +54,10 @@ void CRadialVertices::init (INode *node, Mesh *mesh, TimeValue time, Interface &
 	{
 		// Get the appvalue
 		string pivotName = CExportNel::getScriptAppData (_NodePtr, NEL3D_APPDATA_RADIAL_NORMAL_SM+app-NEL3D_RADIAL_FIRST_SM, "");
+#if MAX_VERSION_MAJOR >= 15
+		ucstring pivotNameUC;
+		pivotNameUC.fromUtf8(pivotName);
+#endif
 
 		// Active ?
 		if (pivotName != "")
@@ -62,7 +66,11 @@ void CRadialVertices::init (INode *node, Mesh *mesh, TimeValue time, Interface &
 			_SmoothingGroupMask |= (1<<app);
 
 			// Get the node by name
+#if MAX_VERSION_MAJOR >= 15
+			INode *pivotNode = ip.GetINodeByName((const wchar_t *)pivotNameUC.c_str());
+#else
 			INode *pivotNode = ip.GetINodeByName(pivotName.c_str());
+#endif
 			if (pivotNode)
 			{
 				// Get the world Pivot point
