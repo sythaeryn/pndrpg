@@ -33,6 +33,14 @@
 #undef max
 #endif
 
+
+#if MAX_VERSION_MAJOR < 15
+#	define NLMAXCONSTCHAR TCHAR
+#else
+#	define NLMAXCONSTCHAR const MCHAR
+#endif
+
+
 #define PO2RPO_CLASS_ID Class_ID(0x43bb65e6, 0x68935530)
 
 extern TCHAR *GetString(int id);
@@ -50,7 +58,7 @@ class PO2RPO : public Modifier {
 		HWND hRollup;
 
 		// From Animatable
-		TCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
+		NLMAXCONSTCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
 
 		//From Modifier
 		//TODO: Add the channels that the modifier needs to perform its modification

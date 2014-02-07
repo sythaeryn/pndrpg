@@ -511,7 +511,7 @@ std::string	CExportNel::getName (MtlBase& mtl)
 std::string	CExportNel::getName (INode& mtl)
 {
 	// Return its name
-	TCHAR* name=mtl.GetName();
+	NLMAXCONSTCHAR *name=mtl.GetName();
 	return std::string (name);
 }
 

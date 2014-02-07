@@ -482,7 +482,7 @@ class PaintPatchMod : public Modifier
 		void BeginEditParams( IObjParam  *ip, ULONG flags, Animatable *prev );
 		void EndEditParams( IObjParam *ip, ULONG flags, Animatable *next );
 		RefTargetHandle Clone(RemapDir& remap = DefaultRemapDir());
-		TCHAR *GetObjectName() { return "NeL Patch Painter"; }
+		NLMAXCONSTCHAR *GetObjectName() { return "NeL Patch Painter"; }
 		
 		void RescaleWorldUnits(float f);
 

@@ -752,7 +752,7 @@ class EditPatchMod : public Modifier, IPatchOps, IPatchSelect, ISubMtlAPI, Attac
 		void BeginEditParams( IObjParam  *ip, ULONG flags, Animatable *prev );
 		void EndEditParams( IObjParam *ip, ULONG flags, Animatable *next );
 		RefTargetHandle Clone(RemapDir& remap = DefaultRemapDir());
-		TCHAR *GetObjectName() { return GetString(IDS_TH_EDITPATCH); }
+		NLMAXCONSTCHAR *GetObjectName() { return GetString(IDS_TH_EDITPATCH); }
 		void ActivateSubobjSel(int level, XFormModes& modes );
 		int NeedUseSubselButton() { return 0; }
 		void SelectSubComponent( HitRecord *hitRec, BOOL selected, BOOL all, BOOL invert );
