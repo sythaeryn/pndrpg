@@ -58,6 +58,7 @@ public:
 		DeathMode,			// Mode for the Death.
 		MountMode,			// Mode for the Mount.
 		ThirdMode,			// Third Person View Mode
+		CamAnimMode,		// Mode for camera animation
 
 		nbMode				// Not really a mode, just here to know how many modes are there.
 	};
@@ -111,6 +112,13 @@ private:
 	void deathModeStop();
 	/// Manage the Death Mode.
 	void deathMode();
+
+	/// Manage the camera animation Mode (start).
+	void camAnimModeStart();
+	/// Manage the camera animation Mode (stop).
+	void camAnimModeStop();
+	/// Manage the camera animation Mode.
+	void camAnimMode();
 
 	/// Manage the Mount Mode (start).
 	void mountModeStart();

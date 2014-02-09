@@ -56,6 +56,10 @@
 #include "shop_type/named_items.h"
 #include "server_share/log_item_gen.h"
 #include "server_share/log_character_gen.h"
+#include "camera_animation_manager/camera_animation_manager.h"
+#include "game_share/position_or_entity_type.h"
+#include "camera_animation_manager/position_or_entity_type_helper.h"
+
 
 using namespace std;
 using namespace NLMISC;
@@ -130,6 +134,9 @@ Implementation of all mission instructions
 	-set_guild_civ		: set civilization of guild of character made the mission
 	-set_guild_cult		: set cult of guild of characters made the mission
 	-if_no_trial		: jump to an instruction if character made the mission are not a trial account
+	
+	-sound_trigger		: play a sound
+	-camera_animation	: play a camera animation
 
 
 
@@ -5394,3 +5401,106 @@ class CMissionActionHandleRelease : public IMissionAction
 };
 MISSION_REGISTER_ACTION(CMissionActionHandleRelease, "handle_release");
 */
+
+/// camera animation
+// ----------------------------------------------------------------------------
+class CMissionActionCameraAnimation : public IMissionAction
+{
+	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	{
+		bool ret = true;
+		_SourceLine = line;
+		if (script.size() != 2)
+		{
+			MISLOGSYNTAXERROR("<animation_name>");
+			return false;
+		}
+
+		_AnimationName = script[1];
+		CMissionParser::removeBlanks(_AnimationName);
+
+		return ret;
+	}
+
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	{
+		LOGMISSIONACTION("camera_animation");
+		
+		// We tell the client to play the animation by sending him the animation steps
+		std::vector<TDataSetRow> entities;
+		instance->getEntities(entities);
+		// For all entities that do this mission
+		for (uint i = 0; i < entities.size(); i++)
+		{
+			// We send the message
+			CEntityId eid = TheDataset.getEntityId(entities[i]);
+
+			CCameraAnimationManager::getInstance()->sendAnimation(eid, _AnimationName);
+		}
+	};
+	std::string _AnimationName;
+
+	MISSION_ACTION_GETNEWPTR(CMissionActionCameraAnimation)
+};
+MISSION_REGISTER_ACTION(CMissionActionCameraAnimation, "camera_animation");
+
+/// sound trigger
+// ----------------------------------------------------------------------------
+class CMissionActionSoundTrigger : public IMissionAction
+{
+	bool buildAction( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData)
+	{
+		bool ret = true;
+		_SourceLine = line;
+		if (script.size() != 3)
+		{
+			MISLOGSYNTAXERROR("<sound_name> : <sound_position>");
+			return false;
+		}
+
+		std::string SoundName = script[1];
+		CMissionParser::removeBlanks(SoundName);
+		if (script.size() >= 3)
+			_SoundPosition = script[2];
+		else
+			_SoundPosition = "";
+
+		_SoundId = NLMISC::CSheetId(SoundName);
+		if (_SoundId == NLMISC::CSheetId::Unknown)
+		{
+			MISLOGSYNTAXERROR("sound_trigger action: sheetid not found");
+			return false;
+		}
+
+		return ret;
+	}
+
+	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
+	{
+		LOGMISSIONACTION("sound_trigger");
+
+		// We tell the client to play the sound
+		std::vector<TDataSetRow> entities;
+		instance->getEntities(entities);
+
+		// We get the position or entity
+		CPositionOrEntityHelper pos = CPositionOrEntityHelper::fromString(_SoundPosition);
+		if (pos == CPositionOrEntityHelper::Invalid)
+		{
+			nlerror("<sound_trigger mission_action launch> invalid position or entity from %s", _SoundPosition.c_str());
+		}
+
+		// For all entities that do this mission
+		for (uint i = 0; i < entities.size(); i++)
+		{
+			// We send the message
+			CEntityId eid = TheDataset.getEntityId(entities[i]);
+			PlayerManager.sendImpulseToClient(eid, "SOUND_TRIGGER", _SoundId, pos);
+		}
+	};
+	std::string _SoundPosition;
+	NLMISC::CSheetId _SoundId;
+
+	MISSION_ACTION_GETNEWPTR(CMissionActionSoundTrigger)
+};
+MISSION_REGISTER_ACTION(CMissionActionSoundTrigger, "sound_trigger");
