@@ -5,6 +5,9 @@
 **/database.xml = BIN
 **/msg.xml = BIN
 
+**/database.xml = BIN
+**/msg.xml = BIN
+
 **.txt = native
 **.xml = native
 

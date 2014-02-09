@@ -88,6 +88,12 @@
 
 // Std.
 #include <vector>
+#include "game_share/position_or_entity_type.h"
+#include "nel/misc/vector.h"
+#include "nel/misc/entity_id.h"
+#include "entity_cl.h"
+#include "camera_animation_manager/camera_animation_player.h"
+#include "camera_animation_manager/position_or_entity_pos_resolver.h"
 
 
 #define OLD_STRING_SYSTEM
@@ -3555,6 +3561,47 @@ void impulseSetNpcIconTimer(NLMISC::CBitMemStream &impulse)
 	CNPCIconCache::getInstance().setMissionGiverTimer(delay);
 }
 
+void impulsePlaySoundTrigger(NLMISC::CBitMemStream& impulse)
+{
+	NLMISC::CSheetId SoundId;
+	CPositionOrEntity SoundPosition;
+	
+	impulse.serial(SoundId);
+	impulse.serial(SoundPosition);
+
+	if (!SoundPosition.isValid())
+	{
+		nlwarning("<impulsePlaySoundTrigger> invalid SoundPosition");
+		return;
+	}
+
+	NLMISC::CVector pos = resolvePositionOrEntityPosition(SoundPosition);
+	SoundMngr->spawnSource(SoundId, pos);
+}
+
+void impulseCameraAnimationPlay(NLMISC::CBitMemStream& impulse)
+{
+	// We start playing an animation
+	CCameraAnimationPlayer::getInstance()->start();
+}
+
+void impulseCameraAnimationStep(NLMISC::CBitMemStream& impulse)
+{
+	// We got a new step
+	// We first get its name
+	std::string stepName = "camera_animation_step";
+	//impulse.serial(stepName);
+
+	// We tell the camera animation player to load and play this instruction
+	CCameraAnimationPlayer::getInstance()->playStep(stepName, impulse);
+}
+
+void impulseCameraAnimationFinished(NLMISC::CBitMemStream& impulse)
+{
+	// We stop an animation
+	CCameraAnimationPlayer::getInstance()->stop();
+}
+
 //-----------------------------------------------
 // initializeNetwork :
 //-----------------------------------------------
@@ -3704,6 +3751,12 @@ void initializeNetwork()
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SET_DESC",			impulseSetNpcIconDesc );
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SVR_EVENT_MIS_AVL",	impulseServerEventForMissionAvailability );
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SET_TIMER",			impulseSetNpcIconTimer );
+
+	GenericMsgHeaderMngr.setCallback( "SOUND_TRIGGER",			impulsePlaySoundTrigger );
+
+	GenericMsgHeaderMngr.setCallback( "CAMERA_ANIMATION:PLAY",		impulseCameraAnimationPlay );
+	GenericMsgHeaderMngr.setCallback( "CAMERA_ANIMATION:STEP",		impulseCameraAnimationStep );
+	GenericMsgHeaderMngr.setCallback( "CAMERA_ANIMATION:FINISHED",	impulseCameraAnimationFinished );
 }
 
 
