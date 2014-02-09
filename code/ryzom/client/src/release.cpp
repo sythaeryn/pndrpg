@@ -91,7 +91,7 @@
 #include "faction_war_manager.h"
 #include "interface_v3/interface_ddx.h"
 #include "bg_downloader_access.h"
-#include "nel/gui/lua_manager.h"
+#include "camera_animation_manager/camera_animation_player.h"
 
 
 ///////////
@@ -358,6 +358,8 @@ void	releaseMainLoopReselect()
 // Btw the 2 methods should have strong similarities
 void releaseMainLoop(bool closeConnection)
 {
+	CCameraAnimationPlayer::release();
+
 	ProgressBar.release();
 
 	// Release R2 editor if applicable
@@ -608,6 +610,7 @@ void release()
 	CSheetId::uninit();
 
 	// shutdown a few other singletons
+	CCameraAnimationPlayer::release();
 	CLoginProgressPostThread::releaseInstance();
 	CAttackListManager::releaseInstance();
 	CFactionWarManager::release();
