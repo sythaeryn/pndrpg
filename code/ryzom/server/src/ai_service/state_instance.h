@@ -483,52 +483,6 @@ bool CStateInstance::advanceUserTimer(uint32 nbTicks)
 		setUserTimer(k, (t>nbTicks)?(t-nbTicks):0);
 	}
 	return	true;
-}				
-
-inline
-void CStateInstance::processStateEvent(CAIEvent const& stateEvent, CAIState const* state)
-{
-	//	NOTE: This is a quick and inefficient implementation of event treatment - needs to be re-worked
-	//	note that it is OK for state to be 'NULL'
-	if	(!state)
-	{
-		state=getActiveState();
-		if	(!state)
-			return;
-	}
-	
-	bool foundReaction=false;
-	//	nlassert(_mgr);
-	for (uint i=0;i<stateEvent.reactionList().size();++i)
-	{
-		const CAIEventReaction	&reaction=*stateEvent.reactionList()[i];
-		if	(!reaction.testCompatibility(this,state))
-			continue;
-					
-		getDebugHistory()->addHistory("STATE: '%s' EVENT: '%s' REACTION: '%s'",	state->getAliasNode()->fullName().c_str(),
-			stateEvent.getName().c_str(),	reaction.getAliasNode()->fullName().c_str());
-		
-		foundReaction=true;
-		
-		if (!reaction.getAction())
-		{
-			nlwarning("Failed to find action for event: %s",reaction.getAliasNode()->fullName().c_str());
-			continue;
-		}
-		if (!reaction.getAction()->executeAction(this, NULL))
-		{
-			nlwarning("Failed to execute action for event '%s': for stateInstance:'%s' in state:'%s'",	stateEvent.getName().c_str(),
-				aliasTreeOwner()->getAliasNode()->fullName().c_str(),	state->getAliasNode()->fullName().c_str());
-			continue;
-		}
-		
-	}
-	if (!foundReaction)
-	{
-		getDebugHistory()->addHistory("STATE: '%s' EVENT: '%s' NO REACTION",	state->getAliasNode()->fullName().c_str(),
-			stateEvent.getName().c_str());
-	}
-	
 }
 
 inline
