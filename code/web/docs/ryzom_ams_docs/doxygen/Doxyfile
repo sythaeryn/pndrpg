@@ -58,7 +58,7 @@ PROJECT_LOGO           = logo.png
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = ../
+OUTPUT_DIRECTORY       = ../html
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -770,10 +770,10 @@ RECURSIVE              = YES
 # run.
 
 EXCLUDE                = ../../ryzom_ams/ams_lib/smarty \
-			 ../../ryzom_ams/ams_lib/plugins \
+                         ../../ryzom_ams/ams_lib/plugins \
                          ../../ryzom_ams/www/html/misc \
-			 ../../ryzom_ams/www/html/templates_c \
-			 ../../ryzom_ams/drupal
+                         ../../ryzom_ams/www/html/templates_c \
+                         ../../ryzom_ams/drupal
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -2309,4 +2309,3 @@ GENERATE_LEGEND        = YES
 # This tag requires that the tag HAVE_DOT is set to YES.
 
 DOT_CLEANUP            = YES
-
