@@ -298,14 +298,9 @@ CDriverGL::CDriverGL()
 
 	// Compute the Flag which say if one texture has been changed in CMaterial.
 	_MaterialAllTextureTouchedFlag= 0;
-	for(i=0; i < IDRV_MAT_MAXTEXTURES; i++)
+	for(i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 	{
-		_MaterialAllTextureTouchedFlag|= IDRV_TOUCHED_TEX[i];
-#ifdef GL_NONE
-		_CurrentTexAddrMode[i] = GL_NONE;
-#else
-		_CurrentTexAddrMode[i] = 0;
-#endif
+		_MaterialAllTextureTouchedFlag |= IDRV_TOUCHED_TEX[i];
 	}
 
 	_UserTexMatEnabled = 0;
@@ -833,10 +828,10 @@ bool CDriverGL::clearZBuffer(float zval)
 }
 
 // --------------------------------------------------
-bool CDriverGL::clearStencilBuffer(float stencilval)
+bool CDriverGL::clearStencilBuffer(sint stencilval)
 {
 	H_AUTO_OGL(CDriverGL_clearStencilBuffer)
-	glClearStencil((int)stencilval);
+	glClearStencil(stencilval);
 
 	glClear(GL_STENCIL_BUFFER_BIT);
 
