@@ -421,7 +421,7 @@ private:
 	  * The vector of water shapes is released then
 	  * \param bbox the bbox of the zone containing the water shapes
 	  */
-	void makeQuadGridFromWaterShapes(const NLMISC::CAABBox &zoneBBox);
+	void makeQuadGridFromWaterShapes(NLMISC::CAABBox zoneBBox);
 
 
 	/** For each tile of the current zone, check whether it below or above water.

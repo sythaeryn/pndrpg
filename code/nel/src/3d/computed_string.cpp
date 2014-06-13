@@ -30,7 +30,6 @@
 #include "nel/misc/fast_mem.h"
 
 using namespace std;
-using NLMISC::CVectorPacked;
 
 namespace NL3D {
 
@@ -144,7 +143,7 @@ void CComputedString::render2D (IDriver& driver,
 /*------------------------------------------------------------------*\
 							render3D()
 \*------------------------------------------------------------------*/
-void CComputedString::render3D (IDriver& driver,const CMatrix &matrixp,THotSpot hotspot)
+void CComputedString::render3D (IDriver& driver, const CMatrix &matrixp, THotSpot hotspot)
 {
 	if (Vertices.getNumVertices() == 0)
 		return;
@@ -271,9 +270,9 @@ void CComputedString::render2DClip (IDriver& driver, CRenderStringBuffer &rdrBuf
 			// copy and translate pos
 			CHECK_VBA_RANGE(srcvba, srcPtr, Vertices.getVertexSize());
 			CHECK_VBA_RANGE(dstvba, dstPtr, rdrBuffer.Vertices.getVertexSize())
-			((CVectorPacked*)dstPtr)->x= x + ((CVectorPacked*)srcPtr)->x;
-			((CVectorPacked*)dstPtr)->y= ((CVectorPacked*)srcPtr)->y;
-			((CVectorPacked*)dstPtr)->z= z + ((CVectorPacked*)srcPtr)->z;
+			((CVector*)dstPtr)->x= x + ((CVector*)srcPtr)->x;
+			((CVector*)dstPtr)->y= ((CVector*)srcPtr)->y;
+			((CVector*)dstPtr)->z= z + ((CVector*)srcPtr)->z;
 			// uv
 			*((CUV*)(dstPtr+ofsDstUV))= *((CUV*)(srcPtr+ofsSrcUV));
 			// color
@@ -299,12 +298,12 @@ void CComputedString::render2DClip (IDriver& driver, CRenderStringBuffer &rdrBuf
 		uint	numVerts= nNumQuadSrc*4;
 
 		// clip into VerticesClipped
-		CVectorPacked *pIniPos0 = (CVectorPacked*)srcPtr;
-		CVectorPacked *pIniPos2 = (CVectorPacked*)(((uint8*)pIniPos0) + srcSize*2);
-		CVectorPacked *pClipPos0 = (CVectorPacked*)dstPtr;
-		CVectorPacked *pClipPos1 = (CVectorPacked*)(((uint8*)pClipPos0) + dstSize);
-		CVectorPacked *pClipPos2 = (CVectorPacked*)(((uint8*)pClipPos1) + dstSize);
-		CVectorPacked *pClipPos3 = (CVectorPacked*)(((uint8*)pClipPos2) + dstSize);
+		CVector *pIniPos0 = (CVector*)srcPtr;
+		CVector *pIniPos2 = (CVector*)(((uint8*)pIniPos0) + srcSize*2);
+		CVector *pClipPos0 = (CVector*)dstPtr;
+		CVector *pClipPos1 = (CVector*)(((uint8*)pClipPos0) + dstSize);
+		CVector *pClipPos2 = (CVector*)(((uint8*)pClipPos1) + dstSize);
+		CVector *pClipPos3 = (CVector*)(((uint8*)pClipPos2) + dstSize);
 		CUV *pClipUV0 = (CUV*)(dstPtr + ofsDstUV );
 		CUV *pClipUV1 = (CUV*)(((uint8*)pClipUV0) + dstSize);
 		CUV *pClipUV2 = (CUV*)(((uint8*)pClipUV1) + dstSize);
@@ -337,28 +336,28 @@ void CComputedString::render2DClip (IDriver& driver, CRenderStringBuffer &rdrBuf
 
 				// copy with no clip
 				// v0
-				*((CVectorPacked*) (dstPtr + dstSize*0))= *((CVectorPacked*) (srcPtr + srcSize*0));
+				*((CVector*) (dstPtr + dstSize*0))= *((CVector*) (srcPtr + srcSize*0));
 				*((CUV*)	 (dstPtr + dstSize*0 + ofsDstUV))= *((CUV*)(srcPtr + srcSize*0 + ofsSrcUV));
 				if (vtype == CVertexBuffer::TRGBA)
 					*((CRGBA*)	 (dstPtr + dstSize*0 + ofsDstColor))= mCol;
 				else
 					*((CBGRA*)	 (dstPtr + dstSize*0 + ofsDstColor))= mCol;
 				// v1
-				*((CVectorPacked*) (dstPtr + dstSize*1))= *((CVectorPacked*) (srcPtr + srcSize*1));
+				*((CVector*) (dstPtr + dstSize*1))= *((CVector*) (srcPtr + srcSize*1));
 				*((CUV*)	 (dstPtr + dstSize*1 + ofsDstUV))= *((CUV*)(srcPtr + srcSize*1 + ofsSrcUV));
 				if (vtype == CVertexBuffer::TRGBA)
 					*((CRGBA*)	 (dstPtr + dstSize*1 + ofsDstColor))= mCol;
 				else
 					*((CBGRA*)	 (dstPtr + dstSize*1 + ofsDstColor))= mCol;
 				// v2
-				*((CVectorPacked*) (dstPtr + dstSize*2))= *((CVectorPacked*) (srcPtr + srcSize*2));
+				*((CVector*) (dstPtr + dstSize*2))= *((CVector*) (srcPtr + srcSize*2));
 				*((CUV*)	 (dstPtr + dstSize*2 + ofsDstUV))= *((CUV*)(srcPtr + srcSize*2 + ofsSrcUV));
 				if (vtype == CVertexBuffer::TRGBA)
 					*((CRGBA*)	 (dstPtr + dstSize*2 + ofsDstColor))= mCol;
 				else
 					*((CBGRA*)	 (dstPtr + dstSize*2 + ofsDstColor))= mCol;
 				// v3
-				*((CVectorPacked*) (dstPtr + dstSize*3))= *((CVectorPacked*) (srcPtr + srcSize*3));
+				*((CVector*) (dstPtr + dstSize*3))= *((CVector*) (srcPtr + srcSize*3));
 				*((CUV*)	 (dstPtr + dstSize*3 + ofsDstUV))= *((CUV*)(srcPtr + srcSize*3 + ofsSrcUV));
 				if (vtype == CVertexBuffer::TRGBA)
 					*((CRGBA*)	 (dstPtr + dstSize*3 + ofsDstColor))= mCol;
@@ -411,10 +410,10 @@ void CComputedString::render2DClip (IDriver& driver, CRenderStringBuffer &rdrBuf
 
 				// next quad out
 				++nNumQuadClipped;
-				pClipPos0 = (CVectorPacked*)(((uint8*)pClipPos0) + dstSize*4);
-				pClipPos1 = (CVectorPacked*)(((uint8*)pClipPos0) + dstSize);
-				pClipPos2 = (CVectorPacked*)(((uint8*)pClipPos1) + dstSize);
-				pClipPos3 = (CVectorPacked*)(((uint8*)pClipPos2) + dstSize);
+				pClipPos0 = (CVector*)(((uint8*)pClipPos0) + dstSize*4);
+				pClipPos1 = (CVector*)(((uint8*)pClipPos0) + dstSize);
+				pClipPos2 = (CVector*)(((uint8*)pClipPos1) + dstSize);
+				pClipPos3 = (CVector*)(((uint8*)pClipPos2) + dstSize);
 				pClipUV0 = (CUV*)( ((uint8*)pClipUV0) + dstSize*4 );
 				pClipUV1 = (CUV*)(((uint8*)pClipUV0) + dstSize);
 				pClipUV2 = (CUV*)(((uint8*)pClipUV1) + dstSize);
@@ -422,8 +421,8 @@ void CComputedString::render2DClip (IDriver& driver, CRenderStringBuffer &rdrBuf
 				dstPtr+=  4*dstSize;
 			}
 			// next quad in
-			pIniPos0 = (CVectorPacked*)(((uint8*)pIniPos0) + srcSize*4);
-			pIniPos2 = (CVectorPacked*)(((uint8*)pIniPos0) + srcSize*2);
+			pIniPos0 = (CVector*)(((uint8*)pIniPos0) + srcSize*4);
+			pIniPos2 = (CVector*)(((uint8*)pIniPos0) + srcSize*2);
 			srcPtr+=  4*srcSize;
 		}
 
@@ -507,8 +506,8 @@ void CComputedString::render2DUnProjected (IDriver& driver, CRenderStringBuffer 
 			// copy and translate pos
 			CHECK_VBA_RANGE(dstvba, dstPtr, Vertices.getVertexSize());
 			CHECK_VBA_RANGE(srcvba, srcPtr, rdrBuffer.Vertices.getVertexSize());
-			((CVectorPacked*)dstPtr)->x= x + ((CVectorPacked*)srcPtr)->x;
-			((CVectorPacked*)dstPtr)->z= z + ((CVectorPacked*)srcPtr)->z;
+			((CVector*)dstPtr)->x= x + ((CVector*)srcPtr)->x;
+			((CVector*)dstPtr)->z= z + ((CVector*)srcPtr)->z;
 
 			// uv
 			*((CUV*)(dstPtr+ofsDstUV))= *((CUV*)(srcPtr+ofsSrcUV));
@@ -534,12 +533,12 @@ void CComputedString::render2DUnProjected (IDriver& driver, CRenderStringBuffer 
 		uint	numVerts= nNumQuadSrc*4;
 
 		// clip into VerticesClipped
-		CVectorPacked *pIniPos0 = (CVectorPacked*)srcPtr;
-		CVectorPacked *pIniPos2 = (CVectorPacked*)(((uint8*)pIniPos0) + srcSize*2);
-		CVectorPacked *pClipPos0 = (CVectorPacked*)dstPtr;
-		CVectorPacked *pClipPos1 = (CVectorPacked*)(((uint8*)pClipPos0) + dstSize);
-		CVectorPacked *pClipPos2 = (CVectorPacked*)(((uint8*)pClipPos1) + dstSize);
-		CVectorPacked *pClipPos3 = (CVectorPacked*)(((uint8*)pClipPos2) + dstSize);
+		CVector *pIniPos0 = (CVector*)srcPtr;
+		CVector *pIniPos2 = (CVector*)(((uint8*)pIniPos0) + srcSize*2);
+		CVector *pClipPos0 = (CVector*)dstPtr;
+		CVector *pClipPos1 = (CVector*)(((uint8*)pClipPos0) + dstSize);
+		CVector *pClipPos2 = (CVector*)(((uint8*)pClipPos1) + dstSize);
+		CVector *pClipPos3 = (CVector*)(((uint8*)pClipPos2) + dstSize);
 		CUV *pClipUV0 = (CUV*)(dstPtr + ofsDstUV );
 		CUV *pClipUV1 = (CUV*)(((uint8*)pClipUV0) + dstSize);
 		CUV *pClipUV2 = (CUV*)(((uint8*)pClipUV1) + dstSize);
@@ -556,28 +555,28 @@ void CComputedString::render2DUnProjected (IDriver& driver, CRenderStringBuffer 
 			{
 				// copy with no clip
 				// v0
-				*((CVectorPacked*) (dstPtr + dstSize*0))= *((CVectorPacked*) (srcPtr + srcSize*0));
+				*((CVector*) (dstPtr + dstSize*0))= *((CVector*) (srcPtr + srcSize*0));
 				*((CUV*)	 (dstPtr + dstSize*0 + ofsDstUV))= *((CUV*)(srcPtr + srcSize*0 + ofsSrcUV));
 				if (vtype == CVertexBuffer::TRGBA)
 					*((CRGBA*)	 (dstPtr + dstSize*0 + ofsDstColor))= Color;
 				else
 					*((CBGRA*)	 (dstPtr + dstSize*0 + ofsDstColor))= Color;
 				// v1
-				*((CVectorPacked*) (dstPtr + dstSize*1))= *((CVectorPacked*) (srcPtr + srcSize*1));
+				*((CVector*) (dstPtr + dstSize*1))= *((CVector*) (srcPtr + srcSize*1));
 				*((CUV*)	 (dstPtr + dstSize*1 + ofsDstUV))= *((CUV*)(srcPtr + srcSize*1 + ofsSrcUV));
 				if (vtype == CVertexBuffer::TRGBA)
 					*((CRGBA*)	 (dstPtr + dstSize*1 + ofsDstColor))= Color;
 				else
 					*((CBGRA*)	 (dstPtr + dstSize*1 + ofsDstColor))= Color;
 				// v2
-				*((CVectorPacked*) (dstPtr + dstSize*2))= *((CVectorPacked*) (srcPtr + srcSize*2));
+				*((CVector*) (dstPtr + dstSize*2))= *((CVector*) (srcPtr + srcSize*2));
 				*((CUV*)	 (dstPtr + dstSize*2 + ofsDstUV))= *((CUV*)(srcPtr + srcSize*2 + ofsSrcUV));
 				if (vtype == CVertexBuffer::TRGBA)
 					*((CRGBA*)	 (dstPtr + dstSize*2 + ofsDstColor))= Color;
 				else
 					*((CBGRA*)	 (dstPtr + dstSize*2 + ofsDstColor))= Color;
 				// v3
-				*((CVectorPacked*) (dstPtr + dstSize*3))= *((CVectorPacked*) (srcPtr + srcSize*3));
+				*((CVector*) (dstPtr + dstSize*3))= *((CVector*) (srcPtr + srcSize*3));
 				*((CUV*)	 (dstPtr + dstSize*3 + ofsDstUV))= *((CUV*)(srcPtr + srcSize*3 + ofsSrcUV));
 				if (vtype == CVertexBuffer::TRGBA)
 					*((CRGBA*)	 (dstPtr + dstSize*3 + ofsDstColor))= Color;
@@ -631,10 +630,10 @@ void CComputedString::render2DUnProjected (IDriver& driver, CRenderStringBuffer 
 
 				// next quad out
 				++nNumQuadClipped;
-				pClipPos0 = (CVectorPacked*)(((uint8*)pClipPos0) + dstSize*4);
-				pClipPos1 = (CVectorPacked*)(((uint8*)pClipPos0) + dstSize);
-				pClipPos2 = (CVectorPacked*)(((uint8*)pClipPos1) + dstSize);
-				pClipPos3 = (CVectorPacked*)(((uint8*)pClipPos2) + dstSize);
+				pClipPos0 = (CVector*)(((uint8*)pClipPos0) + dstSize*4);
+				pClipPos1 = (CVector*)(((uint8*)pClipPos0) + dstSize);
+				pClipPos2 = (CVector*)(((uint8*)pClipPos1) + dstSize);
+				pClipPos3 = (CVector*)(((uint8*)pClipPos2) + dstSize);
 				pClipUV0 = (CUV*)( ((uint8*)pClipUV0) + dstSize*4 );
 				pClipUV1 = (CUV*)(((uint8*)pClipUV0) + dstSize);
 				pClipUV2 = (CUV*)(((uint8*)pClipUV1) + dstSize);
@@ -642,8 +641,8 @@ void CComputedString::render2DUnProjected (IDriver& driver, CRenderStringBuffer 
 				dstPtr+=  4*dstSize;
 			}
 			// next quad in
-			pIniPos0 = (CVectorPacked*)(((uint8*)pIniPos0) + srcSize*4);
-			pIniPos2 = (CVectorPacked*)(((uint8*)pIniPos0) + srcSize*2);
+			pIniPos0 = (CVector*)(((uint8*)pIniPos0) + srcSize*4);
+			pIniPos2 = (CVector*)(((uint8*)pIniPos0) + srcSize*2);
 			srcPtr+=  4*srcSize;
 		}
 
@@ -658,13 +657,13 @@ void CComputedString::render2DUnProjected (IDriver& driver, CRenderStringBuffer 
 	{
 		// preset unprojection
 		CVector tmp;
-		tmp.x = ((CVectorPacked*)dstPtrBackup)->x * OOW;
-		tmp.y = ((CVectorPacked*)dstPtrBackup)->z * OOH;
+		tmp.x = ((CVector*)dstPtrBackup)->x * OOW;
+		tmp.y = ((CVector*)dstPtrBackup)->z * OOH;
 		tmp.z = depth;
 		// mul by user scale matrix
 		tmp= scaleMatrix * tmp;
 		// Unproject it
-		*((CVectorPacked*)dstPtrBackup) = frustum.unProjectZ(tmp);
+		*((CVector*)dstPtrBackup) = frustum.unProjectZ(tmp);
 		dstPtrBackup += dstSize;
 	}
 

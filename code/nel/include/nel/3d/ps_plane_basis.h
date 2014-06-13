@@ -37,8 +37,8 @@ namespace NL3D {
 
 struct CPlaneBasis
 {
-	NLMISC::CVectorPacked X ;
-	NLMISC::CVectorPacked Y ;
+	NLMISC::CVector X ;
+	NLMISC::CVector Y ;
 
 
 	// default ctor
@@ -62,7 +62,7 @@ struct CPlaneBasis
 	/// compute the normal of the plane basis
 	NLMISC::CVector getNormal(void) const
 	{
-		return CVector(X) ^ CVector(Y) ;
+		return X ^ Y ;
 	}
 
 

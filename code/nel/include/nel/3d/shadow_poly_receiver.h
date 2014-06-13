@@ -83,29 +83,12 @@ public:
 									  );
 
 	// a vertex
-	NL_ALIGN_SSE2(16)
-	struct CRGBAVertex // FIXME_SSE2
+	struct CRGBAVertex
 	{
-#if USE_SSE2
-		float X, Y, Z;
-#else
 		CVector V;
-#endif
 		CRGBA Color;
 		CRGBAVertex() {}
-#if USE_SSE2
-		CRGBAVertex(const CVector &v, CRGBA c) : X(v.x), Y(v.y), Z(v.z), Color(c) {}
-		const CVector &asVector() const
-		{
-			nlctassert(sizeof(CVector) == sizeof(CRGBAVertex));
-			*reinterpret_cast<const CVector *>(this);
-		}
-#else
-		const CVector &asVector() const
-		{
-			return V;
-		}
-#endif
+		CRGBAVertex(const CVector &v, CRGBA c) : V(v), Color(c) {}
 	};
 
 	/** Compute list of clipped tri under the shadow mat

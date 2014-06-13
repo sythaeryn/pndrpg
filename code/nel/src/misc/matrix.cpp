@@ -16,11 +16,6 @@
 
 #include "stdmisc.h"
 
-#if (USE_SSE2)
-#	include <xmmintrin.h>
-#	include <emmintrin.h>
-#endif
-
 #include "nel/misc/matrix.h"
 #include "nel/misc/plane.h"
 #include "nel/misc/debug.h"
@@ -30,6 +25,11 @@ using namespace std;
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
+#endif
+
+#ifdef NL_HAS_SSE2
+// #define NL_MATRIX_MUL_SSE2
+#define NL_MATRIX_COPY_SSE2
 #endif
 
 namespace	NLMISC
@@ -166,6 +166,20 @@ CMatrix::CMatrix(const CMatrix &m)
 // ======================================================================================================
 CMatrix		&CMatrix::operator=(const CMatrix &m)
 {
+#ifdef NL_MATRIX_COPY_SSE2
+	if (m.StateBit & ((~MAT_VALIDALL) & (~MAT_TRANS)))
+	{
+		MF = m.MF;
+		StateBit = m.StateBit;
+		Scale33 = m.Scale33;
+	}
+	else
+	{
+		// Must always copy Trans part.
+		MF.d = m.MF.d;
+		StateBit = m.StateBit & MAT_TRANS;
+	}
+#else
 	StateBit= m.StateBit & ~MAT_VALIDALL;
 	if(hasAll())
 	{
@@ -191,6 +205,7 @@ CMatrix		&CMatrix::operator=(const CMatrix &m)
 		// Must always copy Trans part.
 		memcpy(&a14, &m.a14, 3*sizeof(float));
 	}
+#endif
 	return *this;
 }
 
@@ -695,85 +710,16 @@ void		CMatrix::scale(const CVector &v)
 // ======================================================================================================
 // ======================================================================================================
 
-void		CMatrix::setMulMatrixSSE2(const CMatrix &m1, const CMatrix &m2)
-{
-	m1.testExpandRot();
-	m1.testExpandProj();
-	m2.testExpandRot();
-	m2.testExpandProj();
-
-	// Use exactly the 8 MMX registers we have
-	register __m128 in1a = _mm_loadu_ps(&m1.M[0]);
-	register __m128 in1b = _mm_loadu_ps(&m1.M[4]);
-	register __m128 in1c = _mm_loadu_ps(&m1.M[8]);
-	register __m128 in1d = _mm_loadu_ps(&m1.M[12]);
-	register __m128 in2;
-	register __m128 outrow;
-	register __m128 tempsplat;
-	register __m128 tempmul;
-
-	in2 = _mm_loadu_ps(&m2.M[0]);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(0, 0, 0, 0));
-	outrow = _mm_mul_ps(in1a, tempsplat);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(1, 1, 1, 1));
-	tempmul = _mm_mul_ps(in1b, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(2, 2, 2, 2));
-	tempmul = _mm_mul_ps(in1c, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(3, 3, 3, 3));
-	tempmul = _mm_mul_ps(in1d, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	_mm_storeu_ps(&M[0], outrow);
-
-	in2 = _mm_loadu_ps(&m2.M[4]);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(0, 0, 0, 0));
-	outrow = _mm_mul_ps(in1a, tempsplat);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(1, 1, 1, 1));
-	tempmul = _mm_mul_ps(in1b, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(2, 2, 2, 2));
-	tempmul = _mm_mul_ps(in1c, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(3, 3, 3, 3));
-	tempmul = _mm_mul_ps(in1d, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	_mm_storeu_ps(&M[4], outrow);
-
-	in2 = _mm_loadu_ps(&m2.M[8]);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(0, 0, 0, 0));
-	outrow = _mm_mul_ps(in1a, tempsplat);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(1, 1, 1, 1));
-	tempmul = _mm_mul_ps(in1b, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(2, 2, 2, 2));
-	tempmul = _mm_mul_ps(in1c, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(3, 3, 3, 3));
-	tempmul = _mm_mul_ps(in1d, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	_mm_storeu_ps(&M[8], outrow);
-
-	in2 = _mm_loadu_ps(&m2.M[12]);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(0, 0, 0, 0));
-	outrow = _mm_mul_ps(in1a, tempsplat);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(1, 1, 1, 1));
-	tempmul = _mm_mul_ps(in1b, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(2, 2, 2, 2));
-	tempmul = _mm_mul_ps(in1c, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(3, 3, 3, 3));
-	tempmul = _mm_mul_ps(in1d, tempsplat);
-	outrow = _mm_add_ps(outrow, tempmul);
-	_mm_storeu_ps(&M[12], outrow);
-}
 
 // ***************************************************************************
 void		CMatrix::setMulMatrixNoProj(const CMatrix &m1, const CMatrix &m2)
 {
-#if USE_SSE2
-	setMulMatrixSSE2(m1, m2);
+#ifdef NL_MATRIX_MUL_SSE2
+	m1.testExpandRot();
+	m1.testExpandProj();
+	m2.testExpandRot();
+	m2.testExpandProj();
+	MF = mul(m1.MF, m2.MF);
 #else
 	/*
 	For a fast MulMatrix, it appears to be better to not take State bits into account (no test/if() overhead)
@@ -818,14 +764,18 @@ void		CMatrix::setMulMatrixNoProj(const CMatrix &m1, const CMatrix &m2)
 // ***************************************************************************
 void		CMatrix::setMulMatrix(const CMatrix &m1, const CMatrix &m2)
 {
-	// Do *this= m1*m2
-#ifdef USE_SSE2
-	setMulMatrixSSE2(m1, m2);
+#ifdef NL_MATRIX_MUL_SSE2
+	m1.testExpandRot();
+	m1.testExpandProj();
+	m2.testExpandRot();
+	m2.testExpandProj();
+	MF = mul(m1.MF, m2.MF);
 	StateBit = m1.StateBit | m2.StateBit;
 	StateBit |= MAT_VALIDALL;
 	if (m1.hasTrans() && m2.hasProj())
 		StateBit |= MAT_ROT | MAT_SCALEANY;
 #else
+	// Do *this= m1*m2
 	identity();
 	StateBit= m1.StateBit | m2.StateBit;
 	StateBit&= ~MAT_VALIDALL;
@@ -919,7 +869,7 @@ void		CMatrix::setMulMatrix(const CMatrix &m1, const CMatrix &m2)
 	if( (StateBit & MAT_SCALEUNI) && !(StateBit & MAT_SCALEANY) )
 	{
 		// Must have correct Scale33
-#ifndef USE_SSE2
+#ifndef NL_MATRIX_MUL_SSE2
 		m1.testExpandRot();
 		m2.testExpandRot();
 #endif
@@ -928,7 +878,7 @@ void		CMatrix::setMulMatrix(const CMatrix &m1, const CMatrix &m2)
 	else
 		Scale33=1;
 
-#ifndef USE_SSE2
+#ifndef NL_MATRIX_MUL_SSE2
 	// In every case, I am valid now!
 	StateBit|=MAT_VALIDROT;
 
@@ -1331,36 +1281,11 @@ bool		CMatrix::normalize(TRotOrder ro)
 // ======================================================================================================
 // ======================================================================================================
 
+
 // ======================================================================================================
 CVector		CMatrix::mulVector(const CVector &v) const
 {
-#ifdef USE_SSE2
-	if (hasRot())
-	{
-		CVector ret;
-		register __m128 in1a = _mm_loadu_ps(&M[0]);
-		register __m128 in1b = _mm_loadu_ps(&M[4]);
-		register __m128 in1c = _mm_loadu_ps(&M[8]);
-		register __m128 in2 = _mm_loadu_ps(&v.x); // WARNING: Read goes past size of CVector!
-		register __m128 tempsplat;
-		register __m128 tempmul;
-		register __m128 out;
-		tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(0, 0, 0, 0));
-		out = _mm_mul_ps(in1a, tempsplat);
-		tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(1, 1, 1, 1));
-		tempmul = _mm_mul_ps(in1b, tempsplat);
-		out = _mm_add_ps(out, tempmul);
-		tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(2, 2, 2, 2));
-		tempmul = _mm_mul_ps(in1c, tempsplat);
-		out = _mm_add_ps(out, tempmul);
-		_mm_storeu_ps(&ret.x, out);
-		return ret; // WARNING: Write goes past size of CVector (this occurs on the stack)!
-	}
-	else
-	{
-		return v;
-	}
-#else
+
 	CVector	ret;
 
 	if( hasRot() )
@@ -1372,7 +1297,6 @@ CVector		CMatrix::mulVector(const CVector &v) const
 	}
 	else
 		return v;
-#endif
 }
 
 // ======================================================================================================
@@ -1383,31 +1307,9 @@ CVector		CMatrix::mulPoint(const CVector &v) const
 
 	if( hasRot() )
 	{
-#ifdef USE_SSE2
-		register __m128 in1a = _mm_loadu_ps(&M[0]);
-		register __m128 in1b = _mm_loadu_ps(&M[4]);
-		register __m128 in1c = _mm_loadu_ps(&M[8]);
-		register __m128 in1d = _mm_loadu_ps(&M[12]);
-		register __m128 in2 = _mm_loadu_ps(&v.x); // WARNING: Read goes past size of CVector!
-		register __m128 tempsplat;
-		register __m128 tempmul;
-		register __m128 out;
-		tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(0, 0, 0, 0));
-		out = _mm_mul_ps(in1a, tempsplat);
-		tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(1, 1, 1, 1));
-		tempmul = _mm_mul_ps(in1b, tempsplat);
-		out = _mm_add_ps(out, tempmul);
-		tempsplat = _mm_shuffle_ps(in2, in2, _MM_SHUFFLE(2, 2, 2, 2));
-		tempmul = _mm_mul_ps(in1c, tempsplat);
-		out = _mm_add_ps(out, tempmul);
-		out = _mm_add_ps(out, in1d);
-		_mm_storeu_ps(&ret.x, out);
-		return ret; // WARNING: Write goes past size of CVector (this occurs on the stack)!
-#else
 		ret.x= a11*v.x + a12*v.y + a13*v.z;
 		ret.y= a21*v.x + a22*v.y + a23*v.z;
 		ret.z= a31*v.x + a32*v.y + a33*v.z;
-#endif
 	}
 	else
 	{
@@ -1421,6 +1323,34 @@ CVector		CMatrix::mulPoint(const CVector &v) const
 	}
 
 	return ret;
+}
+
+// ======================================================================================================
+CVector3F	CMatrix::mulPoint(const CVector3F &v) const
+{
+#ifdef NL_HAS_SSE2
+	CVector3F ret;
+	if (hasRot())
+	{
+		ret = add(
+			mul(xyz(MF.a), xxx(v)),
+			mul(xyz(MF.b), yyy(v)),
+			mul(xyz(MF.c), zzz(v)));
+	}
+	else
+	{
+		ret = v;
+	}
+	if (hasTrans())
+	{
+		ret = add(
+			ret,
+			xyz(MF.d));
+	}
+	return ret;
+#else
+	return set3F(mulPoint(toVector(v)));
+#endif
 }
 
 

@@ -74,7 +74,6 @@ public:
 public:
 
 	// skinning
-	void		applySkin(NLMISC::CVectorPacked *dst, std::vector<CMatrix3x4> &boneMat3x4);
 	void		applySkin(NLMISC::CVector *dst, std::vector<CMatrix3x4> &boneMat3x4);
 
 	/** return ray intersection.

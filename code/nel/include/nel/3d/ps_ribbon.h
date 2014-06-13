@@ -247,7 +247,7 @@ private:
 	//@}
 
 	CSmartPtr<ITexture>				_Tex;
-	CPSVector<NLMISC::CVectorPacked>::V	_Shape;
+	CPSVector<NLMISC::CVector>::V	_Shape;
 	float							_UFactor, _VFactor;
 	TOrientation					_Orientation;
 

@@ -404,8 +404,8 @@ void CPSMesh::updatePos()
 
 
 
-			mat.setRot( CVector(ptBasis->X) * CPSUtil::getCos((sint32) *ptCurrAngle) + CVector(ptBasis->Y) * CPSUtil::getSin((sint32) *ptCurrAngle)
-						, CVector(ptBasis->X) * CPSUtil::getCos((sint32) *ptCurrAngle + 64) + CVector(ptBasis->Y) * CPSUtil::getSin((sint32) *ptCurrAngle + 64)
+			mat.setRot( ptBasis->X * CPSUtil::getCos((sint32) *ptCurrAngle) + ptBasis->Y * CPSUtil::getSin((sint32) *ptCurrAngle)
+						, ptBasis->X * CPSUtil::getCos((sint32) *ptCurrAngle + 64) + ptBasis->Y * CPSUtil::getSin((sint32) *ptCurrAngle + 64)
 						, ptBasis->X ^ ptBasis->Y
 					  );
 
@@ -660,9 +660,9 @@ public:
 								CHECK_VERTEX_BUFFER(outVb,	  outVertex + outNormalOff);
 
 								// translate and resize the vertex (relatively to the mesh origin)
-								*(CVectorPacked *) outVertex = *posIt + sM * CVector(*(CVectorPacked *) inVertex);
+								*(CVector *) outVertex = *posIt + sM * *(CVector *) inVertex;
 								// copy the normal
-								*(CVectorPacked *) (outVertex + outNormalOff) = M * CVector(*(CVectorPacked *) (inVertex + inNormalOff));
+								*(CVector *) (outVertex + outNormalOff) = M * *(CVector *) (inVertex + inNormalOff);
 
 
 								inVertex  += inVSize;
@@ -683,7 +683,7 @@ public:
 								CHECK_VERTEX_BUFFER(outVb, outVertex);
 
 								// translate and resize the vertex (relatively to the mesh origin)
-								*(CVectorPacked *) outVertex = *posIt + sM * CVector(*(CVectorPacked *) inVertex);
+								*(CVector *) outVertex = *posIt + sM * *(CVector *) inVertex;
 
 								inVertex  += inVSize;
 								outVertex += outVSize;
@@ -774,10 +774,10 @@ public:
 								CHECK_VERTEX_BUFFER(outVb,	  outVertex + outNormalOff);
 
 								// morph, and transform the vertex
-								*(CVectorPacked *) outVertex = *posIt + sM * (opLambda * CVector(*(CVectorPacked *) m0) + lambda * CVector(*(CVectorPacked *) m1));
+								*(CVector *) outVertex = *posIt + sM * (opLambda * *(CVector *) m0 + lambda * *(CVector *) m1);
 								// morph, and transform the normal
-								*(CVectorPacked *) (outVertex + outNormalOff) = M * (opLambda * CVector(*(CVectorPacked *) (m0 + inNormalOff))
-																			  + lambda * CVector(*(CVectorPacked *) (m1 + inNormalOff))).normed();
+								*(CVector *) (outVertex + outNormalOff) = M * (opLambda * *(CVector *) (m0 + inNormalOff)
+																			  + lambda * *(CVector *) (m1 + inNormalOff)).normed();
 
 
 								m0  += inVSize;
@@ -799,7 +799,7 @@ public:
 								CHECK_VERTEX_BUFFER((*inVB1),	  m1);
 								CHECK_VERTEX_BUFFER(outVb, outVertex);
 								// morph, and transform the vertex
-								*(CVectorPacked *) outVertex = *posIt + sM * (opLambda * CVector(*(CVectorPacked *) m0) + opLambda * CVector(*(CVectorPacked *) m1));
+								*(CVector *) outVertex = *posIt + sM * (opLambda * *(CVector *) m0 + opLambda * *(CVector *) m1);
 
 								m0  += inVSize;
 								m1  += inVSize;
@@ -948,9 +948,9 @@ public:
 
 
 							// translate and resize the vertex (relatively to the mesh origin)
-							*(CVectorPacked *)  outVertex						 = *posIt + *ptCurrSize * CVector(*(CVectorPacked *) inVertex);
+							*(CVector *)  outVertex						 = *posIt + *ptCurrSize * *(CVector *) inVertex;
 							// copy the normal
-							*(CVectorPacked *)  (outVertex + normalOff ) = *(CVectorPacked *) (inVertex + pNormalOff);
+							*(CVector *)  (outVertex + normalOff ) = *(CVector *) (inVertex + pNormalOff);
 							inVertex  += inVSize;
 							outVertex += outVSize;
 						}
@@ -963,7 +963,7 @@ public:
 							// translate and resize the vertex (relatively to the mesh origin)
 							CHECK_VERTEX_BUFFER(outVb, outVertex);
 							CHECK_VERTEX_BUFFER(prerotVb, inVertex);
-							*(CVectorPacked *)  outVertex = *posIt + *ptCurrSize * CVector(*(CVectorPacked *) inVertex);
+							*(CVector *)  outVertex = *posIt + *ptCurrSize * *(CVector *) inVertex;
 							inVertex  += inVSize;
 							outVertex += outVSize;
 						}
@@ -1684,8 +1684,8 @@ CVertexBuffer &CPSConstraintMesh::makePrerotatedVb(const CVertexBuffer &inVb)
 				CHECK_VERTEX_BUFFER(prerotatedVb, outVertex);
 				CHECK_VERTEX_BUFFER(prerotatedVb, outVertex + pNormalOff);
 
-				* (CVectorPacked *) outVertex =  mat.mulVector(* (CVectorPacked *) inVertex);
-				* (CVectorPacked *) (outVertex + normalOff) =  mat.mulVector(* (CVectorPacked *) (inVertex + pNormalOff) );
+				* (CVector *) outVertex =  mat.mulVector(* (CVector *) inVertex);
+				* (CVector *) (outVertex + normalOff) =  mat.mulVector(* (CVector *) (inVertex + pNormalOff) );
 				outVertex += vpSize;
 				inVertex  += vSize;
 
@@ -1701,7 +1701,7 @@ CVertexBuffer &CPSConstraintMesh::makePrerotatedVb(const CVertexBuffer &inVb)
 				CHECK_VERTEX_BUFFER(prerotatedVb, outVertex);
 				CHECK_VERTEX_BUFFER(inVb, inVertex);
 
-				* (CVectorPacked *) outVertex =  mat.mulVector(* (CVectorPacked *) inVertex);
+				* (CVector *) outVertex =  mat.mulVector(* (CVector *) inVertex);
 				outVertex += vpSize;
 				inVertex += vSize;
 			}

@@ -220,7 +220,6 @@ public:
 	CScene *getScene(void);
 
 	/// shortcut to the same method of the owning particle system
-	void getLODVect(NLMISC::CVectorPacked &v, float &offset, TPSMatrixMode matrixMode);
 	void getLODVect(NLMISC::CVector &v, float &offset, TPSMatrixMode matrixMode);
 
 
@@ -412,7 +411,7 @@ public:
 	void computeForces();
 
 	// compute collisions
-	void computeCollisions(uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter);
+	void computeCollisions(uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
 
 	// get a conversion matrix between 2 matrix modes
 	static const NLMISC::CMatrix &getConversionMatrix(const CParticleSystem &ps, TPSMatrixMode to, TPSMatrixMode from);
@@ -509,12 +508,11 @@ public:
 	  */
 	void integrateSingle(float startDate, float deltaT, uint numStep,
 						 uint32 indexInLocated,
-						 NLMISC::CVectorPacked *destPos,
-						 uint posStride = sizeof(NLMISC::CVectorPacked)) const;
+						 NLMISC::CVector *destPos,
+						 uint posStride = sizeof(NLMISC::CVector)) const;
 
 	// compute position for a single element at the given date
 	// NB : only works with object that have parametric trajectories
-	inline void computeParametricPos(float date, uint indexInLocated, NLMISC::CVectorPacked &dest) const;
 	inline void computeParametricPos(float date, uint indexInLocated, NLMISC::CVector &dest) const;
 
 
@@ -615,7 +613,7 @@ public:
 	struct CParametricInfo
 	{
 		CParametricInfo() {}
-		CParametricInfo(const NLMISC::CVector &pos, const NLMISC::CVector &speed, float date)
+		CParametricInfo(NLMISC::CVector pos, NLMISC::CVector speed, float date)
 			: Pos(pos), Speed(speed), Date(date)
 		{
 		}
@@ -1054,12 +1052,6 @@ inline TAnimationTime	CPSLocated::getAgeInSeconds(uint elementIndex) const
 
 // *****************************************************************************************************
 inline void	CPSLocated::computeParametricPos(float date, uint indexInLocated, NLMISC::CVector &dest) const
-{
-	NLMISC::CVectorPacked temp;
-	integrateSingle(date, 1.f, 1, indexInLocated, &temp);
-	dest = temp;
-}
-inline void	CPSLocated::computeParametricPos(float date, uint indexInLocated, NLMISC::CVectorPacked &dest) const
 {
 	integrateSingle(date, 1.f, 1, indexInLocated, &dest);
 }

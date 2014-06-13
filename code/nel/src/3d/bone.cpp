@@ -189,7 +189,9 @@ void	CBone::compute(CBone *parent, const CMatrix &rootMatrix, CSkeletonModel *sk
 			// retrieve scale from our father.
 			parent->getScale(fatherScale);
 			// inverse this scale.
-			fatherScale = 1.0f / fatherScale;
+			fatherScale.x= 1.0f / fatherScale.x;
+			fatherScale.y= 1.0f / fatherScale.y;
+			fatherScale.z= 1.0f / fatherScale.z;
 
 			// Compute InverseScale compensation:
 			// with UnheritScale, formula per bone should be  T*Sf-1*P*R*S*P-1.
@@ -197,7 +199,9 @@ void	CBone::compute(CBone *parent, const CMatrix &rootMatrix, CSkeletonModel *sk
 			// So we must compute T*Sf-1*T-1, in order to get wanted result.
 			invScaleComp.setScale(fatherScale);
 			// Faster compute of the translation part: just "trans + fatherScale MUL -trans" where MUL is comp mul
-			trans -= mul(trans, fatherScale);
+			trans.x-= fatherScale.x * trans.x;
+			trans.y-= fatherScale.y * trans.y;
+			trans.z-= fatherScale.z * trans.z;
 			invScaleComp.setPos(trans);
 
 

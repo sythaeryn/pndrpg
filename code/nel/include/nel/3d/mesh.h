@@ -41,7 +41,6 @@ namespace NL3D
 
 
 using	NLMISC::CVector;
-using	NLMISC::CVectorPacked;
 using	NLMISC::CPlane;
 using	NLMISC::CMatrix;
 
@@ -843,8 +842,8 @@ private:
 
 	void	flagSkinVerticesForMatrixBlock(uint8 *skinFlags, CMatrixBlock &mb);
 	void	computeSkinMatrixes(CSkeletonModel *skeleton, CMatrix3x4 *matrixes, CMatrixBlock  *prevBlock, CMatrixBlock &curBlock);
-	void	computeSoftwarePointSkinning(CMatrix3x4 *matrixes, CVector *srcVector, CPaletteSkin *srcPal, float *srcWgt, CVectorPacked *dstVector);
-	void	computeSoftwareVectorSkinning(CMatrix3x4 *matrixes, CVector *srcVector, CPaletteSkin *srcPal, float *srcWgt, CVectorPacked *dstVector);
+	void	computeSoftwarePointSkinning(CMatrix3x4 *matrixes, CVector *srcVector, CPaletteSkin *srcPal, float *srcWgt, CVector *dstVector);
+	void	computeSoftwareVectorSkinning(CMatrix3x4 *matrixes, CVector *srcVector, CPaletteSkin *srcPal, float *srcWgt, CVector *dstVector);
 
 	// Shadow mapping and CMesh. NB: not serialized, but created at each load
 	CShadowSkin				_ShadowSkin;
