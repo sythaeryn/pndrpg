@@ -35,25 +35,11 @@ class IStream;
  * \author Lionel Berenguier
  * \author Nevrax France
  * \date 2000
- * \author Jan Boon
- * \date 2014
  */
-NL_ALIGN_SSE2(16)
 class CVector
 {
 public:		// Attributes.
-#ifdef USE_SSE2
-	union
-	{
-		struct
-		{
-			float x, y, z, P;
-		};
-		__m128 mm;
-	};
-#else
 	float	x,y,z;
-#endif
 
 public:		// const.
 	/// Null vector (0,0,0).
@@ -69,15 +55,11 @@ public:		// Methods.
 	/// @name Object.
 	//@{
 	/// Constructor which does nothing.
-	CVector() { /*if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error");*/ }
+	CVector() {}
 	/// Constructor .
-	CVector(float	_x, float _y, float _z) : x(_x), y(_y), z(_z) { /*if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error");*/ }
+	CVector(float	_x, float _y, float _z) : x(_x), y(_y), z(_z) {}
 	/// Copy Constructor.
-#if USE_SSE2
-	CVector(const CVector &v) : mm(v.mm) { /*if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error");*/ }
-#else
-	CVector(const CVector &v) : x(v.x), y(v.y), z(v.z) { /*if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error");*/ }
-#endif
+	CVector(const CVector &v) : x(v.x), y(v.y), z(v.z) {}
 	//@}
 
 	/// @name Base Maths.
@@ -152,137 +134,20 @@ public:		// Methods.
 
 	// friends.
 	friend	CVector	operator*(float f, const CVector &v0);
-	friend	CVector	operator/(float f, const CVector &v0);
-};
-
-class CVectorPacked
-{
-public: // Attributes.
-	float	x,y,z;
-
-public:
-	/// @name Object.
-	//@{
-	/// Constructor which does nothing.
-	CVectorPacked() { }
-	/// Constructor .
-	CVectorPacked(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
-	/// Copy Constructor.
-	CVectorPacked(const CVector &v) : x(v.x), y(v.y), z(v.z) {}
-	//@}
-
-	void set(float _x, float _y, float _z)
-	{
-		x = _x;
-		y = _y;
-		z = _z;
-	}
-
-	CVectorPacked &operator += (const CVector &v)
-	{
-		x += v.x;
-		y += v.y;
-		z += v.z;
-		return *this;
-	}
-
-	CVectorPacked &operator -= (const CVector &v)
-	{
-		x -= v.x;
-		y -= v.y;
-		z -= v.z;
-		return *this;
-	}
-
-	operator CVector () const
-	{
-		return CVector(x, y, z);
-	}
-
-	void serial(IStream &f)
-	{
-		f.serial(x,y,z);
-	}
-
-	CVector	operator+(const CVector &v) const
-	{
-		return CVector(*this) + v;
-	}
-
-	CVector	operator-(const CVector &v) const
-	{
-		return CVector(*this) - v;
-	}
-
-	bool	operator==(const CVectorPacked &v) const
-	{
-		return x==v.x && y==v.y && z==v.z;
-	}
-	bool	operator!=(const CVectorPacked &v) const
-	{
-		return !(*this==v);
-	}
-	bool	operator<(const CVectorPacked &v) const
-	{
-		if(x!=v.x)
-			return x<v.x;
-		if(y!=v.y)
-			return y<v.y;
-		return z<v.z;
-	}
-	
-	CVector	operator^(const CVector &v) const
-	{
-		CVector	ret;
-
-		ret.x= y*v.z - z*v.y;
-		ret.y= z*v.x - x*v.z;
-		ret.z= x*v.y - y*v.x;
-
-		return ret;
-	}
 };
 
 // blend (faster version than the generic version found in algo.h)
 inline CVector blend(const CVector &v0, const CVector &v1, float lambda)
 {
 	float invLambda = 1.f - lambda;
-#ifdef USE_SSE2
-	CVector res;
-	__m128 mLambda = _mm_set1_ps(lambda);
-	__m128 mInvLambda = _mm_set1_ps(invLambda);
-	__m128 mv0 = v0.mm;
-	__m128 mv1 = v1.mm;
-	mv0 = _mm_mul_ps(mv0, mInvLambda);
-	mv1 = _mm_mul_ps(mv1, mLambda);
-	res.mm = _mm_add_ps(mv0, mv1);
-	return res;
-#else
 	return CVector(invLambda * v0.x + lambda * v1.x,
 		           invLambda * v0.y + lambda * v1.y,
 				   invLambda * v0.z + lambda * v1.z);
-#endif
 }
 
 
-
 }
 
-
-namespace std {
-	inline void swap(NLMISC::CVectorPacked &v1, NLMISC::CVector &v2)
-	{
-		NLMISC::CVectorPacked temp = v2;
-		v2 = NLMISC::CVector(v1);
-		v1 = temp;
-	}
-	inline void swap(NLMISC::CVector &v1,  NLMISC::CVectorPacked &v2)
-	{
-		NLMISC::CVectorPacked temp = v1;
-		v1 = NLMISC::CVector(v2);
-		v2 = temp;
-	}
-}
 
 #include "vector_inline.h"
 

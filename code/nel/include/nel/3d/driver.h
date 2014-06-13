@@ -57,7 +57,6 @@ using NLMISC::CRefCount;
 using NLMISC::CSmartPtr;
 using NLMISC::CRGBA;
 using NLMISC::CVector;
-using NLMISC::CVectorPacked;
 using NLMISC::CMatrix;
 using NLMISC::CSynchronized;
 

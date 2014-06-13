@@ -28,7 +28,6 @@ namespace NLMISC
 {
 	class CMatrix;
 	class CVector;
-	class CVectorPacked;
 };
 
 namespace NL3D

@@ -59,11 +59,11 @@ public:
 		/// The ratio distance/max earing distance
 		float			DistFactor;
 		/// The sound virtual position (in fact Dist * Direction)
-		NLMISC::CVectorPacked	Position;
+		NLMISC::CVector	Position;
 		/// The blending factor between real sound pos and virtual pos (1 mean virtual pos, 0 mean real pos).
 		float			PosAlpha;
 		/// The direction vector for the virtual sound source.
-		NLMISC::CVectorPacked	Direction;
+		NLMISC::CVector	Direction;
 		/// The occlusion att.
 		sint32			Occlusion;
 		/// The occlusion LF factor (see EAX spec)
@@ -97,18 +97,18 @@ public:
 		/// A blending factor to compute virtual source position.
 		float			Alpha;
 		/// The direction vector from listener to the first portal/cluster
-		NLMISC::CVectorPacked	Direction1;
+		NLMISC::CVector	Direction1;
 		/// The direction vector from the first portal/cluster to the second one.
-		NLMISC::CVectorPacked	Direction2;
+		NLMISC::CVector	Direction2;
 		/// The current blended direction used to place vitual source.
-		NLMISC::CVectorPacked	Direction;
+		NLMISC::CVector	Direction;
 		/// The previously traversed cluster. Used to stop back traversal.
 		NL3D::CCluster	*PreviousCluster;
 		/// The previous sound propagation vector
-		NLMISC::CVectorPacked	PreviousVector;
+		NLMISC::CVector	PreviousVector;
 
 		/// The last pseudo listener position
-		NLMISC::CVectorPacked	ListenerPos;
+		NLMISC::CVector	ListenerPos;
 
 		/// Constructor. Init all default value.
 		CSoundTravContext(const NLMISC::CVector &listenerPos,

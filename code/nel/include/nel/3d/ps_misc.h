@@ -51,12 +51,12 @@ inline uint ScaleFloatGE(float f, float deltaT, float clampValue, uint numStep)
   * \param destPos		The destination, that will be filled with the given value
   * \param stride		Number of byte between each value to be copied
   */
-inline NLMISC::CVectorPacked *FillBufUsingSubdiv(const	NLMISC::CVector &value,
+inline NLMISC::CVector *FillBufUsingSubdiv(const	NLMISC::CVector &value,
 									  float					clampValue,
 									  float					&startValue,
 									  float					deltaT,
 									  uint					&maxNumStep,
-									  NLMISC::CVectorPacked	*destPos,
+									  NLMISC::CVector		*destPos,
 									  uint32				stride
 									  )
 {
@@ -68,7 +68,7 @@ inline NLMISC::CVectorPacked *FillBufUsingSubdiv(const	NLMISC::CVector &value,
 	while (numToFill--)
 	{
 		*destPos = value;
-		destPos = (NLMISC::CVectorPacked *) ( (uint8 *) destPos + stride);
+		destPos = (NLMISC::CVector *) ( (uint8 *) destPos + stride);
 	}
 
 	return destPos;

@@ -30,21 +30,15 @@ namespace NL3D
 
 
 using	NLMISC::CVector;
-using	NLMISC::CVectorPacked;
 using	NLMISC::CUV;
 
 /// A simple Vertex Pos/Normal/Uv
 class	CRawSkinVertex
 {
 public:
-#if USE_SSE2
-	CVectorPacked	Pos;
-	CVectorPacked	Normal;
-#else
-	CVector			Pos;
-	CVector			Normal;
-#endif
-	CUV				UV;
+	CVector		Pos;
+	CVector		Normal;
+	CUV			UV;
 };
 
 /// Vertices influenced by 1 matrix only.

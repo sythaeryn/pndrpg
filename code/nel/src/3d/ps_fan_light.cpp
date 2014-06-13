@@ -23,7 +23,6 @@
 #include "nel/3d/particle_system.h"
 #include "nel/3d/driver.h"
 
-using NLMISC::CVectorPacked;
 
 
 namespace NL3D
@@ -155,7 +154,7 @@ public:
 				{
 
 					CHECK_VERTEX_BUFFER(*vb, ptVect);
-					*(CVectorPacked *) ptVect = *posIt;
+					*(CVector *) ptVect = *posIt;
 					// the start angle
 					currentAngle = *currentAnglePt;
 					const uint8 phaseAdd = (uint8) (f._PhaseSpeed * (*timeIt));
@@ -164,7 +163,7 @@ public:
 					const float moveIntensity = f._MoveIntensity * fanSize;
 					// compute radius & vect for first fan
 					firstSize  = fanSize + (moveIntensity * CPSUtil::getCos(randomPhaseTab[0] + phaseAdd));
-					*(CVectorPacked *) ptVect = (*posIt) + I * firstSize * (CPSUtil::getCos((sint32) currentAngle))
+					*(CVector *) ptVect = (*posIt) + I * firstSize * (CPSUtil::getCos((sint32) currentAngle))
 										  + K * firstSize * (CPSUtil::getSin((sint32) currentAngle));
 					currentAngle += angleStep;
 					ptVect += stride;
@@ -174,7 +173,7 @@ public:
 					for (k = 1; k <= upperBound; ++k)
 					{
 						fSize  = fanSize + (moveIntensity * CPSUtil::getCos(randomPhaseTab[k] + phaseAdd));
-						*(CVectorPacked *) ptVect = (*posIt) + I * fSize * (CPSUtil::getCos((sint32) currentAngle))
+						*(CVector *) ptVect = (*posIt) + I * fSize * (CPSUtil::getCos((sint32) currentAngle))
 											  + K * fSize * (CPSUtil::getSin((sint32) currentAngle));
 						currentAngle += angleStep;
 						ptVect += stride;
@@ -184,14 +183,14 @@ public:
 					sizeStep = sizeStepBase * (firstSize - fSize);
 					for (; k <= (sint32) (f._NbFans - 1); ++k)
 					{
-						*(CVectorPacked *) ptVect = (*posIt) + I * fSize * (CPSUtil::getCos((sint32) currentAngle))
+						*(CVector *) ptVect = (*posIt) + I * fSize * (CPSUtil::getCos((sint32) currentAngle))
 											  + K * fSize * (CPSUtil::getSin((sint32) currentAngle));
 						currentAngle += angleStep;
 						ptVect += stride;
 						fSize  += sizeStep;
 					}
 					// last fan
-					*(CVectorPacked *) ptVect = (*posIt) + I * firstSize * (CPSUtil::getCos((sint32) *currentAnglePt))
+					*(CVector *) ptVect = (*posIt) + I * firstSize * (CPSUtil::getCos((sint32) *currentAnglePt))
 											  + K * firstSize * (CPSUtil::getSin((sint32) *currentAnglePt));
 					ptVect += stride;
 					currentSizePt += currentSizePtIncrement;
