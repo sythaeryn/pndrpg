@@ -20,7 +20,11 @@
 #include "vector.h"
 #include "vector_h.h"
 #include "quat.h"
+#include "vectorf.h"
 
+#ifdef NL_HAS_SSE2
+#	include "matrixf.h"
+#endif
 
 namespace	NLMISC
 {
@@ -53,6 +57,7 @@ class	CPlane;
  * \author Nevrax France
  * \date 2000
  */
+NL_ALIGN_SSE2
 class CMatrix
 {
 public:
@@ -329,12 +334,11 @@ public:
 	CVector		mulVector(const CVector &v) const;
 	/// Multiply a point. ie v.w=1 so the Translation component do affect result. Projection doesn't affect result.
 	CVector		mulPoint(const CVector &v) const;
+	CVector3F	mulPoint(const CVector3F &v) const;
 	/** Multiply a point. \sa mulPoint
 	  */
-	CVector		operator*(const CVector &v) const
-	{
-		return mulPoint(v);
-	}
+	NL_FORCE_INLINE CVector operator*(const CVector &v) const { return mulPoint(v); }
+	NL_FORCE_INLINE CVector3F operator*(const CVector3F &v) const { return mulPoint(v); }
 
 	/// Multiply with an homogeneous vector
 	CVectorH	operator*(const CVectorH& v) const;
@@ -357,9 +361,24 @@ public:
 	/// Plane (line vector) multiplication.
 	friend CPlane		operator*(const CPlane &p, const CMatrix &m);
 
+#ifdef NL_HAS_SSE2
+	inline CMatrix44F &getMatrix44F() { testExpandRot(); testExpandProj(); return MF; }
+	inline const CMatrix44F &getMatrix44F() const  { testExpandRot(); testExpandProj(); return MF; }
+#else
+	inline CMatrix44F &getMatrix44F() { return reinterpret_cast<CMatrix44F &>(*this); }
+	inline const CMatrix44F &getMatrix44F() const  { return reinterpret_cast<const CMatrix44F &>(*this); }
+#endif
 
 private:
+#ifdef NL_HAS_SSE2
+	union
+	{
+		float M[16];
+		CMatrix44F MF;
+	};
+#else
 	float	M[16];
+#endif
 	float	Scale33;
 	uint32	StateBit;	// BitVector. 0<=>identity.
 
