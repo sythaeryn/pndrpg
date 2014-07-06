@@ -1,18 +1,16 @@
 <?php
-
 /**
- * function plugins to get
- * plugins from the Database using pagination object
+ * function plugins_update to get
+ * plugins updates from the Database using pagination object
  * 
  * @author shubham meena mentored by Matthew Lagoe 
  */
 
-function plugins()
+function plugins_update()
  {
     if ( Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) ) {
-        
-        $pagination = new Pagination( "SELECT * FROM plugins", "lib", 5, "Plugincache" );
-         $pageResult['plug'] = Gui_Elements :: make_table( $pagination -> getElements(), Array( "getId", "getPluginName", "getPluginType", "getPluginPermission", "getPluginStatus", "getPluginInfo" ), Array( "id", "plugin_name", "plugin_type", "plugin_permission", "plugin_status", "plugin_info" ) );
+        $pagination = new Pagination( "SELECT * FROM plugins INNER JOIN updates ON plugins.Id=updates.PluginId", "lib", 5, "Plugincache" );
+         $pageResult['plug'] = Gui_Elements :: make_table( $pagination -> getElements(), Array( "getId", "getPluginName", "getPluginInfo", "getUpdateInfo" ), Array( "id", "plugin_name", "plugin_info", "update_info" ) );
          $pageResult['links'] = $pagination -> getLinks( 5 );
          $pageResult['lastPage'] = $pagination -> getLast();
          $pageResult['currentPage'] = $pagination -> getCurrent();
@@ -35,5 +33,4 @@ function plugins()
          header( "Location: index.php?page=error" );
          exit;
          } 
-    
     }
