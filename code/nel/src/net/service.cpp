@@ -562,7 +562,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 	bool userInitCalled = false;
 	CConfigFile::CVar *var = NULL;
 
-	IThread *timeoutThread = NULL;
+	CThread *timeoutThread = NULL;
 
 	// a short name service can't be a number
 	uint tmp;
@@ -1268,7 +1268,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Activate the timeout assertion thread
 		//
 
-		timeoutThread = IThread::create(&MyTAT, 1024*4);
+		timeoutThread = new CThread(&MyTAT);
 		timeoutThread->start();
 
 		//

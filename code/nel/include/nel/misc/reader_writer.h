@@ -33,10 +33,10 @@ class CReaderWriter
 {
 private:
 
-	volatile CMutex	_Fairness;
-	volatile CMutex	_ReadersMutex;
-	volatile CMutex	_RWMutex;
-	volatile sint	_ReadersLevel;
+	volatile CMutex			_Fairness;
+	volatile CMutex			_ReadersMutex;
+	volatile CMutex			_RWMutex;
+	volatile sint			_ReadersLevel;
 
 public:
 

@@ -105,6 +105,8 @@
 #include <windows.h>
 extern HINSTANCE HInstance;
 extern HWND SlashScreen;
+#else
+void destroySplashScreen();
 #endif // NL_OS_WINDOWS
 
 #include "app_bundle_utils.h"
@@ -378,41 +380,10 @@ void outOfMemory()
 	nlstopex (("OUT OF MEMORY"));
 }
 
-// For multi cpu, active only one CPU for the main thread
-uint64		Debug_OldCPUMask= 0;
-uint64		Debug_NewCPUMask= 0;
-void setCPUMask ()
-{
-	uint64 cpuMask = IProcess::getCurrentProcess ()->getCPUMask();
-	Debug_OldCPUMask= cpuMask;
-
-	// get the processor to allow process
-	uint i = 0;
-	while ((i<64) && ((cpuMask&(SINT64_CONSTANT(1)<<i)) == 0))
-		i++;
-
-	// Set the CPU mask
-	if (i<64)
-	{
-		IProcess::getCurrentProcess ()->setCPUMask(1<<i);
-		//IThread::getCurrentThread ()->setCPUMask (1<<i);
-	}
-
-	// check
-	cpuMask = IProcess::getCurrentProcess ()->getCPUMask();
-	Debug_NewCPUMask= cpuMask;
-}
-
-void	displayCPUInfo()
-{
-	nlinfo("CPUInfo: CPUMask before change: %x, after change: %x, CPUID: %x, hasHyperThreading: %s", (uint32)Debug_OldCPUMask, (uint32)Debug_NewCPUMask, CSystemInfo::getCPUID(), (CSystemInfo::hasHyperThreading()?"YES":"NO"));
-}
-
 string getVersionString (uint64 version)
 {
 	return toString ("%u.%u.%u.%u", (unsigned int) (version >> 48), (unsigned int) ((version >> 32) & 0xffff), (unsigned int) ((version >> 16) & 0xffff), (unsigned int) (version & 0xffff));
 }
-
 
 string getSystemInformation()
 {
@@ -421,10 +392,6 @@ string getSystemInformation()
 	s += "Process Virtual Memory: " + bytesToHumanReadable(CSystemInfo::virtualMemory()) + "\n";
 	s += "OS: " + CSystemInfo::getOS() + "\n";
 	s += "Processor: " + CSystemInfo::getProc() + "\n";
-	s += toString("CPUID: %x\n", CSystemInfo::getCPUID());
-	s += toString("HT: %s\n", CSystemInfo::hasHyperThreading()?"YES":"NO");
-	s += toString("CpuMask: %x\n", IProcess::getCurrentProcess ()->getCPUMask());
-
 
 	if(Driver)
 		s += "NeL3D: " + string(Driver->getVideocardInformation()) + "\n";
@@ -748,12 +715,10 @@ void prelogInit()
 #ifdef NL_OS_WINDOWS
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
-		
+
 		CTime::CTimerInfo timerInfo;
 		NLMISC::CTime::probeTimerInfo(timerInfo);
-		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
-			setCPUMask();
-		
+
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
@@ -793,9 +758,6 @@ void prelogInit()
 		AssertLog->addDisplayer (ClientLogDisplayer);
 
 		setCrashCallback(crashCallback);
-
-		// Display Some Info On CPU
-		displayCPUInfo();
 
 		// Display the client version.
 #if FINAL_VERSION
@@ -943,7 +905,7 @@ void prelogInit()
 			Driver->setSwapVBLInterval(1);
 		else
 			Driver->setSwapVBLInterval(0);
-		
+
 		if (StereoDisplay) // VR_CONFIG // VR_DRIVER
 		{
 			// override mode TODO
@@ -975,12 +937,18 @@ void prelogInit()
 
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetupHighColor, "login_step_video_mode_setup_high_color"));
 
-#ifdef NL_OS_WINDOWS
-
+#if 0
 		CBGDownloaderAccess::getInstance().init();
+#endif
+
+#ifdef NL_OS_WINDOWS
 
 		if (SlashScreen)
 			DestroyWindow (SlashScreen);
+
+#else
+
+		destroySplashScreen();
 
 #endif // NL_OS_WINDOW
 
@@ -1003,7 +971,7 @@ void prelogInit()
 			filenames.push_back(CPath::lookup("ryzom.png"));
 
 		vector<CBitmap> bitmaps;
-		
+
 		for(size_t i = 0; i < filenames.size(); ++i)
 		{
 			CIFile file;
@@ -1069,34 +1037,6 @@ void prelogInit()
 
 		FPU_CHECKER_ONCE
 
-		// Test mouse & keyboard low-level mode, if DisableDirectInput not set.
-		// In case of failure, exit the client.
-		// In case of success, set it back to normal mode, to provide for the user
-		// the ability to manually set the firewall's permissions when the client connects.
-		// The low-level mode will actually be set when "launching" (after loading).
-		if (!ClientCfg.DisableDirectInput)
-		{
-			// Test mouse and set back to normal mode
-			if (!Driver->enableLowLevelMouse (true, ClientCfg.HardwareCursor))
-			{
-				ExitClientError (CI18N::get ("can_t_initialise_the_mouse").toUtf8 ().c_str ());
-				// ExitClientError() call exit() so the code after is never called
-				return;
-			}
-			Driver->enableLowLevelMouse (false, ClientCfg.HardwareCursor);
-
-			// Test keyboard and set back to normal mode
-			// NB : keyboard will be initialized later now
-			/*if (!Driver->enableLowLevelKeyboard (true))
-			{
-				ExitClientError (CI18N::get ("can_t_initialise_the_keyboard").toUtf8 ().c_str ());
-				// ExitClientError() call exit() so the code after is never called
-				return;
-			}
-			Driver->enableLowLevelKeyboard (false);
-			*/
-		}
-
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
 		for ( uint i=0; i<3; i++)
@@ -1141,7 +1081,7 @@ void prelogInit()
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
 
-		
+
 		CInterfaceManager::getInstance();
 
 		// Yoyo: initialize NOW the InputHandler for Event filtering.
@@ -1190,7 +1130,7 @@ void prelogInit()
 
 		// init bloom effect
 		CBloomEffect::getInstance().init(driver != UDriver::Direct3d);
-		
+
 		if (StereoDisplay) // VR_CONFIG
 		{
 			// Init stereo display resources
