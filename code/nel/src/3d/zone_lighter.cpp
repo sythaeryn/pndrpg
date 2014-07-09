@@ -33,6 +33,7 @@
 #include "nel/misc/file.h"
 #include "nel/misc/aabbox.h"
 #include "nel/misc/algo.h"
+#include "nel/misc/system_info.h"
 
 
 #ifdef NL_OS_WINDOWS
@@ -317,38 +318,6 @@ void NEL3DCalcBase (CVector &direction, CMatrix& matrix)
 
 // ***************************************************************************
 
-void setCPUMask (IThread *thread, uint process)
-{
-	// Set the processor mask
-	uint64 mask = IProcess::getCurrentProcess()->getCPUMask ();
-
-	// Mask must not be NULL
-	nlassert (mask != 0);
-
-	if (mask != 0)
-	{
-		uint i=0;
-		uint count = 0;
-		for(;;)
-		{
-			if (mask & (UINT64_CONSTANT(1)<<i))
-			{
-				if (count == process)
-					break;
-				count++;
-			}
-			i++;
-			if (i==64)
-				i = 0;
-		}
-
-		// Set the CPU mask
-		thread->setCPUMask (1<<i);
-	}
-}
-
-// ***************************************************************************
-
 class NL3D::CLightRunnable : public IRunnable
 {
 	// Members
@@ -357,7 +326,7 @@ class NL3D::CLightRunnable : public IRunnable
 	const CZoneLighter::CLightDesc	*_Description;
 
 public:
-	IThread			*Thread;
+	CThread			*Thread;
 
 public:
 	// Ctor
@@ -371,9 +340,6 @@ public:
 	// Run method
 	void run()
 	{
-		// Set the CPU mask
-		setCPUMask (Thread, _Process);
-
 		_ZoneLighter->processCalc (_Process, *_Description);
 		_ZoneLighter->_ProcessExitedMutex.enter();
 		_ZoneLighter->_ProcessExited++;
@@ -399,7 +365,7 @@ class NL3D::CRenderZBuffer : public IRunnable
 	const vector<CZoneLighter::CTriangle>		*_Triangles;
 
 public:
-	IThread			*Thread;
+	CThread			*Thread;
 
 public:
 	// Ctor
@@ -616,9 +582,6 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 
 void NL3D::CRenderZBuffer::run()
 {
-	// Set the CPU mask
-	setCPUMask (Thread, _Process);
-
 	// Span array
 	CPolygon2D::TRasterVect borders;
 
@@ -917,11 +880,6 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	 * -
 	 */
 
-	// Backup thread mask
-	IThread *currentThread = IThread::getCurrentThread ();
-	uint64 threadMask = currentThread->getCPUMask();
-	currentThread->setCPUMask (1);
-
 	// Calc the ray basis
 	_SunDirection=description.SunDirection;
 	NEL3DCalcBase (_SunDirection, _RayBasis);
@@ -936,16 +894,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	_ProcessCount=description.NumCPU;
 	if (_ProcessCount==0)
 	{
-		// Create a doomy thread
-		IProcess *pProcess=IProcess::getCurrentProcess ();
-		_CPUMask = pProcess->getCPUMask();
-		_ProcessCount = 0;
-		uint64 i;
-		for (i=0; i<64; i++)
-		{
-			if (_CPUMask&((uint64)1<<i))
-				_ProcessCount++;
-		}
+		_ProcessCount = CSystemInfo::getCPUCount();
 	}
 	if (_ProcessCount>MAX_CPU_PROCESS)
 		_ProcessCount=MAX_CPU_PROCESS;
@@ -1029,7 +978,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 
 			// Create a thread
 			CRenderZBuffer *runnable = new CRenderZBuffer (process, this, &description, firstTriangle, lastTriangle - firstTriangle, &obstacles);
-			IThread *pThread=IThread::create (runnable);
+			CThread *pThread=new CThread (runnable);
 			runnable->Thread = pThread;
 
 			// New first patch
@@ -1185,7 +1134,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 
 		// Create a thread
 		CLightRunnable *runnable = new CLightRunnable (process, this, &description);
-		IThread *pThread=IThread::create (runnable);
+		CThread *pThread=new CThread (runnable);
 		runnable->Thread = pThread;
 
 		// New first patch
@@ -1203,9 +1152,6 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 		// Call the progress callback
 		progress ("Lighting patches", (float)_NumberOfPatchComputed/(float)_PatchInfo.size());
 	}
-
-	// Reset old thread mask
-	currentThread->setCPUMask (threadMask);
 
 	// overflow ?
 	if (_ZBufferOverflow)
@@ -2863,7 +2809,7 @@ void CZoneLighter::lightShapes(uint zoneID, const CLightDesc& description)
 	{
 		uint lastShapeIndex = currShapeIndex + numShapePerThread;
 		lastShapeIndex = std::min((uint)_LightableShapes.size(), lastShapeIndex);
-		IThread *pThread = IThread::create (new CCalcLightableShapeRunnable(process, this, &description, &_LightableShapes, currShapeIndex, lastShapeIndex));
+		CThread *pThread = new CThread (new CCalcLightableShapeRunnable(process, this, &description, &_LightableShapes, currShapeIndex, lastShapeIndex));
 		pThread->start();
 		currShapeIndex = lastShapeIndex;
 	}
