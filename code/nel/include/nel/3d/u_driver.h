@@ -209,16 +209,17 @@ public:
 	 */
 	virtual void			endDialogMode() =0;
 
+	/// to enable special effects for 3D render
+	virtual void			beginSceneRender() =0;
+	virtual void			endSceneRender() =0;
+
 	/// Release the window. All components are released (Texture, materials, scene, textcontexts).
 	virtual	void			release() =0;
 
 	/// Before rendering via a driver in a thread, must activate() (per thread).
 	virtual bool			activate(void)=0;
-	/// Return true if driver is still active. Return false else. If he user close the window, must return false.
-	virtual bool			isActive()=0;
-
 	/// Return an OS dependent window handle. Under Win32, it is a HWND.
-	virtual nlWindow		getDisplay () = 0;
+	virtual NLMISC::CWindow*	getDisplay () = 0;
 	// @}
 
 
@@ -488,16 +489,6 @@ public:
 	/// Get the number of texture stage available, for multitexturing (Normal material shaders). Valid only after setDisplay().
 	virtual	uint			getNbTextureStages() = 0;
 
-	/// Get the width and the height of the window
-	virtual void			getWindowSize (uint32 &width, uint32 &height) = 0;
-	/// Get the width of the window
-	virtual uint			getWindowWidth () =0;
-	/// Get the height of the window
-	virtual uint			getWindowHeight () =0;
-
-	/// Get the x and y coord of the windows always (0,0) in fullscreen
-	virtual void			getWindowPos (sint32 &x, sint32 &y) = 0;
-
 	/** Return the amount of AGP memory allocated by initVertexArrayRange() to store vertices.
 	*/
 	virtual uint32			getAvailableVertexAGPMemory () =0;
@@ -543,81 +534,6 @@ public:
 
 	// @}
 
-
-	/// \name Mouse / Keyboard / Gamedevices
-	// @{
-		/** Enable / disable  low level mouse. This allow to take advantage of some options (speed of the mouse, automatic wrapping)
-		  * It returns a interface to these parameters when it is supported, or NULL otherwise
-		  * The interface pointer is valid as long as the low level mouse is enabled.
-		  * A call to disable the mouse returns NULL, and restore the default mouse behaviour
-		  * NB : - In this mode the mouse cursor isn't drawn.
-		  *      - Calls to showCursor have no effects
-		  *      - Calls to setCapture have no effects
-		  */
-		virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool hardware) = 0;
-
-		/** Enable / disable  a low level keyboard.
-		  * This returns a interface to some parameters when it is supported, or NULL otherwise.
-		  * The interface pointer is valid as long as the low level keyboard is enabled.
-		  * A call to disable the keyboard returns NULL, and restore the default keyboard behaviour.
-		  */
-		virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable) = 0;
-
-		/** Check whether there is a low level device manager available, and get its interface. Return NULL if not available.
-		  * From this interface you can deal with mouse and keyboard as above, but you can also manage game devices (joysticks, joypads ...)
-		  */
-		virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager() = 0;
-
-		/**
-		 * wrapper for IEventEmitter::emulateMouseRawMode()
-		 */
-		virtual void emulateMouseRawMode(bool enable) = 0;
-
-		// get delay used for mouse double click
-		virtual uint	getDoubleClickDelay(bool hardwareMouse) = 0;
-
-		/** show cursor if b is true, or hide it if b is false
-		  * NB: This has no effects if a low level mouse is used.
-		  */
-		virtual void			showCursor (bool b) = 0;
-
-		/// x and y must be between 0.0 and 1.0
-		virtual void			setMousePos (float x, float y) = 0;
-
-		/** If true, capture the mouse to force it to stay under the window.
-		  * NB : If a low level mouse is used, it does nothing
-		  */
-		virtual void			setCapture (bool b) = 0;
-
-		// see if system cursor is currently captured
-		virtual bool			isSystemCursorCaptured() = 0;
-
-		// Add a new cursor (name is case unsensitive)
-		virtual void			addCursor(const std::string &name, const NLMISC::CBitmap &bitmap) = 0;
-
-		// Display a cursor from its name (case unsensitive)
-		virtual void			setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild = false) = 0;
-
-		// Change default scale for all cursors
-		virtual void			setCursorScale(float scale) = 0;
-
-	// @}
-
-	/// \name Misc.
-	// @{
-
-	/** Output a system message box and print a message with an icon. This method can be call even if the driver is not initialized.
-	  * This method is used to return internal driver problem when string can't be displayed in the driver window.
-	  * If the driver can't open a messageBox, it should not override this method and let the IDriver class manage it with the ASCII console.
-	  *
-	  * \param message This is the message to display in the message box.
-	  * \param title This is the title of the message box.
-	  * \param type This is the type of the message box, ie number of button and label of buttons.
-	  * \param icon This is the icon of the message box should use like warning, error etc...
-	  */
-	virtual TMessageBoxId	systemMessageBox (const char* message, const char* title, TMessageBoxType type=okType, TMessageBoxIcon icon=noIcon) =0;
-
-
 	/** Set the global polygon mode. Can be filled, line or point. The implementation driver must
 	  * call IDriver::setPolygonMode and active this mode.
 	  *
@@ -662,12 +578,6 @@ public:
 	 *	NB: this is done only on TextureFile
 	 */
 	virtual void			forceTextureResize(uint divisor)=0;
-
-	/** Setup monitor color properties.
-	  *
-	  * Return false if setup failed.
-	  */
-	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties) = 0;
 
 	// @}
 
@@ -820,15 +730,6 @@ public:
 	// @}
 
 	virtual uint64	getSwapBufferCounter() = 0;
-
-	/// \name Clipboard management
-	// @{
-		// Copy a string to system clipboard.
-		virtual bool copyTextToClipboard(const ucstring &text) =0;
-
-		// Paste a string from system clipboard.
-		virtual bool pasteTextFromClipboard(ucstring &text) =0;
-	// @}
 
 public:
 
