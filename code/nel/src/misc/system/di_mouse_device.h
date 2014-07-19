@@ -23,7 +23,7 @@
 
 
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
+#include "di_event_emitter.h"
 #include "nel/misc/input_device_server.h"
 #include "nel/misc/mouse_device.h"
 #include <dinput.h>

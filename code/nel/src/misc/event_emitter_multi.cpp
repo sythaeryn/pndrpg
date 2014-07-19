@@ -103,17 +103,4 @@ const IEventEmitter *CEventEmitterMulti::getEmitter(uint index) const
 	return _Emitters[index].first;
 }
 
-bool CEventEmitterMulti::copyTextToClipboard(const ucstring &text)
-{
-	// Naush: wrapped to old API to avoid duplicate code
-	return CSystemUtils::copyTextToClipboard(text);
-}
-
-bool CEventEmitterMulti::pasteTextFromClipboard(ucstring &text)
-{
-	// Naush: wrapped to old API to avoid duplicate code
-	return CSystemUtils::pasteTextFromClipboard(text);
-}
-
-
 } // NLMISC

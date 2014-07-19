@@ -16,12 +16,12 @@
 
 
 
-#include "stdmisc.h"
+#include "../stdmisc.h"
 #include "di_keyboard_device.h"
 
 #ifdef NL_OS_WINDOWS
 
-#include "nel/misc/win_event_emitter.h"
+#include "win_event_emitter.h"
 #include <dinput.h>
 #include <Winuser.h>
 
@@ -113,8 +113,8 @@ static const CKeyConv DIToNel[] =
 	{DIK_CONVERT, KeyCONVERT, "CONVERT", false},
 	{DIK_NOCONVERT, KeyNONCONVERT, "NOCONVERT", true},
 	//
-	{DIK_KANA, KeyKANA, "KANA", false},
-	{DIK_KANJI, KeyKANJI, "KANJI", false},
+	{DIK_KANA, KeyKANA, false},
+	{DIK_KANJI, KeyKANJI, false},
 };
 
 
@@ -164,7 +164,7 @@ CDIKeyboard::CDIKeyboard(CWinEventEmitter *we, HWND hwnd)
 		_RepeatPeriod = (uint) (1000.f / (keybSpeed * (27.5f / 31.f) + 2.5f));
 	}
 	// get keyboard layout
-	_KBLayout = ::GetKeyboardLayout(0);
+	_KBLayout = ::GetKeyboardLayout(NULL);
 
 	_RepetitionDisabled.resize(NumKeys);
 	_RepetitionDisabled.clearAll();
