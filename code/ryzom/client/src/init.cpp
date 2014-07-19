@@ -33,7 +33,6 @@
 #include "nel/misc/class_registry.h"
 #include "nel/misc/system_info.h"
 #include "nel/misc/block_memory.h"
-#include "nel/misc/system_utils.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/u_driver.h"
@@ -285,11 +284,12 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 				break;
 				case IDC_RYZOM_ERROR_HELP:
 				{
-					if (Driver)
-					{
-						HWND wnd = Driver->getDisplay();
-						ShowWindow(wnd, SW_MINIMIZE);
-					}
+					CSystem::instance()->getDisplay()->getWindow()->show();
+//					if (Driver)
+//					{
+//						HWND wnd = Driver->getDisplay();
+//						ShowWindow(wnd, SW_MINIMIZE);
+//					}
 					browseFAQ(ClientCfg.ConfigFile);
 					EndDialog(hwndDlg, IDOK);
 				}
@@ -458,13 +458,13 @@ static string crashCallback()
 	#ifdef NL_OS_WINDOWS
 		if (Driver)
 		{
-			NL3D::UDriver::CMode mode;
-			Driver->getCurrentScreenMode(mode);
-			if (!mode.Windowed)
-			{
-				HWND wnd = Driver->getDisplay();
-				ShowWindow(wnd, SW_MINIMIZE);
-			}
+//			NL3D::UDriver::CMode mode;
+//			Driver->getCurrentScreenMode(mode);
+//			if (!mode.Windowed)
+//			{
+//				HWND wnd = Driver->getDisplay();
+//				ShowWindow(wnd, SW_MINIMIZE);
+//			}
 		}
 	#endif
 
@@ -543,8 +543,8 @@ void checkDriverDepth ()
 	if (ClientCfg.Windowed)
 	{
 		nlassert (Driver);
-		UDriver::CMode mode;
-		Driver->getCurrentScreenMode(mode);
+		SDisplayMode mode;
+		CSystem::instance()->getDisplay()->getCurrentMode(mode);
 #ifdef NL_OS_WINDOWS
 		if (mode.Depth != 32)
 #else
@@ -725,6 +725,8 @@ static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
 //---------------------------------------------------
 void prelogInit()
 {
+	CWindow *window = CSystem::instance()->getDisplay()->createWindow();
+
 	try
 	{
 		// Assert if no more memory
@@ -736,10 +738,10 @@ void prelogInit()
 		set_new_handler(outOfMemory);
 
 		// save screen saver state and disable it
-		LastScreenSaverEnabled = CSystemUtils::isScreensaverEnabled();
+//		LastScreenSaverEnabled = CSystemUtils::isScreensaverEnabled();
 
-		if (LastScreenSaverEnabled)
-			CSystemUtils::enableScreensaver(false);
+//		if (LastScreenSaverEnabled)
+//			CSystemUtils::enableScreensaver(false);
 
 		// Random init
 		srand ((uint)CTime::getLocalTime());
@@ -791,7 +793,7 @@ void prelogInit()
 		WarningLog->addDisplayer (ClientLogDisplayer);
 		ErrorLog->addDisplayer (ClientLogDisplayer);
 		AssertLog->addDisplayer (ClientLogDisplayer);
-
+*/
 		setCrashCallback(crashCallback);
 
 		// Display Some Info On CPU
@@ -969,9 +971,7 @@ void prelogInit()
 			return;
 		}
 
-		// initialize system utils class
-		CSystemUtils::init();
-		CSystemUtils::setWindow(Driver->getDisplay());
+		window = CSystem::instance()->getDisplay()->getWindow();
 
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetupHighColor, "login_step_video_mode_setup_high_color"));
 
@@ -985,7 +985,7 @@ void prelogInit()
 #endif // NL_OS_WINDOW
 
 		// Set the title
-		Driver->setWindowTitle(CI18N::get("TheSagaOfRyzom"));
+		window->setTitle(CI18N::get("TheSagaOfRyzom"));
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 		// add all existing icons
@@ -1030,18 +1030,20 @@ void prelogInit()
 		else
 		{
 			// position is not saved in config so center the window
-			if (Driver->getCurrentScreenMode(mode))
+			if (1 /* Driver->getCurrentScreenMode(mode) */)
 			{
-				posX = (mode.Width - Driver->getWindowWidth())/2;
-				posY = (mode.Height - Driver->getWindowHeight())/2;
+				uint width, height;
+				window->getSize(width, height);
+				posX = (mode.Width - width)/2;
+				posY = (mode.Height - height)/2;
 			}
 		}
 
 		// Set the window position
-		Driver->setWindowPos(posX, posY);
+		window->setPosition(posX, posY);
 
 		// Show the window
-		Driver->showWindow();
+		window->show();
 
 		// for background downloader : store this window handle in shared memory for later access
 		// (we use SendMessage to communicate with the background downloader)
@@ -1077,13 +1079,14 @@ void prelogInit()
 		if (!ClientCfg.DisableDirectInput)
 		{
 			// Test mouse and set back to normal mode
-			if (!Driver->enableLowLevelMouse (true, ClientCfg.HardwareCursor))
+			if (!window->enableLowLevelMouse(true, ClientCfg.HardwareCursor))
 			{
 				ExitClientError (CI18N::get ("can_t_initialise_the_mouse").toUtf8 ().c_str ());
 				// ExitClientError() call exit() so the code after is never called
 				return;
 			}
-			Driver->enableLowLevelMouse (false, ClientCfg.HardwareCursor);
+
+			window->enableLowLevelMouse(false, ClientCfg.HardwareCursor);
 
 			// Test keyboard and set back to normal mode
 			// NB : keyboard will be initialized later now
@@ -1105,10 +1108,10 @@ void prelogInit()
 			monitorColor.Luminosity[i] = ClientCfg.Luminosity;
 			monitorColor.Gamma[i] = ClientCfg.Gamma;
 		}
-		if (!Driver->setMonitorColorProperties (monitorColor))
-		{
-			nlwarning("init : setMonitorColorProperties fails");
-		}
+//		if (!Driver->setMonitorColorProperties (monitorColor))
+//		{
+//			nlwarning("init : setMonitorColorProperties fails");
+//		}
 
 		// The client require at least 2 textures.
 		if(Driver->getNbTextureStages() < 2)

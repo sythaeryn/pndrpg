@@ -445,8 +445,10 @@ void CUserControls::getMouseAngleMove(float &dx, float &dy)
 			MouseDevice->convertStdMouseMoveInMickeys(dmpx, dmpy);
 		else
 		{
-			dmpx *= (float)Driver->getWindowWidth();
-			dmpy *= (float)Driver->getWindowHeight();
+			uint width, height;
+			CSystem::instance()->getDisplay()->getWindow()->getSize(width, height);
+			dmpx *= (float)width;
+			dmpy *= (float)height;
 		}
 
 		// handle inverted mouse, if enabled

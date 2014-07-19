@@ -22,6 +22,9 @@
 #include "nel/misc/ucstring.h"
 #include "nel/misc/matrix.h"
 
+namespace NLMISC {
+	class CWindow;
+}
 
 namespace NL3D {
 
@@ -111,9 +114,9 @@ public:
 		NLMISC::CVector getHotSpotVector(THotSpot hotspot);
 
 		/// convert size in pixels to size in 0-1 relative coordinates, according to Driver current size
-		void		convertTo01Size(UDriver *drv);
+		void		convertTo01Size(NLMISC::CWindow *window);
 		/// convert back to pixels size, according to Driver current size
-		void		convertToPixelSize(UDriver *drv);
+		void		convertToPixelSize(NLMISC::CWindow *windowv);
 	};
 
 

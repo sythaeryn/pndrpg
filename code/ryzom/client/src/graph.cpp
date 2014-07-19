@@ -68,8 +68,8 @@ void CGraph::renderGraph ()
 		return;
 
 	// Display the background
-	uint32 w, h;
-	_Driver->getWindowSize (w, h);
+	uint w, h;
+	CSystem::instance()->getDisplay()->getWindow()->getSize(w, h);
 	float ScreenWidth = (float) w;
 	float ScreenHeight = (float) h;
 	_Driver->setMatrixMode2D (CFrustum (0.0f, ScreenWidth, 0.0f, ScreenHeight, -1.0f, 1.0f, false));

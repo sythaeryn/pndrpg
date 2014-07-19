@@ -19,6 +19,7 @@
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/event_listener.h"
 #include "nel/misc/path.h"
+#include "nel/misc/system.h"
 
 // look at 3dinit example
 #include "nel/3d/nelu.h"
@@ -91,7 +92,7 @@ int main(int argc, char **argv)
 	fontManager.computeString (ucs, tc.getFontGenerator(), CRGBA(32,64,127), 75, CNELU::Driver, csUnicode);
 
 	// look at event example
-	CNELU::EventServer.addEmitter(CNELU::Driver->getEventEmitter());
+	CNELU::EventServer.addEmitter(CSystem::instance()->getDisplay()->getWindow()->getEventEmitter());
 	CNELU::AsyncListener.addToServer(CNELU::EventServer);
 
 	do

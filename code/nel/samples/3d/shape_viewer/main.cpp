@@ -27,6 +27,7 @@
 #include <nel/3d/u_camera.h>
 #include <nel/3d/u_driver.h>
 #include <nel/3d/u_instance.h>
+#include <nel/misc/system.h>
 
 #ifdef NL_OS_WINDOWS
 	#ifndef NL_COMP_MINGW
@@ -89,7 +90,8 @@ sint main(int argc, char **argv)
 		Driver->setDisplay(UDriver::CMode(800, 600, 32, true));
 
 		// set the title
-		Driver->setWindowTitle(ucstring("NeL shape viewer"));
+		NLMISC::CWindow *window = NLMISC::CSystem::instance()->getDisplay()->getWindow();
+		window->setTitle(ucstring("NeL shape viewer"));
 
 		// can use both dds and tga textures for shapes
 		CPath::remapExtension ("dds", "tga", true);
@@ -151,7 +153,7 @@ sint main(int argc, char **argv)
 		float angle = 0.f;
 
 		// main loop
-		while (Driver->isActive())
+		while (window->isActive())
 		{
 			Driver->EventServer.pump();
 			

@@ -519,8 +519,9 @@ CCameraBackup setupCameraForScreenshot(UScene &scene, uint left, uint right, uin
 
 	// Build a viewport
 	CViewport viewport;
-	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
-	viewport.init (0, 0, (float)(right-left)/Driver->getWindowWidth(),(float)(bottom-top)/Driver->getWindowHeight());
+	uint width, height;
+	CSystem::instance()->getDisplay()->getWindow()->getSize(width, height);
+	viewport.init (0, 0, (float)(right-left)/width, (float)(bottom-top)/height);
 
 	// Activate all this
 	scene.getCam().setFrustum (frustumPart);
@@ -554,7 +555,6 @@ void renderSceneScreenShot (uint left, uint right, uint top, uint bottom, uint s
 
 void getBuffer (CBitmap &btm)
 {
-	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 	//
 	if (ClientCfg.ScreenShotWidth && ClientCfg.ScreenShotHeight)
 	{
@@ -562,27 +562,30 @@ void getBuffer (CBitmap &btm)
 		CBitmap temp;
 		btm.resize (ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight, CBitmap::RGBA);
 
+		uint width, height;
+		CSystem::instance()->getDisplay()->getWindow()->getSize(width, height);
+
 		uint top;
-		uint bottom = std::min (Driver->getWindowHeight (), ClientCfg.ScreenShotHeight);
-		for (top=0; top<ClientCfg.ScreenShotHeight; top+=Driver->getWindowHeight ())
+		uint bottom = std::min (height, ClientCfg.ScreenShotHeight);
+		for (top=0; top<ClientCfg.ScreenShotHeight; top+=height)
 		{
 			uint left;
-			uint right = std::min (Driver->getWindowWidth (), ClientCfg.ScreenShotWidth);
-			for (left=0; left<ClientCfg.ScreenShotWidth; left+=Driver->getWindowWidth ())
+			uint right = std::min (width, ClientCfg.ScreenShotWidth);
+			for (left=0; left<ClientCfg.ScreenShotWidth; left+=width)
 			{
 				Driver->clearBuffers (CRGBA::Black);
 				renderSceneScreenShot (left, right, top, bottom, ClientCfg.ScreenShotWidth, ClientCfg.ScreenShotHeight);
 				// Get the bitmap
 				Driver->getBuffer (temp);
 				Driver->swapBuffers ();
-				btm.blit (temp, 0, Driver->getWindowHeight ()-(bottom-top), right-left, bottom-top, left, top);
+				btm.blit (temp, 0, height-(bottom-top), right-left, bottom-top, left, top);
 
 				// Next
-				right = std::min (right+Driver->getWindowWidth (), ClientCfg.ScreenShotWidth);
+				right = std::min (right+width, ClientCfg.ScreenShotWidth);
 			}
 
 			// Next
-			bottom = std::min (bottom+Driver->getWindowHeight (), ClientCfg.ScreenShotHeight);
+			bottom = std::min (bottom+height, ClientCfg.ScreenShotHeight);
 		}
 	}
 	else
@@ -614,8 +617,6 @@ bool screenshotZBuffer(const std::string &filename)
 	std::string ext = filename.substr(pos+1);
 
 	std::vector<float> z;
-	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
-
 	Driver->getZBuffer(z);
 
 	float min = std::numeric_limits<float>::max();
@@ -637,8 +638,11 @@ bool screenshotZBuffer(const std::string &filename)
 
 	max = max - min;
 
+	uint width, height;
+	CSystem::instance()->getDisplay()->getWindow()->getSize(width, height);
+
 	CBitmap zi;
-	zi.resize(Driver->getWindowWidth(), Driver->getWindowHeight());
+	zi.resize(width, height);
 	CRGBA *dest = (CRGBA *) &zi.getPixels()[0];
 
 	for(uint k = 0; k < z.size(); ++k)

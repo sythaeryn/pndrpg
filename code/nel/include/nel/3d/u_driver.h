@@ -39,6 +39,7 @@ namespace NLMISC
 	struct IKeyboardDevice;
 	struct IInputDeviceManager;
 	class CLog;
+	class CWindow;
 }
 
 
@@ -182,22 +183,11 @@ public:
 	  * \param show show or hide the window in window mode.
 	  */
 	virtual	bool			setDisplay(const CMode &mode, bool show = true, bool resizeable = true) =0;
-	virtual	bool			setDisplay(nlWindow wnd, const CMode &mode, bool show = true, bool resizeable = true) =0;
+	virtual	bool			setDisplay(NLMISC::CWindow *wnd, const CMode &mode, bool show = true, bool resizeable = true) =0;
 	virtual bool			setMode(const CMode& mode)=0;
 	virtual bool			getModes(std::vector<CMode> &modes)=0;
 	virtual bool			getCurrentScreenMode(CMode &mode)=0;
 
-	/// Set the title of the NeL window
-	virtual void			setWindowTitle(const ucstring &title)=0;
-
-	/// Set icon(s) of the NeL window
-	virtual void			setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)=0;
-
-	/// Set the position of the NeL window
-	virtual void			setWindowPos(sint32 x, sint32 y)=0;
-
-	/// Show or hide the NeL window
-	virtual void			showWindow(bool show = true)=0;
 
 	/* Pass in dialog box mode. After having called this method, you can use normal GUI.
 	 * In fullscreen under direct3d, the main 3d window is minimized.

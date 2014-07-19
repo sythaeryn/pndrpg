@@ -3371,7 +3371,7 @@ class CHandlerGameConfigApply : public IActionHandler
 				else
 				{
 					uint32 width, height;
-					Driver->getWindowSize(width, height);
+					CSystem::instance()->getDisplay()->getWindow()->getSize(width, height);
 
 					// window is too large
 					if (width >= screenMode.Width || height >= screenMode.Height)

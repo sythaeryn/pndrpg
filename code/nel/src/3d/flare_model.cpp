@@ -28,6 +28,7 @@
 #include "nel/3d/viewport.h"
 #include "nel/misc/common.h"
 
+#include "nel/misc/system.h"
 
 
 namespace NL3D {
@@ -158,8 +159,8 @@ void	CFlareModel::traverseRender()
 		distIntensity = distRatio > fs->getMaxViewDistRatio() ? 1.f - (distRatio - fs->getMaxViewDistRatio()) / (1.f - fs->getMaxViewDistRatio()) : 1.f;
 	}
 	//
-	uint32 width, height;
-	drv->getWindowSize(width, height);
+	uint width, height;
+	NLMISC::CSystem::instance()->getDisplay()->getWindow()->getSize(width, height);
 	// Compute position on screen
 	const float middleX = .5f * (renderTrav.Left + renderTrav.Right);
 	const float middleZ = .5f * (renderTrav.Bottom + renderTrav.Top);

@@ -29,6 +29,7 @@
 #include "nel/misc/time_nl.h"
 #include "nel/misc/event_server.h"
 #include "nel/misc/event_listener.h"
+#include "nel/misc/system.h"
 
 #include "nel/3d/nelu.h"
 #include "nel/3d/driver.h"
@@ -442,7 +443,7 @@ int main()
 		}
 
 	}
-	while ((!CNELU::AsyncListener.isKeyPushed(KeyESCAPE)) && CNELU::Driver->isActive());
+	while ((!CNELU::AsyncListener.isKeyPushed(KeyESCAPE)) && CSystem::instance()->getDisplay()->getWindow()->isActive());
 
 	return EXIT_SUCCESS;
 }

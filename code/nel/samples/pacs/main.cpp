@@ -30,6 +30,7 @@ DEL: remove a primitive
 // Misc includes
 #include <nel/misc/path.h>
 #include <nel/misc/time_nl.h>
+#include <nel/misc/system.h>
 
 // Pacs includes
 #include <nel/pacs/u_move_container.h>
@@ -219,7 +220,7 @@ int main ()
 		CRGBA clearColor;
 
 		// Main loop
-		while (pDriver->isActive() && (!pDriver->AsyncListener.isKeyPushed (KeyESCAPE)))
+		while (CSystem::instance()->getDisplay()->getWindow()->isActive() && (!pDriver->AsyncListener.isKeyPushed (KeyESCAPE)))
 		{
 			// Get the current time
 			TTime newTime=CTime::getLocalTime ();

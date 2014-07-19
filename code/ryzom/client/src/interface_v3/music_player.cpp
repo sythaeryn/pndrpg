@@ -188,7 +188,7 @@ public:
 			// Hardware mouse
 			bool wasHardware = IsMouseCursorHardware ();
 			InitMouseWithCursor (true);
-			Driver->showCursor (true);
+			CSystem::instance()->getDisplay()->getWindow()->showCursor(true);
 
 			if (false) //supportUnicode())
 			{
@@ -210,7 +210,7 @@ public:
 				OPENFILENAME ofn;
 				memset (&ofn, 0, sizeof(OPENFILENAME));
 				ofn.lStructSize = sizeof(OPENFILENAME);
-				ofn.hwndOwner = Driver ? Driver->getDisplay():NULL;
+//				ofn.hwndOwner = Driver ? Driver->getDisplay():NULL;
 				ofn.hInstance = HInstance;
 				ofn.lpstrFilter = szFilter;
 				ofn.nFilterIndex = 0;
@@ -293,7 +293,7 @@ public:
 
 			// Restaure mouse
 			InitMouseWithCursor (wasHardware);
-			Driver->showCursor (wasHardware);
+			CSystem::instance()->getDisplay()->getWindow()->showCursor(wasHardware);
 
 			// Restaure current path
 			CPath::setCurrentPath (currentPath.c_str());

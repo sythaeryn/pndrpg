@@ -28,6 +28,7 @@
 #include <nel/misc/vector.h>
 #include <nel/misc/matrix.h>
 #include <nel/misc/command.h>
+#include <nel/misc/system.h>
 
 #include <nel/3d/u_material.h>
 #include <nel/3d/u_camera.h>
@@ -64,7 +65,7 @@ void CGraph::render (NL3D::UDriver *Driver, NL3D::UTextContext *TextContext)
 {
 	// Display the background
 	uint32 w, h;
-	Driver->getWindowSize (w, h);
+	CSystem::instance()->getDisplay()->getWindow()->getSize (w, h);
 	float ScreenWidth = (float) w;
 	float ScreenHeight = (float) h;
 	Driver->setMatrixMode2D (CFrustum (0.0f, ScreenWidth, 0.0f, ScreenHeight, 0.0f, 1.0f, false));

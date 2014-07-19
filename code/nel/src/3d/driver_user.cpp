@@ -35,6 +35,7 @@
 #include "nel/3d/u_camera.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/event_emitter.h"
+#include "nel/misc/system.h"
 
 using namespace NLMISC;
 
@@ -148,7 +149,8 @@ CDriverUser::CDriverUser (uintptr_t windowIcon, TDriver driver, emptyProc exitFu
 		_Driver= CDRU::createGlEsDriver();
 
 	nlassert(_Driver);
-	_Driver->init (windowIcon, exitFunc);
+
+//	_Driver->init (windowIcon, exitFunc);
 
 	_WindowInit= false;
 
@@ -237,16 +239,25 @@ bool			CDriverUser::setDisplay(const CMode &mode, bool show, bool resizeable)
 {
 	NL3D_HAUTO_UI_DRIVER;
 
-	return setDisplay(EmptyWindow, mode, show, resizeable);
+	return setDisplay(NULL, mode, show, resizable);
 }
 
 // ***************************************************************************
-bool			CDriverUser::setDisplay(nlWindow wnd, const CMode &mode, bool show, bool resizeable)
+bool			CDriverUser::setDisplay(CWindow *window, const CMode &mode, bool show, bool resizable)
 {
 	NL3D_HAUTO_UI_DRIVER;
 
+	CDisplay *display = CSystem::instance()->getDisplay();
+
+	if (window == NULL)
+	{
+		window = display->getWindow();
+
+		if (window == NULL) window = display->createWindow();
+	}
+
 	// window init.
-	if (_Driver->setDisplay(wnd, GfxMode(mode.Width, mode.Height, mode.Depth, mode.Windowed, false, mode.Frequency, mode.AntiAlias), show, resizeable))
+	if (_Driver->setDisplay(window, GfxMode(mode.Width, mode.Height, mode.Depth, mode.Windowed, false, mode.Frequency, mode.AntiAlias), show, resizable))
 	{
 		// Always true
 		nlverify (activate());
@@ -255,7 +266,7 @@ bool			CDriverUser::setDisplay(nlWindow wnd, const CMode &mode, bool show, bool 
 
 		// Event init.
 		AsyncListener.reset ();
-		EventServer.addEmitter(_Driver->getEventEmitter());
+		EventServer.addEmitter(CSystem::instance()->getDisplay()->getWindow()->getEventEmitter());
 		AsyncListener.addToServer(EventServer);
 
 		// Matrix Context (2D).
@@ -336,36 +347,6 @@ bool CDriverUser::getCurrentScreenMode(CMode &mode)
 	mode.AntiAlias= gfxMode.AntiAlias;
 	return res;
 }
-
-// ***************************************************************************
-void CDriverUser::setWindowTitle(const ucstring &title)
-{
-	NL3D_HAUTO_UI_DRIVER;
-	_Driver->setWindowTitle(title);
-}
-
-// ***************************************************************************
-void CDriverUser::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
-{
-	NL3D_HAUTO_UI_DRIVER;
-	_Driver->setWindowIcon(bitmaps);
-}
-
-// ***************************************************************************
-void CDriverUser::setWindowPos(sint32 x, sint32 y)
-{
-	NL3D_HAUTO_UI_DRIVER;
-	_Driver->setWindowPos(x, y);
-}
-
-// ***************************************************************************
-void CDriverUser::showWindow(bool show)
-{
-	NL3D_HAUTO_UI_DRIVER;
-	_Driver->showWindow(show);
-}
-
-// ***************************************************************************
 void			CDriverUser::release()
 {
 	NL3D_HAUTO_UI_DRIVER;
@@ -385,7 +366,7 @@ void			CDriverUser::release()
 
 	// release event.
 	AsyncListener.removeFromServer(EventServer);
-	EventServer.removeEmitter(_Driver->getEventEmitter());
+	EventServer.removeEmitter(NLMISC::CSystem::instance()->getDisplay()->getWindow()->getEventEmitter());
 
 	// release window.
 	_Driver->release();
@@ -402,16 +383,7 @@ bool			CDriverUser::activate(void)
 }
 
 // ***************************************************************************
-bool			CDriverUser::isActive()
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->isActive();
-}
-
-
-// ***************************************************************************
-nlWindow		CDriverUser::getDisplay ()
+NLMISC::CWindow*		CDriverUser::getDisplay ()
 {
 	NL3D_HAUTO_UI_DRIVER;
 
@@ -1308,19 +1280,6 @@ void			CDriverUser::drawWiredQuad (float xcenter, float ycenter, float radius, C
 
 
 // ***************************************************************************
-UDriver::TMessageBoxId	CDriverUser::systemMessageBox (const char* message, const char* title, TMessageBoxType type, TMessageBoxIcon icon)
-{
-
-	IDriver::TMessageBoxId		dret;
-	IDriver::TMessageBoxType	dtype= (IDriver::TMessageBoxType)(uint32)type;
-	IDriver::TMessageBoxIcon	dicon= (IDriver::TMessageBoxIcon)(uint32)icon;
-	dret= _Driver->systemMessageBox (message, title, dtype, dicon);
-
-	return (UDriver::TMessageBoxId)(uint32)dret;
-}
-
-
-// ***************************************************************************
 CMaterial		&CDriverUser::convMat(UMaterial &mat)
 {
 
@@ -1496,13 +1455,6 @@ void			CDriverUser::forceTextureResize(uint divisor)
 
 	_Driver->forceTextureResize(divisor);
 }
-bool			CDriverUser::setMonitorColorProperties (const CMonitorColorProperties &properties)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->setMonitorColorProperties (properties);
-}
-
 
 
 // ***************************************************************************
@@ -1534,34 +1486,6 @@ uint			CDriverUser::getNbTextureStages()
 	NL3D_HAUTO_UI_DRIVER;
 
 	return _Driver->getNbTextureStages();
-}
-void			CDriverUser::getWindowSize (uint32 &width, uint32 &height)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	_Driver->getWindowSize (width, height);
-}
-uint			CDriverUser::getWindowWidth ()
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	uint32 width, height;
-	_Driver->getWindowSize (width, height);
-	return width;
-}
-uint			CDriverUser::getWindowHeight ()
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	uint32 width, height;
-	_Driver->getWindowSize (width, height);
-	return height;
-}
-void			CDriverUser::getWindowPos (sint32 &x, sint32 &y)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	_Driver->getWindowPos (x, y);
 }
 uint32			CDriverUser::getAvailableVertexAGPMemory ()
 {
@@ -1600,90 +1524,6 @@ bool			CDriverUser::fillBuffer (CBitmap &bitmap)
 	NL3D_HAUTO_UI_DRIVER;
 
 	return _Driver->fillBuffer(bitmap);
-}
-
-
-// ***************************************************************************
-// ***************************************************************************
-// Mouse / Keyboards / Game devices
-// ***************************************************************************
-// ***************************************************************************
-
-NLMISC::IMouseDevice			*CDriverUser::enableLowLevelMouse(bool enable, bool exclusive)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->enableLowLevelMouse(enable, exclusive);
-}
-NLMISC::IKeyboardDevice			*CDriverUser::enableLowLevelKeyboard(bool enable)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->enableLowLevelKeyboard(enable);
-}
-
-void CDriverUser::emulateMouseRawMode(bool enable)
-{
-	_Driver->getEventEmitter()->emulateMouseRawMode(enable);
-}
-
-uint CDriverUser::getDoubleClickDelay(bool hardwareMouse)
-{
-	NL3D_HAUTO_UI_DRIVER;
-	return _Driver->getDoubleClickDelay(hardwareMouse);
-}
-
-NLMISC::IInputDeviceManager		*CDriverUser::getLowLevelInputDeviceManager()
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->getLowLevelInputDeviceManager();
-}
-void			CDriverUser::showCursor (bool b)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	_Driver->showCursor(b);
-}
-void			CDriverUser::setMousePos (float x, float y)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	_Driver->setMousePos (x, y);
-}
-void			CDriverUser::setCapture (bool b)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	_Driver->setCapture (b);
-}
-
-bool			CDriverUser::isSystemCursorCaptured()
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->isSystemCursorCaptured();
-}
-
-void			CDriverUser::addCursor(const std::string &name, const NLMISC::CBitmap &bitmap)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	_Driver->addCursor(name, bitmap);
-}
-
-void			CDriverUser::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	_Driver->setCursor(name, col, rot, hotSpotX, hotSpotY, forceRebuild);
-}
-
-void			CDriverUser::setCursorScale(float scale)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	_Driver->setCursorScale(scale);
 }
 
 // ***************************************************************************
@@ -1875,6 +1715,20 @@ void CDriverUser::endDialogMode()
 }
 
 // ***************************************************************************
+void CDriverUser::beginSceneRender()
+{
+	NL3D_HAUTO_UI_DRIVER
+	_Driver->beginSceneRender();
+}
+
+// ***************************************************************************
+void CDriverUser::endSceneRender()
+{
+	NL3D_HAUTO_UI_DRIVER
+	_Driver->endSceneRender();
+}
+
+// ***************************************************************************
 void CDriverUser::enableStencilTest(bool enable)
 {
 	NL3D_HAUTO_UI_DRIVER
@@ -1979,15 +1833,6 @@ bool CDriverUser::setRenderTarget(class UTexture & uTex, uint32 x, uint32 y, uin
 	setViewport(currentViewport);
 
 	return result;
-}
-bool CDriverUser::copyTextToClipboard(const ucstring &text)
-{
-	return _Driver->copyTextToClipboard(text);
-}
-
-bool CDriverUser::pasteTextFromClipboard(ucstring &text)
-{
-	return _Driver->pasteTextFromClipboard(text);
 }
 
 } // NL3D

@@ -18,6 +18,7 @@
 
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
+#include "nel/misc/system.h"
 
 #include "nel/3d/nelu.h"
 #include "nel/3d/dru.h"
@@ -76,12 +77,14 @@ bool			CNELU::initDriver (uint w, uint h, uint bpp, bool windowed, nlWindow syst
 		return false;
 	}
 
+/*
 	if (!CNELU::Driver->init())
 	{
 		nlwarning ("CNELU::initDriver: init() failed");
 		return false;
 	}
-	if (!CNELU::Driver->setDisplay(systemWindow, GfxMode(uint16(w), uint16(h), uint8(bpp), windowed, offscreen)))
+*/
+	if (!CNELU::Driver->setDisplay(NULL, GfxMode(uint16(w), uint16(h), uint8(bpp), windowed, offscreen)))
 	{
 		nlwarning ("CNELU::initDriver: setDisplay() failed");
 		return false;
@@ -135,7 +138,7 @@ void			CNELU::initScene(CViewport viewport)
 void			CNELU::initEventServer()
 {
 	CNELU::AsyncListener.reset ();
-	CNELU::EventServer.addEmitter(CNELU::Driver->getEventEmitter());
+	CNELU::EventServer.addEmitter(NLMISC::CSystem::instance()->getDisplay()->getWindow()->getEventEmitter());
 	CNELU::AsyncListener.addToServer(CNELU::EventServer);
 }
 
@@ -145,7 +148,7 @@ void			CNELU::releaseEventServer()
 	CNELU::AsyncListener.removeFromServer(CNELU::EventServer);
 	if (CNELU::Driver != NULL)
 	{
-		CNELU::EventServer.removeEmitter(CNELU::Driver->getEventEmitter());
+		CNELU::EventServer.removeEmitter(NLMISC::CSystem::instance()->getDisplay()->getWindow()->getEventEmitter());
 	}
 }
 
