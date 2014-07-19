@@ -587,7 +587,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	str += message;
 
-	CSystemUtils::copyTextToClipboard(str);
+	CSystem::instance()->getDisplay()->getWindow()->copyTextToClipboard(str);
 
 	// create the string on the screen
 	needSpace = false;
@@ -767,7 +767,7 @@ void CMsgBoxDisplayer::display (const std::string& str)
 {
 #ifdef NL_OS_WINDOWS
 
-	CSystemUtils::copyTextToClipboard(str);
+	CSystem::instance().copyTextToClipboard(str);
 
 	string strf = str;
 	strf += "\n\n(this message was copied in the clipboard)";

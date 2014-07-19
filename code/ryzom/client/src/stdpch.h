@@ -67,7 +67,6 @@
 #include <nel/misc/string_conversion.h>
 #include <nel/misc/string_mapper.h>
 #include <nel/misc/system_info.h>
-#include <nel/misc/system_utils.h>
 #include <nel/misc/time_nl.h>
 #include <nel/misc/types_nl.h>
 #include <nel/misc/ucstring.h>
@@ -75,6 +74,7 @@
 #include <nel/misc/vector.h>
 #include <nel/misc/vector_2f.h>
 #include <nel/misc/vectord.h>
+#include <nel/misc/system.h>
 
 #include <nel/georges/u_form_loader.h>
 #include <nel/georges/u_form.h>

@@ -520,6 +520,8 @@ void CInterface3DScene::draw ()
 		cam.setClusterSystem ((UInstanceGroup*)-1);
 	}
 
+	Driver->beginSceneRender();
+
 	////////////////////////
 	// Clear the Z-Buffer //
 	////////////////////////
@@ -535,6 +537,8 @@ void CInterface3DScene::draw ()
 	///////////////////////////////////////////////
 
 	pDisp->_Scene->render();
+
+	Driver->endSceneRender();
 
 	Driver->setViewport(oldVP);
 	Driver->setFrustum(oldFrustum);

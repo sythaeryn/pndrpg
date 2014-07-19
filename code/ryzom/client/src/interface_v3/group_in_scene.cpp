@@ -85,6 +85,8 @@ void CGroupInScene::computeWindowPos(sint32 &newX, sint32 &newY, CVector &newPro
 		{
 			tmp = pVR.getFrustum().projectZ (tmp);
 
+			uint w, h;
+			CSystem::instance()->getDisplay()->getWindow()->getSize(w, h);
 			// Get the width and height
 			tmp.x *= (float)CViewRenderer::getInstance()->getDriver()->getWindowWidth();
 			tmp.y *= (float)CViewRenderer::getInstance()->getDriver()->getWindowHeight();

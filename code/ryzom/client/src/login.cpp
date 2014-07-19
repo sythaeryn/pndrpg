@@ -27,7 +27,6 @@
 #include "nel/misc/path.h"
 #include "nel/misc/thread.h"
 #include "nel/misc/big_file.h"
-#include "nel/misc/system_utils.h"
 
 #include "nel/net/tcp_sock.h"
 #include "nel/3d/u_driver.h"
@@ -470,14 +469,13 @@ void loginMainLoop()
 					#ifdef NL_OS_WINDOWS
 					{
 						// Get the window
-						HWND hWnd = Driver->getDisplay();
-						nlassert (hWnd);
+						CSystem::instance()->getDisplay()->getWindow()->show();
 						// Show the window, unless it has been minimized, in
 						// which case we don't pop it unexpectedly
 						if (!windowBlinkDone)
 						{
 							bgDownloader.hideDownloader();
-							ShowWindow (hWnd, SW_RESTORE);
+//							ShowWindow (hWnd, SW_RESTORE);
 							windowBlinkDone = true;
 						}
 
@@ -860,7 +858,7 @@ bool login()
 	bool tmpDI = ClientCfg.DisableDirectInput;
 	ClientCfg.DisableDirectInput = true;
 	InitMouseWithCursor(false);
-	Driver->showCursor (false);
+	CSystem::instance()->getDisplay()->getWindow()->showCursor(false);
 	SetMouseFreeLook ();
 	SetMouseCursor (false);
 	SetMouseSpeed (ClientCfg.CursorSpeed);
@@ -1832,7 +1830,7 @@ class CAHOpenURL : public IActionHandler
 		// Check for special install tag
 		const char *KeyName = "InstallTag";
 
-		installTag = CSystemUtils::getRegKey(KeyName);
+//		installTag = CSystemUtils::getRegKey(KeyName);
 
 		if (installTag.length() > 1)
 		{

@@ -82,6 +82,7 @@
 #include "nel/misc/heap_memory.h"
 #include "nel/misc/event_emitter_multi.h"
 #include "nel/misc/time_nl.h"
+#include "nel/misc/system.h"
 #include "nel/misc/rect.h"
 #include "nel/misc/mouse_device.h"
 #include "nel/misc/dynloadlib.h"

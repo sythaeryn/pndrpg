@@ -29,6 +29,7 @@
 #include "nel/misc/debug.h"
 
 #include "nel/misc/file.h"
+#include "nel/misc/system.h"
 
 using namespace std;
 
@@ -89,8 +90,8 @@ void CFontManager::computeString (const ucstring &s,
 	// resize fontSize if window not of 800x600.
 	if (keep800x600Ratio)
 	{
-		uint32 width, height;
-		driver->getWindowSize (width, height);
+		uint width, height;
+		NLMISC::CSystem::instance()->getDisplay()->getWindow()->getSize(width, height);
 		if ((height == 0) || (width == 0))
 			return;
 
@@ -236,8 +237,8 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 	// resize fontSize if window not of 800x600.
 	if (keep800x600Ratio)
 	{
-		uint32 width, height;
-		driver->getWindowSize (width, height);
+		uint width, height;
+		NLMISC::CSystem::instance()->getDisplay()->getWindow()->getSize(width, height);
 		if ((height == 0) || (width == 0))
 			return;
 		// keep the 800*600 ratio

@@ -3978,12 +3978,8 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		#ifdef NL_OS_WINDOWS
-			NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
-			if (Driver)
-			{
-				HWND wnd = (HWND) Driver->getDisplay();
-				ShowWindow(wnd, SW_MINIMIZE);
-			}
+		CSystem::instance()->getDisplay()->getWindow()->show();
+//		ShowWindow(wnd, SW_MINIMIZE);
 		#endif
 		browseFAQ(ClientCfg.ConfigFile);
 	}

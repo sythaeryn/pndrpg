@@ -18,7 +18,7 @@
 
 #include "nel/3d/text_context_user.h"
 #include "nel/misc/hierarchical_timer.h"
-
+#include "nel/misc/window.h"
 
 namespace NL3D
 {
@@ -62,18 +62,18 @@ NLMISC::CVector UTextContext::CStringInfo::getHotSpotVector(UTextContext::THotSp
 
 
 // ***************************************************************************
-void		UTextContext::CStringInfo::convertTo01Size(UDriver *drv)
+void		UTextContext::CStringInfo::convertTo01Size(NLMISC::CWindow *window)
 {
-	uint32	w,h;
-	drv->getWindowSize(w,h);
+	uint	w,h;
+	window->getSize(w,h);
 	StringWidth/= w;
 	StringHeight/= h;
 	StringLine/= h;
 }
-void		UTextContext::CStringInfo::convertToPixelSize(UDriver *drv)
+void		UTextContext::CStringInfo::convertToPixelSize(NLMISC::CWindow *window)
 {
-	uint32	w,h;
-	drv->getWindowSize(w,h);
+	uint	w,h;
+	window->getSize(w,h);
 	StringWidth*= w;
 	StringHeight*= h;
 	StringLine*= h;

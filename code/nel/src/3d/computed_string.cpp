@@ -29,6 +29,8 @@
 #include "nel/misc/file.h"
 #include "nel/misc/fast_mem.h"
 
+#include "nel/misc/system.h"
+
 using namespace std;
 
 namespace NL3D {
@@ -84,8 +86,8 @@ void CComputedString::render2D (IDriver& driver,
 		return;
 
 	// get window size
-	uint32	wndWidth, wndHeight;
-	driver.getWindowSize(wndWidth, wndHeight);
+	uint	wndWidth, wndHeight;
+	NLMISC::CSystem::instance()->getDisplay()->getWindow()->getSize(wndWidth, wndHeight);
 	CViewport vp;
 	driver.getViewport(vp);
 	wndWidth = (uint32)((float)wndWidth * vp.getWidth());
@@ -151,8 +153,8 @@ void CComputedString::render3D (IDriver& driver, const CMatrix &matrixp, THotSpo
 	CMatrix matrix = matrixp;
 
 	// get window size
-	uint32	wndWidth, wndHeight;
-	driver.getWindowSize(wndWidth, wndHeight);
+	uint	wndWidth, wndHeight;
+	NLMISC::CSystem::instance()->getDisplay()->getWindow()->getSize(wndWidth, wndHeight);
 	// scale according to window height (backward compatibility)
 	matrix.scale(1.0f/wndHeight);
 
@@ -187,8 +189,8 @@ void CComputedString::render2DClip (IDriver& driver, CRenderStringBuffer &rdrBuf
 		return;
 
 	// get window size
-	uint32	wndWidth, wndHeight;
-	driver.getWindowSize(wndWidth, wndHeight);
+	uint wndWidth, wndHeight;
+	NLMISC::CSystem::instance()->getDisplay()->getWindow()->getSize(wndWidth, wndHeight);
 	// scale to window size.
 	x*= wndWidth;
 	z*= wndHeight;
@@ -443,8 +445,8 @@ void CComputedString::render2DUnProjected (IDriver& driver, CRenderStringBuffer 
 		return;
 
 	// get window size
-	uint32	wndWidth, wndHeight;
-	driver.getWindowSize(wndWidth, wndHeight);
+	uint wndWidth, wndHeight;
+	NLMISC::CSystem::instance()->getDisplay()->getWindow()->getSize(wndWidth, wndHeight);
 	// scale to window size.
 	x*= wndWidth;
 	z*= wndHeight;
@@ -693,8 +695,8 @@ void	CRenderStringBuffer::flush(IDriver& driver, CMaterial *fontMat)
 		return;
 
 	// get window size
-	uint32	wndWidth, wndHeight;
-	driver.getWindowSize(wndWidth, wndHeight);
+	uint wndWidth, wndHeight;
+	NLMISC::CSystem::instance()->getDisplay()->getWindow()->getSize(wndWidth, wndHeight);
 
 	// **** setup driver context
 	driver.setFrustum(0, (float)wndWidth, 0, (float)wndHeight, -1, 1, false);  // resX/resY

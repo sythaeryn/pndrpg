@@ -472,7 +472,7 @@ void CBGDownloaderAccess::CDownloadCoTask::restartDownloader()
 	}
 	*(uint32 *) Parent->_RyzomInstPIDPtr = (uint32) GetCurrentProcessId();
 
-	HWND hWnd = Driver->getDisplay();
+	HWND hWnd = (HWND)CSystem::instance()->getDisplay()->getWindow()->getNativePointer();
 
 	// for safety, stop any running downloader
 	if (isDownloaderProcessRunning())

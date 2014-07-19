@@ -1711,8 +1711,9 @@ void CClientConfig::setValues()
 			monitorColor.Luminosity[i]	= ClientCfg.Luminosity;
 			monitorColor.Gamma[i]		= ClientCfg.Gamma;
 		}
-		if(!Driver->setMonitorColorProperties(monitorColor))
-			cfgWarning("reloadCFG: setMonitorColorProperties fails");
+//		CSystem::instance()->getDisplay()->setMonitorColorProperties(monitorColor);
+//		if(!Driver->setMonitorColorProperties(monitorColor))
+//			cfgWarning("reloadCFG: setMonitorColorProperties fails");
 	}
 
 
@@ -2028,14 +2029,16 @@ void CClientConfig::release ()
 		{
 			CConfigFile::CVar *varPtr = NULL;
 
+			CWindow *window = CSystem::instance()->getDisplay()->getWindow();
+
 			// Driver still alive ?
-			if (Driver && Driver->isActive ())
+			if (window && window->isActive ())
 			{
 				sint32 x, y;
 				uint32 width, height;
 
-				Driver->getWindowPos(x, y);
-				Driver->getWindowSize(width, height);
+				window->getPosition(x, y);
+				window->getSize(width, height);
 
 				// Are we in window mode ?
 				if (ClientCfg.Windowed /* && !isWindowMaximized() */)

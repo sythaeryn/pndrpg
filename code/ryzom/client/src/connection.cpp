@@ -27,7 +27,6 @@
 #include "nel/misc/path.h"
 #include "nel/misc/time_nl.h"
 #include "nel/misc/algo.h"
-#include "nel/misc/system_utils.h"
 // 3D Interface.
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
@@ -194,7 +193,7 @@ void connectionRestaureVideoMode ()
 	if (mode.Windowed)
 	{
 		uint32 width, height;
-		Driver->getWindowSize(width, height);
+		CSystem::instance()->getDisplay()->getWindow()->getSize(width, height);
 		mode.Width = width;
 		mode.Height = height;
 	}
@@ -269,12 +268,12 @@ void	setOutGameFullScreen()
 		}
 		/*
 		InitMouseWithCursor (true);
-		Driver->showCursor(false);
-		Driver->showCursor(true);
+		CSystem::instance()->getDisplay()->getWindow()->showCursor(false);
+		CSystem::instance()->getDisplay()->getWindow()->showCursor(true);
 		Driver->clearBuffers(CRGBA::Black);
 		Driver->swapBuffers();
-		Driver->showCursor(false);
-		Driver->showCursor(true);
+		CSystem::instance()->getDisplay()->getWindow()->showCursor(false);
+		CSystem::instance()->getDisplay()->getWindow()->showCursor(true);
 		*/
 	}
 
@@ -350,7 +349,7 @@ bool connection (const string &cookie, const string &fsaddr)
 	ProgressBar.newMessage (ClientCfg.buildLoadingString(nmsg) );
 
 	// Hide cursor for interface
-	//Driver->showCursor (false);
+	//CSystem::instance()->getDisplay()->getWindow()->showCursor(false);
 
 	// Init global variables
 	userChar		= false;
@@ -514,7 +513,7 @@ bool reconnection()
 	pIM->initOutGame();
 
 	// Hide cursor for interface
-	Driver->showCursor (false);
+	CSystem::instance()->getDisplay()->getWindow()->showCursor(false);
 
 	// Init global variables
 	userChar		= false;
@@ -1127,16 +1126,16 @@ TInterfaceState globalMenu()
 							}
 							if (i == CharacterSummaries.size())
 							{
-								Driver->systemMessageBox("You have no character for the current user.\nClient will exit.", "Char loading error", UDriver::okType, UDriver::exclamationIcon);
+//								Driver->systemMessageBox("You have no character for the current user.\nClient will exit.", "Char loading error", UDriver::okType, UDriver::exclamationIcon);
 								exit(-1);
 							}
 							else
 							{
-								UDriver::TMessageBoxId ret = Driver->systemMessageBox("The pre-selected character doesn't exist.\nDo you want to use the first available character instead ?", "Char loading error", UDriver::yesNoType, UDriver::warningIcon);
-								if (ret == UDriver::noId)
-									exit(-1);
-								else
-									ClientCfg.SelectCharacter = i;
+//								UDriver::TMessageBoxId ret = Driver->systemMessageBox("The pre-selected character doesn't exist.\nDo you want to use the first available character instead ?", "Char loading error", UDriver::yesNoType, UDriver::warningIcon);
+//								if (ret == UDriver::noId)
+//									exit(-1);
+//								else
+//									ClientCfg.SelectCharacter = i;
 							}
 						}
 
@@ -2390,7 +2389,7 @@ public:
 		}
 
 		// default to 'ZQSD' for French and Belgian keyboard, 'WASD' else
-		bool wasd = !CSystemUtils::isAzertyKeyboard();
+		bool wasd = false; // !CSystemUtils::isAzertyKeyboard();
 
 		/*sint startIndex = wasd ? wasdIndex : zqsdIndex;
 		if (startIndex == -1) startIndex = 0;

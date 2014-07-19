@@ -17,6 +17,8 @@
 #include "std3d.h"
 
 #include "nel/misc/common.h"
+#include "nel/misc/system.h"
+
 #include "nel/3d/motion_blur.h"
 #include "nel/3d/driver.h"
 #include "nel/3d/texture.h"
@@ -60,8 +62,8 @@ void CMotionBlur::performMotionBlur(IDriver *driver, float motionBlurAmount)
 	vb.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag ) ;
 	vb.setNumVertices(4) ;
 
-	uint32 width, height ;
-	driver->getWindowSize(width, height) ;
+	uint width, height;
+	NLMISC::CSystem::instance()->getDisplay()->getWindow()->getSize(width, height);
 
 	float widthRatio = _W / (float) NLMISC::raiseToNextPowerOf2 (_W) ;
 	float heightRatio = _H / (float) NLMISC::raiseToNextPowerOf2 (_H) ;

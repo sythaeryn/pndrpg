@@ -3032,9 +3032,10 @@ void CEditor::updateSelectingDecals()
 // *******************************************************************************************************
 void CEditor::reset()
 {
+	CWindow *window = CSystem::instance()->getDisplay()->getWindow();
 	//H_AUTO(R2_CEditor_reset)
 	if (ClientCfg.R2EDExtendedDebug)
-		Driver->setWindowTitle(ucstring("Resetting R2ED editor ..."));
+		window->setTitle(ucstring("Resetting R2ED editor ..."));
 
 	CHECK_EDITOR
 	_SerializeUIConfig = false; // prevent reloading of ui for speed
@@ -3080,9 +3081,9 @@ void CEditor::reset()
 
 	if (ClientCfg.R2EDExtendedDebug)
 	{
-		Driver->setWindowTitle(CI18N::get("TheSagaOfRyzom"));
+		window->setTitle(CI18N::get("TheSagaOfRyzom"));
 		// Show the window
-		Driver->showWindow();
+		window->show();
 	}
 
 	getUI().displaySystemInfo(CI18N::get("uiR2EDEditorReseted"), "BC");

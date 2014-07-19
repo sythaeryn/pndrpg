@@ -1334,7 +1334,7 @@ void CFarTP::onFailure()
 	{
 		reason += ": no characters found!";
 	}
-	Driver->systemMessageBox(("Unable to join shard"+reason).c_str(), "Error", UDriver::okType, UDriver::exclamationIcon);
+//	Driver->systemMessageBox(("Unable to join shard"+reason).c_str(), "Error", UDriver::okType, UDriver::exclamationIcon);
 
 	// TODO: recover from error
 
