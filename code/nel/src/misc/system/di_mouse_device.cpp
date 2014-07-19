@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdmisc.h"
+#include "../stdmisc.h"
 
 #include "di_mouse_device.h"
 #include "nel/misc/game_device_events.h"
-#include "nel/misc/win_event_emitter.h"
+#include "win_event_emitter.h"
 
 
 #ifdef NL_OS_WINDOWS
@@ -26,12 +26,6 @@
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
-
-#ifdef NL_COMP_MINGW
-#	undef FIELD_OFFSET
-#	define FIELD_OFFSET(t,f) offsetof(t,f)
-#endif
-
 
 namespace NLMISC
 {
@@ -84,7 +78,7 @@ void	    CDIMouse::setMouseMode(TAxis axis, TAxisMode axisMode)
 //======================================================
 CDIMouse::TAxisMode	CDIMouse::getMouseMode(TAxis axis) const
 {
-	nlassert((int)axis < (int)NumMouseAxis);
+	nlassert(axis < NumMouseAxis);
 	return _MouseAxisMode[axis];
 }
 

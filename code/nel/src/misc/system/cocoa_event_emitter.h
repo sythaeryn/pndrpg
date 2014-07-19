@@ -21,7 +21,6 @@
 #include "nel/misc/event_server.h"
 #include "nel/misc/events.h"
 #include "nel/misc/game_device_events.h"
-#include "nel/3d/driver.h"
 #import  "cocoa_opengl_view.h"
 
 #include <Carbon/Carbon.h>
@@ -35,7 +34,6 @@ class CCocoaEventEmitter : public IEventEmitter
 	bool             _emulateRawMode;
 	bool             _setToEmulateRawMode;
 	bool             _eventLoop;
-	NL3D::IDriver*   _driver;
 	CocoaOpenGLView* _glView;
 
 	// TODO like internal server in unix event emitter... review!
@@ -45,6 +43,7 @@ public:
 	CCocoaEventEmitter() : 
 		_emulateRawMode(false), 
 		_setToEmulateRawMode(false),
+		_eventLoop(false),
 		_driver(NULL),
 		_glView(nil),
 		_server(NULL) { }

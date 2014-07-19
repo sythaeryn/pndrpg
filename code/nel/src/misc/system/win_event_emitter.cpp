@@ -14,17 +14,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdmisc.h"
+#include "../stdmisc.h"
+#include "win_event_emitter.h"
 
 #include "nel/misc/events.h"
 #include "nel/misc/event_emitter.h"
-#include "nel/misc/win_event_emitter.h"
 #include "nel/misc/event_server.h"
 
 #ifdef NL_OS_WINDOWS
-#ifndef NL_COMP_MINGW
 #define NOMINMAX
-#endif
 #include <windows.h>
 #include <windowsx.h>
 
@@ -340,9 +338,6 @@ void CWinEventEmitter::resetButtonFlagState ()
 	_MouseButtons[0]=( (GetAsyncKeyState(VK_LBUTTON)&0x8000) != 0);
 	_MouseButtons[1]=( (GetAsyncKeyState(VK_RBUTTON)&0x8000) != 0);
 	_MouseButtons[2]=( (GetAsyncKeyState(VK_MBUTTON)&0x8000) != 0);
-
-
-
 }
 
 //==========================================================

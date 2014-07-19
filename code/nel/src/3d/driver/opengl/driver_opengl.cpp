@@ -21,17 +21,6 @@
 // by default, we disable the windows menu keys (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
 #define NL_DISABLE_MENU
 
-#include "nel/3d/viewport.h"
-#include "nel/3d/scissor.h"
-#include "nel/3d/u_driver.h"
-#include "nel/3d/vertex_buffer.h"
-#include "nel/3d/light.h"
-#include "nel/3d/index_buffer.h"
-#include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
-#include "nel/misc/hierarchical_timer.h"
-#include "nel/misc/dynloadlib.h"
 #include "driver_opengl_vertex_buffer_hard.h"
 
 
@@ -39,7 +28,38 @@ using namespace std;
 using namespace NLMISC;
 
 
+#ifndef NL_DEBUG
 
+// If not in debug, do nothing
+#define CHECK_GL_ERROR() do {} while (false)
+
+#else
+
+// If in debug, check for an error after a GL call
+#define CHECK_GL_ERROR() checkGlError(__FILE__, __LINE__)
+#endif
+
+static const char *getGlErrStr(GLenum error) {
+	switch (error) {
+	case GL_NO_ERROR:           return "GL_NO_ERROR";
+	case GL_INVALID_ENUM:       return "GL_INVALID_ENUM";
+	case GL_INVALID_OPERATION:  return "GL_INVALID_OPERATION";
+	case GL_STACK_OVERFLOW:     return "GL_STACK_OVERFLOW";
+	case GL_STACK_UNDERFLOW:    return "GL_STACK_UNDERFLOW";
+	case GL_OUT_OF_MEMORY:      return "GL_OUT_OF_MEMORY";
+	}
+
+	// FIXME: Convert to use Common::String::format()
+	static char buf[40];
+	sprintf(buf, "(Unknown GL error code 0x%x)", error);
+	return buf;
+}
+
+void checkGlError(const char *file, int line) {
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+		nlwarning("%s:%d: GL error: %s", file, line, getGlErrStr(error));
+}
 
 
 // ***************************************************************************
@@ -154,10 +174,6 @@ namespace NLDRIVERGL {
 CMaterial::CTexEnv CDriverGL::_TexEnvReplace;
 
 
-#ifdef NL_OS_WINDOWS
-uint CDriverGL::_Registered=0;
-#endif // NL_OS_WINDOWS
-
 // Version of the driver. Not the interface version!! Increment when implementation of the driver change.
 const uint32 CDriverGL::ReleaseVersion = 0x11;
 
@@ -222,41 +238,11 @@ CDriverGL::CDriverGL()
 
 #endif // NL_OS_UNIX
 
-	_ColorDepth = ColorDepth32;
-
-	_DefaultCursor = EmptyCursor;
-	_BlankCursor = EmptyCursor;
-
-	_AlphaBlendedCursorSupported = false;
-	_AlphaBlendedCursorSupportRetrieved = false;
-	_CurrCol = CRGBA::White;
-	_CurrRot = 0;
-	_CurrHotSpotX = 0;
-	_CurrHotSpotY = 0;
-	_CursorScale = 1.f;
-	_MouseCaptured = false;
-
-	_NeedToRestaureGammaRamp = false;
-
-	_win = EmptyWindow;
-	_WindowX = 0;
-	_WindowY = 0;
-	_WindowVisible = true;
-	_DestroyWindow = false;
-	_Maximized = false;
-
-	_CurrentMode.Width = 0;
-	_CurrentMode.Height = 0;
-	_CurrentMode.Depth = 0;
-	_CurrentMode.OffScreen = false;
-	_CurrentMode.Windowed = true;
-	_CurrentMode.AntiAlias = -1;
+	_Display = NULL;
+	_Window = NULL;
 
 	_Interval = 1;
-	_Resizable = false;
-
-	_DecorationWidth = 0;
-	_DecorationHeight = 0;
+	_AntiAlias = 0;
 
 	_CurrentMaterial=NULL;
 	_Initialized = false;
@@ -267,6 +253,8 @@ CDriverGL::CDriverGL()
 	_CurrentFogColor[1]= 0;
 	_CurrentFogColor[2]= 0;
 	_CurrentFogColor[3]= 0;
+
+	_RenderTargetFBO = false;
 
 	_LightSetupDirty= false;
 	_ModelViewMatrixDirty= false;
@@ -382,9 +370,9 @@ CDriverGL::~CDriverGL()
 }
 
 // --------------------------------------------------
-bool CDriverGL::setupDisplay()
+void CDriverGL::registerExtensions()
 {
-	H_AUTO_OGL(CDriverGL_setupDisplay)
+	H_AUTO_OGL(CDriverGL_registerExtensions)
 
 	// Driver caps.
 	//=============
@@ -403,6 +391,12 @@ bool CDriverGL::setupDisplay()
 #elif defined(NL_OS_UNIX)
 	registerGlXExtensions(_Extensions, _dpy, DefaultScreen(_dpy));
 #endif // NL_OS_WINDOWS
+}
+
+// --------------------------------------------------
+bool CDriverGL::setupDisplay()
+{
+	H_AUTO_OGL(CDriverGL_setupDisplay)
 
 	// Check required extensions!!
 	// ARBMultiTexture is a OpenGL 1.2 required extension.
@@ -432,15 +426,18 @@ bool CDriverGL::setupDisplay()
 	// init _DriverGLStates
 	_DriverGLStates.init(_Extensions.ARBTextureCubeMap, (_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle || _Extensions.ARBTextureRectangle), _MaxDriverLight);
 
+	uint width, height;
+	_Window->getSize(width, height);
+
 	// Init OpenGL/Driver defaults.
 	//=============================
-	glViewport(0,0,_CurrentMode.Width,_CurrentMode.Height);
+	glViewport(0,0,width,height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 #ifdef USE_OPENGLES
 	glOrthof(0.f,_CurrentMode.Width,_CurrentMode.Height,0.f,-1.0f,1.0f);
 #else
-	glOrtho(0,_CurrentMode.Width,_CurrentMode.Height,0,-1.0f,1.0f);
+	glOrtho(0,width,height,0,-1.0f,1.0f);
 #endif
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -837,6 +834,7 @@ bool CDriverGL::clearZBuffer(float zval)
 #endif
 
 	_DriverGLStates.enableZWrite(true);
+
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	return true;
@@ -936,6 +934,7 @@ bool CDriverGL::swapBuffers()
 	}
 #endif
 
+/*
 #ifdef NL_OS_WINDOWS
 	if (_EventEmitter.getNumEmitters() > 1) // is direct input running ?
 	{
@@ -943,7 +942,7 @@ bool CDriverGL::swapBuffers()
 		NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1))->poll();
 	}
 #endif
-
+*/
 	if (!_WndActive)
 	{
 		if (_AGPVertexArrayRange) _AGPVertexArrayRange->updateLostBuffers();
@@ -1037,7 +1036,7 @@ bool CDriverGL::release()
 	if (!_Initialized) return true;
 
 	// hide window
-	showWindow(false);
+	_Window->hide();
 
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();
@@ -1065,7 +1064,7 @@ bool CDriverGL::release()
 	_VRAMVertexArrayRange= NULL;
 
 	// destroy window and associated ressources
-	destroyWindow();
+//	_Display->destroyWindow(0);
 
 	// other uninitializations
 	unInit();
@@ -1081,11 +1080,9 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 {
 	H_AUTO_OGL(CDriverGL_setupViewport )
 
-	if (_win == EmptyWindow) return;
-
 	// Setup gl viewport
-	uint32 clientWidth, clientHeight;
-	getWindowSize(clientWidth, clientHeight);
+	uint clientWidth, clientHeight;
+	_Window->getSize(clientWidth, clientHeight);
 
 	// Backup the viewport
 	_CurrViewport = viewport;
@@ -1136,11 +1133,9 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 {
 	H_AUTO_OGL(CDriverGL_setupScissor )
 
-	if (_win == EmptyWindow) return;
-
 	// Setup gl viewport
-	uint32 clientWidth, clientHeight;
-	getWindowSize(clientWidth, clientHeight);
+	uint clientWidth, clientHeight;
+	_Window->getSize(clientWidth, clientHeight);
 
 	// Backup the scissor
 	_CurrScissor= scissor;
@@ -1194,12 +1189,6 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 	}
 }
 
-uint8 CDriverGL::getBitPerPixel ()
-{
-	H_AUTO_OGL(CDriverGL_getBitPerPixel )
-	return _CurrentMode.Depth;
-}
-
 const char *CDriverGL::getVideocardInformation ()
 {
 	H_AUTO_OGL(CDriverGL_getVideocardInformation)
@@ -1219,8 +1208,8 @@ bool CDriverGL::clipRect(NLMISC::CRect &rect)
 {
 	H_AUTO_OGL(CDriverGL_clipRect)
 	// Clip the wanted rectangle with window.
-	uint32 width, height;
-	getWindowSize(width, height);
+	uint width, height;
+	_Window->getSize(width, height);
 
 	sint32	xr=rect.right() ,yr=rect.bottom();
 
@@ -1269,7 +1258,7 @@ void CDriverGL::getZBuffer (std::vector<float>  &zbuffer)
 {
 	H_AUTO_OGL(CDriverGL_getZBuffer )
 	CRect	rect(0,0);
-	getWindowSize(rect.Width, rect.Height);
+	_Window->getSize(rect.Width, rect.Height);
 	getZBufferPart(zbuffer, rect);
 }
 
@@ -1277,7 +1266,7 @@ void CDriverGL::getBuffer (CBitmap &bitmap)
 {
 	H_AUTO_OGL(CDriverGL_getBuffer )
 	CRect	rect(0,0);
-	getWindowSize(rect.Width, rect.Height);
+	_Window->getSize(rect.Width, rect.Height);
 	getBufferPart(bitmap, rect);
 	bitmap.flipV();
 }
@@ -1286,7 +1275,7 @@ bool CDriverGL::fillBuffer (CBitmap &bitmap)
 {
 	H_AUTO_OGL(CDriverGL_fillBuffer )
 	CRect	rect(0,0);
-	getWindowSize(rect.Width, rect.Height);
+	_Window->getSize(rect.Width, rect.Height);
 	if( rect.Width!=bitmap.getWidth() || rect.Height!=bitmap.getHeight() || bitmap.getPixelFormat()!=CBitmap::RGBA )
 		return false;
 

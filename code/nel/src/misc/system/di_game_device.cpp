@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "stdmisc.h"
+#include "../stdmisc.h"
 #include "di_game_device.h"
 #include "nel/misc/game_device_events.h"
 
@@ -217,7 +217,7 @@ static void BuildCtrlName(LPCDIDEVICEOBJECTINSTANCE lpddoi,
 
 //============================================================================
 // A callback to enumerate the controls of a device
-BOOL CALLBACK DIEnumDeviceObjectsCallback
+static BOOL CALLBACK DIEnumDeviceObjectsCallback
 (
   LPCDIDEVICEOBJECTINSTANCE lpddoi,
   LPVOID pvRef

@@ -14,25 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdmisc.h"
-#include "nel/misc/system_utils.h"
-
-#ifdef NL_OS_WINDOWS
-	#ifndef NL_COMP_MINGW
-		#define NOMINMAX
-	#endif
-	#include <windows.h>
-
-	#ifdef _WIN32_WINNT_WIN7
-		// only supported by Windows 7 Platform SDK
-		#include <ShObjIdl.h>
-		#define TASKBAR_PROGRESS 1
-	#endif
-#endif
-
-#ifdef DEBUG_NEW
-	#define new DEBUG_NEW
-#endif
+#include "../stdmisc.h"
+#include "system_utils.h"
 
 using namespace std;
 
@@ -40,155 +23,28 @@ using namespace std;
 static string RootKey;
 static const uint32 KeyMaxLength = 1024;
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 nlWindow CSystemUtils::s_window = EmptyWindow;
 
 bool CSystemUtils::init()
 {
-#ifdef NL_OS_WINDOWS
-	// initialize COM
-	HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
-	if (FAILED(hr)) return false;
-#endif
 
 	return true;
 }
 
 bool CSystemUtils::uninit()
 {
-#ifdef NL_OS_WINDOWS
-	// uninitialize COM
-	CoUninitialize();
-#endif
-
 	return true;
 }
 
 void CSystemUtils::setWindow(nlWindow window)
 {
 	s_window = window;
-}
-
-bool CSystemUtils::updateProgressBar(uint value, uint total)
-{
-#ifdef TASKBAR_PROGRESS
-	if (s_window == NULL)
-	{
-		nlwarning("No window has be set with CSystemUtils::setWindow(), progress bar can't be displayed");
-		return false;
-	}
-
-	ITaskbarList3 *pTaskbarList = NULL;
-
-	// instanciate the taskbar control COM object
-	HRESULT hr = CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pTaskbarList));
-	// error can be ignored because Windows versions before Windows 7 doesn't support it
-	if (FAILED(hr) || !pTaskbarList) return false;
-
-	if (total)
-	{
-		// update the taskbar progress
-		hr = pTaskbarList->SetProgressValue(s_window, (ULONGLONG)value, (ULONGLONG)total);
-	}
-	else
-	{
-		// don't update anymore the progress
-		hr = pTaskbarList->SetProgressState(s_window, value == 0 ? TBPF_INDETERMINATE:TBPF_NOPROGRESS);
-	}
-
-	// release the interface
-	pTaskbarList->Release();
-
-#endif // TASKBAR_PROGRESS
-
-	return true;
-}
-
-bool CSystemUtils::copyTextToClipboard(const ucstring &text)
-{
-	if (!text.size()) return false;
-
-	bool res = false;
-
-#ifdef NL_OS_WINDOWS
-	if (OpenClipboard(NULL))
-	{
-		// check if unicode format is supported by clipboard
-		bool isUnicode = (IsClipboardFormatAvailable(CF_UNICODETEXT) == TRUE);
-
-		// allocates a buffer to copy text in global memory
-		HGLOBAL mem = GlobalAlloc(GHND|GMEM_DDESHARE, (text.size()+1) * (isUnicode ? 2:1));
-
-		if (mem)
-		{
-			// create a lock on this buffer
-			void *hLock = GlobalLock(mem);
-
-			// copy text to this buffer
-			if (isUnicode)
-				wcscpy((wchar_t*)hLock, (const wchar_t*)text.c_str());
-			else
-				strcpy((char*)hLock, text.toString().c_str());
-
-			// unlock buffer
-			GlobalUnlock(mem);
-
-			// empty clipboard
-			EmptyClipboard();
-
-			// set new data to clipboard in the right format
-			SetClipboardData(isUnicode ? CF_UNICODETEXT:CF_TEXT, mem);
-
-			res = true;
-		}
-
-		CloseClipboard();
-	}
-#endif
-
-	return res;
-}
-
-bool CSystemUtils::pasteTextFromClipboard(ucstring &text)
-{
-	bool res = false;
-
-#ifdef NL_OS_WINDOWS
-	if (OpenClipboard(NULL))
-	{
-		// check if unicode format is supported by clipboard
-		bool isUnicode = (IsClipboardFormatAvailable(CF_UNICODETEXT) == TRUE);
-
-		// get data from clipboard (if not of this type, they are converted)
-		// warning, this code can't be debuggued in VC++ IDE, hObj will be always NULL
-		HANDLE hObj = GetClipboardData(isUnicode ? CF_UNICODETEXT:CF_TEXT);
-
-		if (hObj)
-		{
-			// create a lock on clipboard data
-			void *hLock = GlobalLock(hObj);
-
-			if (hLock != NULL)
-			{
-				// retrieve clipboard data
-				if (isUnicode)
-					text = (const ucchar*)hLock;
-				else
-					text = (const char*)hLock;
-
-				// unlock data
-				GlobalUnlock(hObj);
-
-				res = true;
-			}
-		}
-
-		CloseClipboard();
-	}
-#endif
-
-	return res;
 }
 
 bool CSystemUtils::supportUnicode()
@@ -224,7 +80,7 @@ bool CSystemUtils::supportUnicode()
 bool CSystemUtils::isAzertyKeyboard()
 {
 #ifdef NL_OS_WINDOWS
-	uint16 klId = uint16((uintptr_t)GetKeyboardLayout(0) & 0xFFFF);
+	uint16 klId = uint16((uint32)GetKeyboardLayout(0) & 0xFFFF);
 	// 0x040c is French, 0x080c is Belgian
 	if (klId == 0x040c || klId == 0x080c)
 		return true;
@@ -314,8 +170,7 @@ bool CSystemUtils::setRegKey(const string &ValueName, const string &Value)
 	HKEY hkey;
 	DWORD dwDisp;
 
-	char nstr[] = { 0x00 };
-	if (RegCreateKeyExA(HKEY_CURRENT_USER, RootKey.c_str(), 0, nstr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
+	if (RegCreateKeyExA(HKEY_CURRENT_USER, RootKey.c_str(), 0, "", REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
 	{
 		if (RegSetValueExA(hkey, ValueName.c_str(), 0L, REG_SZ, (const BYTE *)Value.c_str(), (DWORD)(Value.size())+1) == ERROR_SUCCESS)
 			res = true;

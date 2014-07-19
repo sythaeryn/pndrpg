@@ -22,8 +22,6 @@
 #include "nel/misc/events.h"
 #include "nel/misc/game_device_events.h"
 
-#include "nel/3d/driver.h"
-
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
 #include <X11/Xlib.h>
@@ -65,16 +63,6 @@ public:
 	 * process input-related events (mouse and keyboard)
 	 */
 	bool processMessage(XEvent &event, CEventServer *server = NULL);
-
-	/**
-	 * Copy a string to system clipboard.
-	 */
-        virtual bool copyTextToClipboard(const ucstring &text);
-
-	/*
-	 * Paste a string from system clipboard.
-	 */
-	virtual bool pasteTextFromClipboard(ucstring &text);
 
 	void createIM();
 	void closeIM();
