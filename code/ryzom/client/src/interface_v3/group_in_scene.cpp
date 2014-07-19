@@ -88,8 +88,8 @@ void CGroupInScene::computeWindowPos(sint32 &newX, sint32 &newY, CVector &newPro
 			uint w, h;
 			CSystem::instance()->getDisplay()->getWindow()->getSize(w, h);
 			// Get the width and height
-			tmp.x *= (float)CViewRenderer::getInstance()->getDriver()->getWindowWidth();
-			tmp.y *= (float)CViewRenderer::getInstance()->getDriver()->getWindowHeight();
+			tmp.x *= (float)w;
+			tmp.y *= (float)h;
 
 			// position without offset, in float
 			newProjCenter.x= tmp.x;
