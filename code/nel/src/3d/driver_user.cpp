@@ -192,6 +192,7 @@ CDriverUser::CDriverUser (uintptr_t windowIcon, TDriver driver, emptyProc exitFu
 	_PBTri.lock (iba);
 	iba.setTri(0, 0, 1, 2);
 
+	_RenderTargetManager.m_Driver = this;
 	_ShapeBank._DriverUser = this;
 
 	NL_SET_IB_NAME(_PBLine, "CDriverUser::_PBLine");
@@ -1357,6 +1358,7 @@ void			CDriverUser::swapBuffers()
 	NL3D_HAUTO_SWAP_DRIVER;
 
 	_Driver->swapBuffers();
+	_RenderTargetManager.cleanup();
 }
 
 // ***************************************************************************
@@ -1609,36 +1611,6 @@ bool			CDriverUser::fillBuffer (CBitmap &bitmap)
 // ***************************************************************************
 // ***************************************************************************
 
-NLMISC::IMouseDevice			*CDriverUser::enableLowLevelMouse(bool enable, bool exclusive)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->enableLowLevelMouse(enable, exclusive);
-}
-NLMISC::IKeyboardDevice			*CDriverUser::enableLowLevelKeyboard(bool enable)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->enableLowLevelKeyboard(enable);
-}
-
-void CDriverUser::emulateMouseRawMode(bool enable)
-{
-	_Driver->getEventEmitter()->emulateMouseRawMode(enable);
-}
-
-uint CDriverUser::getDoubleClickDelay(bool hardwareMouse)
-{
-	NL3D_HAUTO_UI_DRIVER;
-	return _Driver->getDoubleClickDelay(hardwareMouse);
-}
-
-NLMISC::IInputDeviceManager		*CDriverUser::getLowLevelInputDeviceManager()
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->getLowLevelInputDeviceManager();
-}
 void			CDriverUser::showCursor (bool b)
 {
 	NL3D_HAUTO_UI_DRIVER;
