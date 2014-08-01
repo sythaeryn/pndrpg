@@ -34,7 +34,7 @@
 #include "nel/3d/vertex_stream_manager.h"
 #include "nel/3d/async_texture_manager.h"
 #include "nel/3d/lod_character_manager.h"
-
+#include "nel/3d/render_target_manager.h"
 
 namespace NL3D
 {
@@ -71,6 +71,7 @@ protected:
 	bool					_WindowInit;
 	CMatrixContext			_CurrentMatrixContext;
 	CFontManager			_FontManager;
+	CRenderTargetManager	_RenderTargetManager;
 	// Components List.
 	typedef	CPtrSet<CTextureUser>		TTextureSet;
 	typedef	CPtrSet<CTextContextUser>	TTextContextSet;
@@ -253,6 +254,8 @@ public:
 	/// get cahce information.
 	virtual		std::string getFontManagerCacheInformation() const ;
 
+	virtual CRenderTargetManager &getRenderTargetManager() { return _RenderTargetManager; }
+
 
 	/** Create a new texture file, searching in CPath.
 	 * \param file filename, local to CPath paths.
@@ -409,21 +412,6 @@ public:
 	virtual void			getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rect);
 	virtual bool			fillBuffer (CBitmap &bitmap);
 	// @}
-
-
-	/// \name Mouse / Keyboards / Game devices
-	// @{
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-	//
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-
-	/**
-	 * wrapper for IEventEmitter::emulateMouseRawMode()
-	 */
-	virtual void emulateMouseRawMode(bool enable);
-
-	virtual uint	getDoubleClickDelay(bool hardwareMouse);
 
 	/// show cursor if b is true, or hide it if b is false
 	virtual void			showCursor (bool b);
