@@ -103,8 +103,8 @@ namespace GeorgesQt
 
 		connect(Core::ICore::instance(), SIGNAL(changeSettings()),
 			this, SLOT(settingsChanged()));
-		connect(m_georgesDirTreeDialog, SIGNAL(selectedForm(const QString)), 
-			this, SLOT(loadFile(const QString)));
+		connect(m_georgesDirTreeDialog, SIGNAL(fileSelected(const QString&)), 
+			this, SLOT(loadFile(const QString&)));
 		connect(qApp, SIGNAL(focusChanged(QWidget*, QWidget*)),
 			this, SLOT(focusChanged(QWidget*, QWidget*)));
 	}
@@ -144,8 +144,12 @@ namespace GeorgesQt
 	void GeorgesEditorForm::save()
 	{
         m_lastActiveDock->write();
-        m_saveAction->setEnabled(false);
 
+
+        m_saveAction->setEnabled(false);
+		QAction *saveAction = Core::ICore::instance()->menuManager()->action( Core::Constants::SAVE );
+		if( saveAction != NULL )
+			saveAction->setEnabled(false);
 	}
 
 	void GeorgesEditorForm::readSettings()
@@ -190,12 +194,12 @@ namespace GeorgesQt
 		}
 	}
 
-    void GeorgesEditorForm::loadFile(const QString fileName)
+    void GeorgesEditorForm::loadFile(const QString &fileName)
     {
         loadFile(fileName, false);
     }
 
-    void GeorgesEditorForm::loadFile(const QString fileName, bool loadFromDfn)
+    void GeorgesEditorForm::loadFile(const QString &fileName, bool loadFromDfn)
 	{
 		QFileInfo info(fileName);
 
@@ -257,6 +261,10 @@ namespace GeorgesQt
 		{
             nlwarning("Failed to load form: %s", info.fileName().toUtf8().constData());
 			m_dockedWidgets.last()->close();
+
+			QMessageBox::information( this,
+										tr( "Failed to load form..." ),
+										tr( "Failed to load form '%1'" ).arg( info.fileName() ) );
 		}
 	}
 

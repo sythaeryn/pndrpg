@@ -71,7 +71,6 @@ namespace GeorgesQt
 		m_ui.treeView->setHeader(m_header);
 		m_ui.treeView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		m_ui.treeView->header()->setStretchLastSection(true);
-		m_ui.treeViewTabWidget->setTabEnabled (2,false);
 
 		m_form = 0;
 		m_model = NULL;
@@ -91,6 +90,7 @@ namespace GeorgesQt
 		connect(m_browserCtrl, SIGNAL(arrayResized(const QString&,int)), this, SLOT(onArrayResized(const QString&,int)));
 		
 		connect(m_browserCtrl, SIGNAL(modified()), this, SLOT(modifiedFile()));
+		connect(m_browserCtrl, SIGNAL(valueChanged(const QString&,const QString&)), this, SLOT(onValueChanged(const QString&,const QString&)));
 	}
 
 	CGeorgesTreeViewDialog::~CGeorgesTreeViewDialog()
@@ -220,6 +220,9 @@ namespace GeorgesQt
 		else
 			return;
 
+		m_ui.logEdit->setPlainText( form->Header.Log.c_str() );
+		m_ui.logEdit->setReadOnly( true );
+
 		UFormElm *root = 0;
 		root = &m_form->getRootNode();
 
@@ -316,6 +319,8 @@ namespace GeorgesQt
 
 	void CGeorgesTreeViewDialog::write( ) 
 	{
+		NLGEORGES::CForm *form = static_cast< NLGEORGES::CForm* >( m_form );
+		form->Header.Log = m_ui.logEdit->toPlainText().toUtf8().constData();
 
 		NLMISC::COFile file;
 		std::string s = NLMISC::CPath::lookup(loadedForm.toAscii().data(), false);
@@ -468,6 +473,74 @@ namespace GeorgesQt
 		if( !idx.isValid() )
 			return;
 		m_ui.treeView->setCurrentIndex( idx );
+
+		log( name + " resized = " + QString::number( size ) );
+	}
+
+	void CGeorgesTreeViewDialog::onAppendArray()
+	{
+		QModelIndex idx = m_ui.treeView->currentIndex();
+
+		CFormItem *item = reinterpret_cast< CFormItem* >( idx.internalPointer() );
+		QString formName = item->formName().c_str();
+		int size = item->childCount();
+
+		m_model->appendArray( idx );
+
+		m_ui.treeView->reset();
+		m_ui.treeView->expandAll();
+
+		m_ui.treeView->setCurrentIndex( idx );
+		m_browserCtrl->clicked( idx );
+
+		log( formName + " resized = " + QString::number( size + 1 ) );
+
+		modifiedFile();
+	}
+
+	void CGeorgesTreeViewDialog::onDeleteArrayEntry()
+	{
+		QModelIndex current = m_ui.treeView->currentIndex();
+		QModelIndex parent = current.parent();
+
+		CFormItem *item = reinterpret_cast< CFormItem* >( current.internalPointer() );
+		QString formName = item->formName().c_str();
+
+		m_model->deleteArrayEntry( current );
+
+		m_ui.treeView->expandAll();
+		m_ui.treeView->setCurrentIndex( parent );
+		m_browserCtrl->clicked( parent );
+
+		log( "deleted " + formName );
+
+		modifiedFile();
+	}
+
+	void CGeorgesTreeViewDialog::onValueChanged( const QString &key, const QString &value )
+	{
+		log( key + " = " + value );
+	}
+
+	void CGeorgesTreeViewDialog::onRenameArrayEntry()
+	{
+		QModelIndex idx  = m_ui.treeView->currentIndex();
+
+		CFormItem *item = static_cast< CFormItem* >( idx.internalPointer() );
+
+		QString newName = QInputDialog::getText( this,
+												tr( "Rename" ),
+												tr( "Enter new name" ),
+												QLineEdit::Normal,
+												item->name().c_str() );
+
+		m_model->renameArrayEntry( idx, newName );
+
+		QString formName = item->formName().c_str();
+
+		log( formName + " renamed = " + newName );
+
+		modifiedFile();
 	}
 
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
@@ -523,12 +596,17 @@ namespace GeorgesQt
 		//	}
 			if(item->isArray())
 			{
-                contextMenu.addAction("Append array entry...");
+                QAction *appendAction = contextMenu.addAction("Append array entry...");
+				connect( appendAction, SIGNAL( triggered( bool ) ), this, SLOT( onAppendArray() ) );
 			}
 			else if(item->isArrayMember())
 			{
-				contextMenu.addAction("Delete array entry...");
-				contextMenu.addAction("Insert after array entry...");
+				QAction *deleteAction = contextMenu.addAction("Delete array entry...");
+				connect( deleteAction, SIGNAL( triggered( bool ) ), this, SLOT( onDeleteArrayEntry() ) );
+
+				QAction *renameAction = contextMenu.addAction("Rename");
+				connect( renameAction, SIGNAL( triggered( bool ) ), this, SLOT( onRenameArrayEntry() ) );
+				//contextMenu.addAction("Insert after array entry...");
 			}
 		//	else if(item->getFormElm()->isStruct())
 		//	{
@@ -558,24 +636,10 @@ namespace GeorgesQt
 		//	else if(item->getFormElm()->isAtom() && item->valueFrom() == NLGEORGES::UFormElm::ValueForm)
 		//		contextMenu.addAction("Revert to parent/default...");
 
-            QAction *selectedItem = contextMenu.exec(QCursor::pos());
+            contextMenu.exec(QCursor::pos());
+			/*
             if(selectedItem)
             {
-                if(selectedItem->text() == "Append array entry...")
-                {
-
-
-                } // Append an array entry...
-                else if(selectedItem->text() == "Delete array entry...")
-                {
-
-                }
-                else if(selectedItem->text() == "Insert after array entry...")
-                {
-
-                }
-
-
 		//		if(selectedItem->text() == "Add parent...")
 		//		{
 		//			// Get the file extension of the form so we can build a dialog pattern.
@@ -624,10 +688,41 @@ namespace GeorgesQt
 		//		}
 
             } // if selected context menu item is valid.
+			*/
 		} // if 'm' model valid.
 
 		//if(structContext)
 		//	delete structContext;
+	}
+
+	void CGeorgesTreeViewDialog::log( const QString &msg )
+	{
+		QString user = getenv( "USER" );
+		if( user.isEmpty() )
+			user = getenv( "USERNAME" );
+		if( user.isEmpty() )
+			user = "anonymous";
+
+		QTime time = QTime::currentTime();
+		QDate date = QDate::currentDate();
+		
+		QString dateString = date.toString( "ddd MMM dd" );
+		QString timeString = time.toString( "HH:mm:ss" );
+
+		QString logMsg;
+		logMsg += dateString;
+		logMsg += ' ';
+		logMsg += timeString;
+		logMsg += ' ';
+		logMsg += QString::number( date.year() );
+		logMsg += ' ';
+		logMsg += "(";
+		logMsg += user;
+		logMsg += ")";
+		logMsg += ' ';
+		logMsg += msg;
+
+		m_ui.logEdit->appendPlainText( logMsg );
 	}
 
 } /* namespace GeorgesQt */
