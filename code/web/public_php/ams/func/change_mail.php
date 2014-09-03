@@ -7,13 +7,13 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 function change_mail(){
-
+	
     try{
         //if logged in
         if(WebUsers::isLoggedIn()){
-
+            
             if(isset($_POST['target_id'])){
-
+		
                 //check if the user who executed this function is the person of whom the emailaddress is or if it's a mod/admin.
                 if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod(unserialize($_SESSION['ticket_user'])) ){
                     if($_POST['target_id'] == $_SESSION['id']){
@@ -24,22 +24,22 @@ function change_mail(){
 			$webUser = new WebUsers($_POST['target_id']);
                         $target_username = $webUser->getUsername();
                     }
-
+                    
                     $webUser = new WebUsers($_POST['target_id']);
 		    //check if emailaddress is valid.
 		    $reply = $webUser->checkEmail($_POST['NewEmail']);
-
+		    
 		    global $SITEBASE;
                     require_once($SITEBASE . '/inc/settings.php');
                     $result = settings();
-
+		    
 		    if ( $reply != "success" ){
 			$result['EMAIL_ERROR'] = 'TRUE';
 		    }else{
 			$result['EMAIL_ERROR'] = 'FALSE';
 		    }
 		    $result['prevNewEmail'] = filter_var($_POST["NewEmail"], FILTER_SANITIZE_EMAIL);
-
+		    
                     if ($reply== "success"){
 			//if validation was successful, update the emailaddress
                         $status = WebUsers::setEmail($target_username, filter_var($_POST["NewEmail"], FILTER_SANITIZE_EMAIL) );
@@ -58,8 +58,8 @@ function change_mail(){
                             }
                         }
                         helpers :: loadtemplate( 'settings', $result);
-                        throw new SystemExit();
-
+                        exit;
+                         
                     }else{
 			$result['EMAIL'] = $reply;
                         $result['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
@@ -71,36 +71,34 @@ function change_mail(){
                                 $result['isMod'] = "TRUE";
                             }
                         }
+                        $result['CEMAIL_ERROR'] = true;
                         helpers :: loadtemplate( 'settings', $result);
-                        throw new SystemExit();
+                        exit;
                     }
-
+                    
                 }else{
                     //ERROR: permission denied!
 		    $_SESSION['error_code'] = "403";
-                header("Cache-Control: max-age=1");
                     header("Location: index.php?page=error");
-                    throw new SystemExit();
+                    exit;
                 }
-
+        
             }else{
-                //ERROR: The form was not filled in correclty
-                header("Cache-Control: max-age=1");
+                //ERROR: The form was not filled in correctly
 		header("Location: index.php?page=settings");
-		throw new SystemExit();
-            }
+		exit;
+            }    
         }else{
             //ERROR: user is not logged in
-                header("Cache-Control: max-age=1");
 	    header("Location: index.php");
-	    throw new SystemExit();
+	    exit;
         }
-
+                  
     }catch (PDOException $e) {
          //go to error page or something, because can't access website db
          print_r($e);
-         throw new SystemExit();
+         exit;
     }
-
+    
 }
 
