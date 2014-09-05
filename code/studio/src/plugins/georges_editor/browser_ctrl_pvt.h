@@ -61,13 +61,15 @@ Q_SIGNALS:
 
 private:
 	void setupStruct( NLGEORGES::UFormElm *node );
-	void setupAtom( NLGEORGES::CFormElmStruct::CFormElmStructElm &elm );
+	void setupAtom( NLGEORGES::CFormElmStruct *st, int idx );
 
 	void setupStruct( GeorgesQt::CFormItem *node );
 	void setupArray( GeorgesQt::CFormItem *node );
+	void setupAtom( GeorgesQt::CFormItem *node );
 
 	void onStructValueChanged( QtProperty *p, const QVariant &value );
 	void onArrayValueChanged( QtProperty *p, const QVariant &value );
+	void onAtomValueChanged( QtProperty *p, const QVariant &value );
 	void createArray();
 	
 	QtVariantPropertyManager *mgr;
