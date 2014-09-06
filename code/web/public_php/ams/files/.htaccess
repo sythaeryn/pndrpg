@@ -1,0 +1,7 @@
+Options -Indexes
+Options -ExecCGI
+DirectoryIndex disabled
+<Files *.*>
+	ForceType application/octet-stream
+	Header set Content-Disposition attachment
+</Files>
