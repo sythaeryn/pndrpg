@@ -1,17 +1,17 @@
 {block name=content}
 
-	<div class="row-fluid">
+	<div class="row">
 		<div class="box col-md-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<span class="icon-info-sign"></span>{$syncing_title}
+				<span class="glyphicon glyphicon-info-sign"></span>{$syncing_title}
 			</div>
 			<div class="panel-body">
 				<center>
 				<p>{$syncing_info}</p>
 				{if $shard eq "online"}
 				<div class="alert alert-success">
-					<span class="icon-refresh icon-white"></span>{$shard_online}<a href="#" id="sync" onclick="sync()">{$syncing_sync}</a>
+					<span class="glyphicon glyphicon-refresh icon-white"></span>{$shard_online}<a href="#" id="sync" onclick="sync()">{$syncing_sync}</a>
 					<script>
 						function sync(){
 							xmlhttp=new XMLHttpRequest();
@@ -21,8 +21,8 @@
 					</script>
 				</div>
 				{else}
-				<div class="alert alert-error">
-					<strong><span class="icon-refresh icon-white"></span></strong> {$shard_offline}
+				<div class="alert alert-danger">
+					<strong><span class="glyphicon glyphicon-refresh icon-white"></span></strong> {$shard_offline}
 				</div>
 				{/if}
 				</center>
@@ -31,11 +31,11 @@
 			</div>
 		</div>
 	</div>
-			<div class="row-fluid sortable">
+			<div class="row sortable">
 				<div class="box col-md-12">
 				<div class="panel panel-default">
 					<div class="panel-heading" data-original-title>
-						<span class="icon-user"></span> {$members}
+						<span class="glyphicon glyphicon-user"></span> {$members}
 					</div>
 					<div class="panel-body">
 						<table class="table table-striped table-bordered">

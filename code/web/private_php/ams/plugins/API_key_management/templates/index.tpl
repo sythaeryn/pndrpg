@@ -1,41 +1,41 @@
 {block name=content}
 
 {if isset($smarty.get.plugin_action) and $smarty.get.plugin_action eq 'generate_key'}
-<div class="row-fluid">	
+<div class="row">	
 				<div class="box col-md-12">
 				<div class="panel panel-default">
 					<div class="panel-heading" data-original-title>
-						<span class="icon-user"></span> API KEY management
+						<span class="glyphicon glyphicon-user"></span> API KEY management
 						<div class="box-icon">
-							<a href="#" class="btn btn-setting btn-round"><span class="icon-cog"></span></a>
-							<a href="#" class="btn btn-minimize btn-round"><span class="icon-chevron-up"></span></a>
-							<a href="#" class="btn btn-close btn-round"><span class="icon-remove"></span></a>
+							<a href="#" class="btn btn-setting btn-round"><span class="glyphicon glyphicon-cog"></span></a>
+							<a href="#" class="btn btn-xsmize btn-round"><span class="glyphicon glyphicon-chevron-up"></span></a>
+							<a href="#" class="btn btn-close btn-round"><span class="glyphicon glyphicon-remove"></span></a>
 						</div>
 					</div>
 					<div class="box col-md-4">
 			<div class="panel-heading" data-original-title="">
-				<span class="icon-th"></span> Generate Access Key
+				<span class="glyphicon glyphicon-th"></span> Generate Access Key
 				<div class="box-icon">
-					<a href="#" class="btn btn-minimize btn-round"><span class="icon-chevron-up"></span></a>
-					<a href="#" class="btn btn-close btn-round"><span class="icon-remove"></span></a>
+					<a href="#" class="btn btn-xsmize btn-round"><span class="glyphicon glyphicon-chevron-up"></span></a>
+					<a href="#" class="btn btn-close btn-round"><span class="glyphicon glyphicon-remove"></span></a>
 				</div>
 			</div>
 			<div class="panel-body">
-				<div class="row-fluid">
+				<div class="row">
 					<form id="generateKey" class="form-vertical" method="post" action="index.php?page=layout_plugin&&name={$arrkey}&&plugin_action=generate_key">
 						<legend>Generate Key</legend>
 						
-						<div class="control-group">
+						<div class="form-group">
 						<label class="control-label">Name:</label>
 							<div class="controls">
 							    <div class="input-prepend">
-								<span class="add-on" style="margin-left:5px;"><span class="icon-user"></span></span>
+								<span class="add-on" style="margin-left:5px;"><span class="glyphicon glyphicon-user"></span></span>
 									<input type="text" class="input-xlarge" id="sp_name" name="sp_name" placeholder="Your friendly name">
 							    </div>
 							</div>
 						</div>
 						
-					<div class="control-group">
+					<div class="form-group">
 							<label class="control-label">Type:</label>
 							<div class="controls">
 								 <select name="api_type">	
@@ -44,7 +44,7 @@
 								</select>	
 							</div>
 						</div>						
-					<div class="control-group">
+					<div class="form-group">
 							<label class="control-label">Character:</label>
 							<div class="controls">
 								 <select name="character_name">
@@ -57,17 +57,17 @@
 							</div>
 						</div>
 										
-						<div class="control-group ">
+						<div class="form-group ">
 						<label class="control-label">Expirey:</label>
 							<div class="controls">
 							    <div class="input-prepend">
-								<span style="margin-left:5px;" class="add-on"><span class="icon-time"></span></span>
+								<span style="margin-left:5px;" class="add-on"><span class="glyphicon glyphicon-time"></span></span>
 									<input type="text" placeholder="Expiry Date" name="expDate" id="expDate" class="input-xlarge">		
 							    </div>
 							</div>
 						</div>
 						
-						<div class="control-group">
+						<div class="form-group">
 							<label class="control-label"></label>
 							<div class="controls">
 								<button type="submit" name="gen_key" value="true" class="btn btn-primary" style="margin-left:5px; margin-top:10px;">Generate Key</button>
@@ -81,27 +81,27 @@
 				</div><!--/span-->
 			</div><!--/row-->
 {else}
-<div class="row-fluid">	
+<div class="row">	
 				<div class="box col-md-12">
 				<div class="panel panel-default">
 					<div class="panel-heading" data-original-title>
-						<span class="icon-user"></span> API KEY management
+						<span class="glyphicon glyphicon-user"></span> API KEY management
 						<div class="box-icon">
-							<a href="#" class="btn btn-setting btn-round"><span class="icon-cog"></span></a>
-							<a href="#" class="btn btn-minimize btn-round"><span class="icon-chevron-up"></span></a>
-							<a href="#" class="btn btn-close btn-round"><span class="icon-remove"></span></a>
+							<a href="#" class="btn btn-setting btn-round"><span class="glyphicon glyphicon-cog"></span></a>
+							<a href="#" class="btn btn-xsmize btn-round"><span class="glyphicon glyphicon-chevron-up"></span></a>
+							<a href="#" class="btn btn-close btn-round"><span class="glyphicon glyphicon-remove"></span></a>
 						</div>
 					</div>
 					
 			
-			{if isset($hook_info.API_key_management['gen_key_validate']) and $hook_info.API_key_management['gen_key_validate'] eq 'false' }<div class="alert alert-error"><p>Please enter all the fields</p></div>{/if}
-					{if isset($smarty.get.success) and $smarty.get.success eq '1'}<div class="alert alert-error"><p>Key added successfully</p></div>{/if}
-					{if isset($smarty.get.success) and $smarty.get.success eq '2'}<div class="alert alert-error"><p>Key deleted successfully</p></div>{/if}
+			{if isset($hook_info.API_key_management['gen_key_validate']) and $hook_info.API_key_management['gen_key_validate'] eq 'false' }<div class="alert alert-danger"><p>Please enter all the fields</p></div>{/if}
+					{if isset($smarty.get.success) and $smarty.get.success eq '1'}<div class="alert alert-danger"><p>Key added successfully</p></div>{/if}
+					{if isset($smarty.get.success) and $smarty.get.success eq '2'}<div class="alert alert-danger"><p>Key deleted successfully</p></div>{/if}
 					<br /><center>
-						<a href="index.php?page=layout_plugin&&name=API_key_management&&plugin_action=generate_key"><button class="btn btn-primary btn-large dropdown-toggle">Generate key</button></a>
+						<a href="index.php?page=layout_plugin&&name=API_key_management&&plugin_action=generate_key"><button class="btn btn-primary btn-lg dropdown-toggle">Generate key</button></a>
 						</center>
 			<div class="panel-body">
-				<div class="row-fluid">
+				<div class="row">
 					<center><p>All the keys you have generated will be shown and you can customize from here.</p></center>
 						
 						<table class="table table-striped table-bordered">
@@ -124,7 +124,7 @@
 								<td class="center">{$element.UserCharacter}</td>
 								<td class="center">{$element.AccessToken}</td>
 								<td class="center">{$element.ExpiryDate}</td>
-								<td><a href="index.php?page=layout_plugin&&name={$arrkey}&&delete_id={$element.SNo}"><button class="btn btn-primary btn-large">Delete</button></a>
+								<td><a href="index.php?page=layout_plugin&&name={$arrkey}&&delete_id={$element.SNo}"><button class="btn btn-primary btn-lg">Delete</button></a>
                 			</tr>
 							{/foreach}
 							{/if}

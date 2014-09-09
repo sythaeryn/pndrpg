@@ -1,12 +1,12 @@
 {block name=content}
-<div class="row-fluid sortable ui-sortable">
+<div class="row sortable ui-sortable">
     <div class="box col-md-9">
 	<div class="panel panel-default">
         <div class="panel-heading" data-original-title="">
-            <span class="icon-tag"></span> <a href="index.php?page=show_ticket&id={$ticket_id}">[#{$ticket_id}] {$ticket_title}</a> 
+            <span class="glyphicon glyphicon-tag"></span> <a href="index.php?page=show_ticket&id={$ticket_id}">[#{$ticket_id}] {$ticket_title}</a> 
         </div>
         <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
                 <legend>Additional Info </legend>
 		<div style=" padding-left:10%;padding-right:10%;">
 		    <table class="table table-bordered table-condensed " >
@@ -81,14 +81,14 @@
     <div class="box col-md-3">
 	<div class="panel panel-default">
         <div class="panel-heading" data-original-title="">
-            <span class="icon-th"></span>Actions
+            <span class="glyphicon glyphicon-th"></span>Actions
         </div>
         <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
 
 		<legend style="margin-bottom:9px;">Actions</legend>
 		<div class="btn-group">
-		    <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
+		    <button class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
 		    <ul class="dropdown-menu">
 			<li class="divider"></li>
 			{if isset($isMod) and $isMod eq "TRUE"}<li><a href="index.php?page=show_ticket_log&id={$ticket_id}">Show Ticket Log</a></li>{/if}

@@ -18,20 +18,18 @@
 	<meta name="author" content="Daan Janssens & Matthew Lagoe">
 
 	<!-- The styles -->
-	<link id="bs-css" href="css/bootstrap-classic.css" rel="stylesheet">
-    <link id="bs-css" href="css/bootstrap-cerulean.min.css" rel="stylesheet">
-
-    <link href="css/charisma-app.css" rel="stylesheet">
-    <link href='css/jquery.noty.css' rel='stylesheet'>
-    <link href='css/noty_theme_default.css' rel='stylesheet'>
-    <link href='css/elfinder.min.css' rel='stylesheet'>
-    <link href='css/elfinder.theme.css' rel='stylesheet'>
-    <link href='css/jquery.iphone.toggle.css' rel='stylesheet'>
-    <link href='css/uploadify.css' rel='stylesheet'>
-    <link href='css/animate.min.css' rel='stylesheet'>
+	<link id="bs-css" href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/charisma-app.css" rel="stylesheet">
+	<link href='css/jquery.noty.css' rel='stylesheet'>
+	<link href='css/noty_theme_default.css' rel='stylesheet'>
+	<link href='css/elfinder.min.css' rel='stylesheet'>
+	<link href='css/elfinder.theme.css' rel='stylesheet'>
+	<link href='css/jquery.iphone.toggle.css' rel='stylesheet'>
+	<link href='css/uploadify.css' rel='stylesheet'>
+	<link href='css/animate.min.css' rel='stylesheet'>
 
 	<!-- jQuery -->
-    <script src="js/jquery.min.js"></script>
+	<script src="js/jquery.min.js"></script>
 
 	<!-- The HTML5 shim, for IE6-8 support of HTML5 elements -->
 	<!--[if lt IE 9]>
@@ -46,15 +44,15 @@
 </head>
 
 <body>
-  <div class="container-fluid">
+  <div class="container">
 	{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
-	<div class="navbar">
+	<div class="navbar navbar-default" role="navigation">
 		<div class="navbar-inner">
-			<div class="container-fluid">
-				<a class="btn btn-navbar" data-toggle="collapse" data-target=".top-nav.nav-collapse,.sidebar-nav.nav-collapse">
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
+			<div class="container">
+				<a class="btn navbar-btn" data-toggle="collapse" data-target=".top-nav.nav-collapse,.sidebar-nav.nav-collapse">
+					<span class="glyphicon glyphicon-bar"></span>
+					<span class="glyphicon glyphicon-bar"></span>
+					<span class="glyphicon glyphicon-bar"></span>
 				</a>
 				<a class="brand" href="index.php"> <img alt="Ryzom Core Logo" src="img/ryzomcore_166_62.png"></a>
 				<div class="flags_logged_in">
@@ -65,19 +63,19 @@
 				<!-- theme selector starts -->
 				<!--<div class="btn-group pull-right theme-container">
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-						<span class="icon-tint"></span><span class="hidden-phone"> Change Theme / Skin</span>
+						<span class="glyphicon glyphicon-tint"></span><span class="hidden-phone"> Change Theme / Skin</span>
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu" id="themes">
-						<li><a data-value="classic" href="#"><span class="icon-blank"></span> Classic</a></li>
-						<li><a data-value="cerulean" href="#"><span class="icon-blank icon-ok"></span> Cerulean</a></li>
-						<li><a data-value="cyborg" href="#"><span class="icon-blank"></span> Cyborg</a></li>
-						<li><a data-value="redy" href="#"><span class="icon-blank"></span> Redy</a></li>
-						<li><a data-value="journal" href="#"><span class="icon-blank"></span> Journal</a></li>
-						<li><a data-value="simplex" href="#"><span class="icon-blank"></span> Simplex</a></li>
-						<li><a data-value="slate" href="#"><span class="icon-blank"></span> Slate</a></li>
-						<li><a data-value="spacelab" href="#"><span class="icon-blank"></span> Spacelab</a></li>
-						<li><a data-value="united" href="#"><span class="icon-blank"></span> United</a></li>
+						<li><a data-value="classic" href="#"><span class="glyphicon glyphicon-blank"></span> Classic</a></li>
+						<li><a data-value="cerulean" href="#"><span class="glyphicon glyphicon-blank icon-ok"></span> Cerulean</a></li>
+						<li><a data-value="cyborg" href="#"><span class="glyphicon glyphicon-blank"></span> Cyborg</a></li>
+						<li><a data-value="redy" href="#"><span class="glyphicon glyphicon-blank"></span> Redy</a></li>
+						<li><a data-value="journal" href="#"><span class="glyphicon glyphicon-blank"></span> Journal</a></li>
+						<li><a data-value="simplex" href="#"><span class="glyphicon glyphicon-blank"></span> Simplex</a></li>
+						<li><a data-value="slate" href="#"><span class="glyphicon glyphicon-blank"></span> Slate</a></li>
+						<li><a data-value="spacelab" href="#"><span class="glyphicon glyphicon-blank"></span> Spacelab</a></li>
+						<li><a data-value="united" href="#"><span class="glyphicon glyphicon-blank"></span> United</a></li>
 					</ul>
 				</div>-->
 				<!-- theme selector ends -->
@@ -85,7 +83,7 @@
 				{if isset($username)}
 				<div class="btn-group pull-right">
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-						<span class="icon-user"></span><span class="hidden-phone">{$username}</span>
+						<span class="glyphicon glyphicon-user"></span><span class="hidden-phone">{$username}</span>
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu">
@@ -99,11 +97,11 @@
 		</div>
 	</div>
 	{/if}
-	<div class="container-fluid">
-		<div class="row-fluid">
+	<div class="container">
+		<div class="row">
 			{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
 			<!-- left menu starts -->
-			<div class="span2 main-menu-span panel panel-default">
+			<div class="col-md-2 main-menu-span panel panel-default">
 				<div class="nav-collapse panel-body">
 					<ul class="nav nav-tabs nav-stacked main-menu">
 						{block name=menu}{/block}
@@ -114,13 +112,13 @@
 			<!-- left menu ends -->
 
 			<noscript>
-				<div class="alert alert-block span10">
+				<div class="alert alert-block col-md-10">
 					<h4 class="alert-heading">Warning!</h4>
 					<p>You need to have <a href="http://en.wikipedia.org/wiki/JavaScript" target="_blank">JavaScript</a> enabled to use this site.</p>
 				</div>
 			</noscript>
 
-			<div id="content" class="span10">
+			<div id="content" class="col-md-10">
 			<!-- content starts -->
 			{/if}
 
@@ -135,7 +133,7 @@
 
 			{block name=content}{/block}
 			{if isset($hook_info)}
-				<div class="row-fluid">
+				<div class="row">
 					{foreach from=$hook_info key=arrkey item=element}
 						{if isset($smarty.get.page) and $smarty.get.page eq 'layout_plugin' and $smarty.get.name eq $arrkey}
 							{include file=$hook_info[$smarty.get.name]['TemplatePath']}
@@ -146,7 +144,7 @@
 
 
 			{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
-			</div><!--/#content.span10-->
+			</div><!--/#content.col-md-10-->
 			{/if}
 		</div><!--/fluid-row-->
 		{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
@@ -161,7 +159,7 @@
 				<p>Here settings can be configured...</p>
 			</div>
 			<div class="modal-footer">
-				<a href="#" class="btn" data-dismiss="modal">Close</a>
+				<a href="#" class="btn btn-default" data-dismiss="modal">Close</a>
 				<a href="#" class="btn btn-primary">Save changes</a>
 			</div>
 		</div>
@@ -243,32 +241,8 @@
 	<script src="js/jquery-1.7.2.min.js"></script>
 	<!-- jQuery UI -->
 	<script src="js/jquery-ui-1.8.21.custom.min.js"></script>
-	<!-- transition / effect library -->
-	<script src="js/bootstrap-transition.js"></script>
-	<!-- alert enhancer library -->
-	<script src="js/bootstrap-alert.js"></script>
-	<!-- modal / dialog library -->
-	<script src="js/bootstrap-modal.js"></script>
-	<!-- custom dropdown library -->
-	<script src="js/bootstrap-dropdown.js"></script>
-	<!-- scrolspy library -->
-	<script src="js/bootstrap-scrollspy.js"></script>
-	<!-- library for creating tabs -->
-	<script src="js/bootstrap-tab.js"></script>
-	<!-- library for advanced tooltip -->
-	<script src="js/bootstrap-tooltip.js"></script>
-	<!-- popover effect library -->
-	<script src="js/bootstrap-popover.js"></script>
-	<!-- button enhancer library -->
-	<script src="js/bootstrap-button.js"></script>
-	<!-- accordion library (optional, not used in demo) -->
-	<script src="js/bootstrap-collapse.js"></script>
-	<!-- carousel slideshow library (optional, not used in demo) -->
-	<script src="js/bootstrap-carousel.js"></script>
-	<!-- autocomplete library -->
-	<script src="js/bootstrap-typeahead.js"></script>
-	<!-- tour library -->
-	<script src="js/bootstrap-tour.js"></script>
+	<!-- bootstrap -->
+	<script src="js/bootstrap.min.js"></script>
 	<!-- library for cookie management -->
 	<script src="js/jquery.cookie.js"></script>
 	<!-- calander plugin -->

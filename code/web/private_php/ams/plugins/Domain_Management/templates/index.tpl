@@ -2,14 +2,14 @@
 
 {if $permission eq 3}
 	{if isset($smarty.get.edit_domain)}
-<div class="row-fluid sortable ui-sortable">
+<div class="row sortable ui-sortable">
 	<div class="box col-md-9">
 		<div class="panel panel-default">
 			<div class="panel-heading" data-original-title="">
-				<span class="icon-list"></span> Domain: {$hook_info['Domain_Management']['domains']['0']['domain_name']}
+				<span class="glyphicon glyphicon-list"></span> Domain: {$hook_info['Domain_Management']['domains']['0']['domain_name']}
 			</div>
 			<div class="panel-body">
-				<div class="row-fluid">
+				<div class="row">
 					<legend>Users with permissions in domain </legend>
 			<table class="table table-striped table-bordered bootstrap-datatable datatable">
 				<thead>
@@ -55,16 +55,16 @@
 		<div class="box col-md-3">
 		<div class="panel panel-default">
 		<div class="panel-heading" data-original-title="">
-				<span class="icon-pencil"></span> Modify Domain Settings
+				<span class="glyphicon glyphicon-pencil"></span> Modify Domain Settings
 			</div>
 		 <div class="panel-body">
-				<div class="row-fluid">
+				<div class="row">
 
 			<form id="modifyMailSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id=">
 
 			<legend style="margin:0"> Domain Settings of '{$hook_info['Domain_Management']['domains']['0']['domain_name']}'</legend>
 
-			<div class="control-group disabled" style="display: inline-block; ">
+			<div class="form-group disabled" style="display: inline-block; ">
 				<label class="control-label">Domain ID</label>
 				<div class="controls">
 					<div class="input-prepend">
@@ -73,7 +73,7 @@
 				</div>
 			</div>
 
-			<div class="control-group" style="display: inline-block; ">
+			<div class="form-group" style="display: inline-block; ">
 				<label class="control-label">Domain Name</label>
 				<div class="controls">
 					<div class="input-prepend">
@@ -82,7 +82,7 @@
 				</div>
 			</div>
 			
-			<div class="control-group" style="display: inline-block; ">
+			<div class="form-group" style="display: inline-block; ">
 				<label class="control-label">Domain Status</label>		
 				<div class="controls">
 					<select id="status" multiple class="form-control" data-rel="chosen">
@@ -94,7 +94,7 @@
 				</div>
 			</div>
 			
-			<div class="control-group" style="display: inline-block; ">
+			<div class="form-group" style="display: inline-block; ">
 				<label class="control-label">Patch Version</label>
 				<div class="controls">
 					<div class="input-prepend">
@@ -103,7 +103,7 @@
 				</div>
 			</div>
 
-			<div class="control-group" style="display: inline-block; ">
+			<div class="form-group" style="display: inline-block; ">
 				<label class="control-label">Backup Patch URL</label>
 				<div class="controls">
 					<div class="input-prepend">
@@ -112,7 +112,7 @@
 				</div>
 			</div>
 			
-			<div class="control-group" style="display: inline-block; ">
+			<div class="form-group" style="display: inline-block; ">
 				<label class="control-label">Patch URLs</label>
 				<div class="controls">
 					<div class="input-prepend">
@@ -121,7 +121,7 @@
 				</div>
 			</div>
 			
-			<div class="control-group" style="display: inline-block; ">
+			<div class="form-group" style="display: inline-block; ">
 				<label class="control-label">Login Address</label>
 				<div class="controls">
 					<div class="input-prepend">
@@ -130,7 +130,7 @@
 				</div>
 			</div>
 			
-			<div class="control-group" style="display: inline-block; ">
+			<div class="form-group" style="display: inline-block; ">
 				<label class="control-label">Session Manager Address</label>
 				<div class="controls">
 					<div class="input-prepend">
@@ -139,7 +139,7 @@
 				</div>
 			</div>
 
-			<div class="control-group" style="display: inline-block; ">
+			<div class="form-group" style="display: inline-block; ">
 				<label class="control-label">Ring DB Name</label>
 				<div class="controls">
 					<div class="input-prepend">
@@ -148,7 +148,7 @@
 				</div>
 			</div>
 
-			<div class="control-group" style="display: inline-block; ">
+			<div class="form-group" style="display: inline-block; ">
 				<label class="control-label">Web Host</label>
 				<div class="controls">
 					<div class="input-prepend">
@@ -157,7 +157,7 @@
 				</div>
 			</div>
 
-			<div class="control-group" style="display: inline-block; ">
+			<div class="form-group" style="display: inline-block; ">
 				<label class="control-label">Web Host PHP</label>
 				<div class="controls">
 					<div class="input-prepend">
@@ -166,7 +166,7 @@
 				</div>
 			</div>
 
-			<div class="control-group" style="display: inline-block; ">
+			<div class="form-group" style="display: inline-block; ">
 				<label class="control-label">Description</label>
 				<div class="controls">
 					<div class="input-prepend">
@@ -175,7 +175,7 @@
 				</div>
 			</div>
 
-			<div class="control-group">
+			<div class="form-group">
 				<label class="control-label"></label>
 				<div class="controls">
 				<button type="submit" class="btn btn-primary" >Update</button>
@@ -197,12 +197,12 @@
 	</div><!--/row-->
 	{else}
 	
-	<div class="row-fluid">
+	<div class="row">
 <div class="box col-md-12">
 <div class="panel panel-default">
 <div class="panel-heading" data-original-title="">
 
-<span class="icon-user"></span>
+<span class="glyphicon glyphicon-user"></span>
 Domains
 
 </div>

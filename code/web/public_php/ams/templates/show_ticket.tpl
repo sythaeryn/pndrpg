@@ -1,12 +1,12 @@
 {block name=content}
-<div class="row-fluid sortable ui-sortable">
+<div class="row sortable ui-sortable">
     <div class="box col-md-9">
 	<div class="panel panel-default">
         <div class="panel-heading" data-original-title="">
-            <span class="icon-tag"></span>{$t_title} #{$ticket_tId} 
+            <span class="glyphicon glyphicon-tag"></span>{$t_title} #{$ticket_tId} 
         </div>
         <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
                 <legend>{$title}: {$ticket_title} </legend>
 
 
@@ -62,9 +62,9 @@
 				<p>
 				    <span class="label label-info"> {$reply.timestamp}</span>
 				    {if $reply.permission eq '1'}
-				    <span class="label label-success"><strong><span class="icon-user icon-white"></span>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+				    <span class="label label-success"><strong><span class="glyphicon glyphicon-user icon-white"></span>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
 				    {else if $reply.permission gt '1'}
-				    <span class="label label-warning"><strong><span class="icon-star icon-white"></span>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+				    <span class="label label-warning"><strong><span class="glyphicon glyphicon-star icon-white"></span>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
 				    {/if}
 				</p>
 				<p><pre{if $reply.permission gt '1'} {if $reply.hidden eq 0} style="background-color:rgb(248, 200, 200);"{else if $reply.hidden eq 1}style="background-color:rgb(207, 254, 255);"{/if}{/if}> {if $reply.hidden eq 1}<i>{/if}{$reply.replyContent}{if $reply.hidden eq 1}</i>{/if}</pre></p>
@@ -85,16 +85,16 @@
 				<form id="reply" class="form-vertical" method="post" action="index.php">
 				{if $ticket_status neq 3}
 				    <legend>{$t_reply}:</legend>
-				    <div class="control-group">
+				    <div class="form-group">
 					<label class="control-label">{$t_fill}</label>
 					<div class="controls">
 					    <div class="input-prepend">
-						<textarea rows="6" class="span12" id="Content" name="Content"></textarea>
+						<textarea rows="6" class="col-md-12" id="Content" name="Content"></textarea>
 					    </div>
 					</div>
 				    </div>
 				    {if isset($isMod) and $isMod eq "TRUE"}
-				     <div class="control-group">
+				     <div class="form-group">
 					<label class="control-label">Options</label>
 					<div class="controls">
 					    <div class="input-prepend">
@@ -105,7 +105,7 @@
 				    {/if}
 				{/if}
 				{if isset($isMod) and $isMod eq "TRUE"}
-				<div class="control-group"  style="display: inline-block;">
+				<div class="form-group"  style="display: inline-block;">
 				    <label class="control-label">Change status to</label>
 				    <div class="controls">
 					<select name="ChangeStatus">
@@ -115,7 +115,7 @@
 					</select>
 				    </div>
 				</div>
-				<div class="control-group"  style="display: inline-block; margin-left:10px;"">
+				<div class="form-group"  style="display: inline-block; margin-left:10px;"">
 				    <label class="control-label">Change priority to</label>
 				    <div class="controls">
 					<select name="ChangePriority">
@@ -149,7 +149,7 @@
 				</script>
 				{/literal} 
 				<div id="filesUploaded"></div>
-				<div class="control-group">
+				<div class="form-group">
 				    <label class="control-label"></label>
 				    <div class="controls">
 					<button type="submit" class="btn btn-primary" >{$t_send}</button>
@@ -170,10 +170,10 @@
     <div class="box col-md-3">
 	<div class="panel panel-default">
         <div class="panel-heading" data-original-title="">
-            <span class="icon-th"></span>Actions
+            <span class="glyphicon glyphicon-th"></span>Actions
         </div>
         <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
 
 		{if isset($isMod) and $isMod eq "TRUE"}
 
@@ -182,13 +182,13 @@
 		    <form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
 			<input type="hidden" name="ticket_id" value="{$ticket_tId}">
 			<input type="hidden" name="action" value="assignTicket">
-			<button type="submit" class="btn btn-primary" style="margin-bottom:9px;><span class="icon-flag icon-white"></span> Assign Ticket</button>
+			<button type="submit" class="btn btn-primary" style="margin-bottom:9px;><span class="glyphicon glyphicon-flag icon-white"></span> Assign Ticket</button>
 		    </form>
 		{else if $ticket_assignedTo eq $user_id}
 		    <form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
 			<input type="hidden" name="ticket_id" value="{$ticket_tId}">
 			<input type="hidden" name="action" value="unAssignTicket">
-			<button type="submit" class="btn btn-warning" style="margin-bottom:9px;><span class="icon-remove icon-white"></span> Remove Assign</button>
+			<button type="submit" class="btn btn-warning" style="margin-bottom:9px;><span class="glyphicon glyphicon-remove icon-white"></span> Remove Assign</button>
 		    </form>
 		{/if}
 
@@ -201,15 +201,15 @@
 			{$success_unassigned}
 		</div>
 		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "TICKET_NOT_EXISTING"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$ticket_not_existing}
 		</div>
 		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "ALREADY_ASSIGNED"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$ticket_already_assigned}
 		</div>
 		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "NOT_ASSIGNED"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$ticket_not_assigned}
 		</div>
 		{/if}
@@ -217,7 +217,7 @@
 		<legend style="margin-bottom:9px;">Forward to Group</legend>
 		<form id="forward" class="form-vertical" method="post" action="" style="margin-bottom:9px;" >
 
-		<div class="control-group">
+		<div class="form-group">
 		    <div class="controls" >
 			<select name="group">
 				    <option></option>
@@ -229,18 +229,18 @@
 		</div>
 		<input type="hidden" name="ticket_id" value="{$ticket_tId}">
 		<input type="hidden" name="action" value="forward">
-		<div class="control-group">
+		<div class="form-group">
 		    <div class="controls">
 			<button type="submit" class="btn btn-primary" >Forward</button>
 		    </div>
 		</div>
 		</form>
 		{if isset($ACTION_RESULT) and $ACTION_RESULT eq "INVALID_SGROUP"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$invalid_sgroup}
 		</div>
 		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "TICKET_NOT_EXISTING"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$ticket_not_existing}
 		</div>
 		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "SUCCESS_FORWARDED"}
@@ -251,7 +251,7 @@
 		{/if}
 		<legend style="margin-bottom:9px;">Other actions</legend>
 		<div class="btn-group">
-		    <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
+		    <button class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
 		    <ul class="dropdown-menu">
 			<li class="divider"></li>
 			{if isset($isMod) and $isMod eq "TRUE"}<li><a href="index.php?page=show_ticket_log&id={$ticket_tId}">Show Ticket Log</a></li>{/if}
