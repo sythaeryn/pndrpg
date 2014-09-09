@@ -1,12 +1,12 @@
 {block name=content}
-<div class="row-fluid sortable ui-sortable">
+<div class="row sortable ui-sortable">
     <div class="box col-md-9">
 	<div class="panel panel-default">
         <div class="panel-heading" data-original-title="">
-            <span class="icon-user"></span> Profile of {$target_name}
+            <span class="glyphicon glyphicon-user"></span> Profile of {$target_name}
         </div>
         <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
                 <legend>Info</legend>
 		<table class="table table-striped" >
 		    <tbody>
@@ -61,12 +61,12 @@
     <div class="box col-md-3">
 	<div class="panel panel-default">
         <div class="panel-heading" data-original-title="">
-            <span class="icon-th"></span>Actions
+            <span class="glyphicon glyphicon-th"></span>Actions
         </div>
         <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
 		<div class="btn-group">
-                <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
+                <button class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
                 <ul class="dropdown-menu">
 		    <li class="divider"></li>
 		    <li><a href="index.php?page=settings&id={$target_id}">Edit User</a></li>
@@ -94,14 +94,14 @@
     </div><!--/span-->
 </div><!--/row-->
 
-<div class="row-fluid sortable ui-sortable">
+<div class="row sortable ui-sortable">
     <div class="box col-md-9">
 	<div class="panel panel-default">
         <div class="panel-heading" data-original-title="">
-            <span class="icon-tag"></span> Tickets of {$target_name}
+            <span class="glyphicon glyphicon-tag"></span> Tickets of {$target_name}
         </div>
         <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
                 <legend>Tickets</legend>
 		<table class="table table-striped table-bordered bootstrap-datatable datatable">
 		    <thead>
@@ -121,7 +121,7 @@
 				<td class="center"><i>{$ticket.timestamp}</i></td>
 				<td class="center">{$ticket.category}</td>
 
-				<td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <span class="icon-exclamation-sign icon-white"></span>{/if} {$ticket.statusText}</span></td>
+				<td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <span class="glyphicon glyphicon-exclamation-sign icon-white"></span>{/if} {$ticket.statusText}</span></td>
 			  </tr>
 			  {/foreach}
 

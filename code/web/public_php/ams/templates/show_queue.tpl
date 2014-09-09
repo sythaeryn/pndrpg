@@ -1,12 +1,12 @@
 {block name=content}
-<div class="row-fluid sortable ui-sortable">
+<div class="row sortable ui-sortable">
     <div class="box col-md-9">
 	<div class="panel panel-default">
         <div class="panel-heading" data-original-title="">
-            <span class="icon-tag"></span> Ticket Queue {$queue_view}
+            <span class="glyphicon glyphicon-tag"></span> Ticket Queue {$queue_view}
         </div>
         <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
                 <legend>Tickets</legend>
 
 		<div class="alert alert-info">
@@ -44,7 +44,7 @@
 		    </select>
 		    </span>
 		    <input type="hidden" name="action" value="create_queue">
-		    <button type="submit" class="btn btn-primary" style="bottom:4px; position:relative;"  ><span class="icon-tag icon-white"></span> View</button>
+		    <button type="submit" class="btn btn-primary" style="bottom:4px; position:relative;"  ><span class="glyphicon glyphicon-tag icon-white"></span> View</button>
 		    </form>
 
 
@@ -60,15 +60,15 @@
 			{$success_unassigned}
 		</div>
 		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "TICKET_NOT_EXISTING"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$ticket_not_existing}
 		</div>
 		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "ALREADY_ASSIGNED"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$ticket_already_assigned}
 		</div>
 		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "NOT_ASSIGNED"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$ticket_not_assigned}
 		</div>
 		{/if}
@@ -94,7 +94,7 @@
 				<td>{if $ticket.assignedText neq ""} <a href="index.php?page=show_user&id={$ticket.assigned}">{$ticket.assignedText} {else}<i> {$not_assigned}</i> {/if}</td>
 				<td class="center"><span title="{$ticket.timestamp_elapsed}" data-rel="tooltip"  data-placement="right">{$ticket.timestamp}</span></td>
 				<td class="center">{$ticket.category}</td>
-				<td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <span class="icon-exclamation-sign icon-white"></span>{/if} {$ticket.statusText}</span></td>
+				<td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <span class="glyphicon glyphicon-exclamation-sign icon-white"></span>{/if} {$ticket.statusText}</span></td>
 				<td class="center">
 
 				    {if $ticket.forwardedGroupName eq "0"}
@@ -109,13 +109,13 @@
 					<form id="assign_ticket" class="form-vertical" method="post" action="{$getURL}" style="margin:0px 0px 0px;">
 					    <input type="hidden" name="ticket_id" value="{$ticket.tId}">
 					    <input type="hidden" name="action" value="assignTicket">
-					    <button type="submit" class="btn btn-primary" ><span class="icon-flag icon-white"></span> Assign Ticket</button>
+					    <button type="submit" class="btn btn-primary" ><span class="glyphicon glyphicon-flag icon-white"></span> Assign Ticket</button>
 					</form>
 				    {else if $ticket.assigned eq $user_id}
 					<form id="assign_ticket" class="form-vertical" method="post" action="{$getURL}" style="margin:0px 0px 0px;">
 					    <input type="hidden" name="ticket_id" value="{$ticket.tId}">
 					    <input type="hidden" name="action" value="unAssignTicket">
-					    <button type="submit" class="btn btn-warning" ><span class="icon-remove icon-white"></span> Remove Assign</button>
+					    <button type="submit" class="btn btn-warning" ><span class="glyphicon glyphicon-remove icon-white"></span> Remove Assign</button>
 					</form>
 				    {/if}
 				</td>
@@ -142,12 +142,12 @@
     <div class="box col-md-3">
 	<div class="panel panel-default">
         <div class="panel-heading" data-original-title="">
-            <span class="icon-th"></span>Actions
+            <span class="glyphicon glyphicon-th"></span>Actions
         </div>
         <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
     		<div class="btn-group">
-                <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
+                <button class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
                 <ul class="dropdown-menu">
 		    <li class="divider"></li>
 		    <li><a href="index.php?page=show_queue&get=todo">Todo tickets</a></li>

@@ -1,9 +1,9 @@
 {block name=content}
-<div class="row-fluid">
+<div class="row">
 				<div class="box col-md-12">
 				<div class="panel panel-default">
 					<div class="panel-heading" data-original-title>
-						<span class="icon-user"></span> Members
+						<span class="glyphicon glyphicon-user"></span> Members
 					</div>
 					<div class="panel-body">
 						<table class="table table-striped table-bordered">

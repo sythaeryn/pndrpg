@@ -1,15 +1,15 @@
 {block name=content}
 
-	<div class="row-fluid">
+	<div class="row">
 		<div class="box col-md-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<span class="icon-info-sign"></span>{$ip_title}
+				<span class="glyphicon glyphicon-info-sign"></span>{$ip_title}
 			</div>
 			<div class="panel-body">
 				<center>
 				<p>{$ip_support}</p>
-				<div class="alert alert-error">
+				<div class="alert alert-danger">
 				<form enctype="multipart/form-data" method="post" action="index.php?page=plugin&action=install_plugin" id="upload_plugin"  >
 				<label for="file">Filename:</label>&nbsp;&nbsp;
 				<input type="file" name="file" id="file"></br>

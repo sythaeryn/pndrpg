@@ -1,9 +1,9 @@
 {block name=content}
-<div class="row-fluid">
+<div class="row">
 				<div class="box col-md-12">
 				<div class="panel panel-default">
 					<div class="panel-heading" data-original-title>
-						<span class="icon-user"></span> {$up_title}
+						<span class="glyphicon glyphicon-user"></span> {$up_title}
 					</div>
 					<div class="panel-body">
 						<center><p>{$up_info}</p></center>
@@ -24,7 +24,7 @@
 								<td class="center">{$element.plugin_info->Version}</td>
 								<td class="center">{$element.update_info->Version}</td>
 								<td class="center">{$element.update_info->UpdateInfo}</td>
-								<td><a href="index.php?page=plugins&action=update_plugins&id={$element.id}"><button class="btn btn-primary btn-large">Update</button></a>
+								<td><a href="index.php?page=plugins&action=update_plugins&id={$element.id}"><button class="btn btn-primary btn-lg">Update</button></a>
 							</tr>
 							{/foreach}
 

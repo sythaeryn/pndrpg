@@ -1,12 +1,12 @@
 {block name=content}
-<div class="row-fluid sortable ui-sortable">
+<div class="row sortable ui-sortable">
     <div class="box col-md-9">
 	<div class="panel panel-default">
         <div class="panel-heading" data-original-title="">
-            <span class="icon-list"></span>{$groupsname} List
+            <span class="glyphicon glyphicon-list"></span>{$groupsname} List
         </div>
         <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
                 <legend>{$groupsname} Support Group Members</legend>
 		<table class="table table-striped table-bordered bootstrap-datatable datatable">
 		    <thead>
@@ -22,7 +22,7 @@
 			  <tr>
 				<td>{$user.tUserId}</td>
 				<td><a href ="index.php?page=show_user&id={$user.tUserId}">{$user.name}</a></td>
-				{if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a class="btn btn-danger" href="index.php?page=show_sgroup&id={$target_id}&delete={$user.tUserId}"><span class="icon-trash icon-white"></span> Delete</a></td>{/if}
+				{if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a class="btn btn-danger" href="index.php?page=show_sgroup&id={$target_id}&delete={$user.tUserId}"><span class="glyphicon glyphicon-trash icon-white"></span> Delete</a></td>{/if}
 			  </tr>
 			  {/foreach}
 
@@ -37,16 +37,16 @@
     <div class="box col-md-3">
 	<div class="panel panel-default">
         <div class="panel-heading" data-original-title="">
-            <span class="icon-plus-sign"></span> Add User
+            <span class="glyphicon glyphicon-plus-sign"></span> Add User
         </div>
         <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
 
 		<form id="addSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id={$target_id}">
 
 		<legend style="margin:0">Add user to '{$groupsname}'</legend>
 
-		<div class="control-group" style="display: inline-block; ">
+		<div class="form-group" style="display: inline-block; ">
 		    <label class="control-label">username</label>
 		    <div class="controls">
 		    <select style="width: 140px;" name="Name">
@@ -62,7 +62,7 @@
 		<input type="hidden" name="function" value="add_user_to_sgroup">
 		<input type="hidden" name="target_id" value="{$target_id}">
 
-		<div class="control-group">
+		<div class="form-group">
 		    <label class="control-label"></label>
 		    <div class="controls">
 			<button type="submit" class="btn btn-primary" >Add</button>
@@ -74,19 +74,19 @@
 			{$add_to_group_success}
 		</div>
 		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "ALREADY_ADDED"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$user_already_added}
 		</div>
 		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "GROUP_NOT_EXISTING"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$group_not_existing}
 		</div>
 		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "USER_NOT_EXISTING"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$user_not_existing}
 		</div>
 		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "NOT_MOD_OR_ADMIN"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$not_mod_or_admin}
 		</div>
 		{/if}
@@ -99,16 +99,16 @@
 	<div class="box col-md-3">
 	<div class="panel panel-default">
 	<div class="panel-heading" data-original-title="">
-            <span class="icon-pencil"></span> Modify Email Settings
+            <span class="glyphicon glyphicon-pencil"></span> Modify Email Settings
         </div>
 	 <div class="panel-body">
-            <div class="row-fluid">
+            <div class="row">
 
 		<form id="modifyMailSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id={$target_id}">
 
 		<legend style="margin:0">Mail settings of '{$groupsname}'</legend>
 
-		<div class="control-group" style="display: inline-block; ">
+		<div class="form-group" style="display: inline-block; ">
 		    <label class="control-label">Group Email</label>
 		    <div class="controls">
 			<div class="input-prepend">
@@ -117,7 +117,7 @@
 		    </div>
 		</div>
 
-		<div class="control-group" style="display: inline-block; ">
+		<div class="form-group" style="display: inline-block; ">
 		    <label class="control-label">IMAP Mail Server</label>
 		    <div class="controls">
 			<div class="input-prepend">
@@ -126,7 +126,7 @@
 		    </div>
 		</div>
 
-		<div class="control-group" style="display: inline-block; ">
+		<div class="form-group" style="display: inline-block; ">
 		    <label class="control-label">IMAP Username</label>
 		    <div class="controls">
 			<div class="input-prepend">
@@ -135,7 +135,7 @@
 		    </div>
 		</div>
 
-		<div class="control-group" style="display: inline-block; ">
+		<div class="form-group" style="display: inline-block; ">
 		    <label class="control-label">IMAP Password</label>
 		    <div class="controls">
 			<div class="input-prepend">
@@ -147,7 +147,7 @@
 		<input type="hidden" name="function" value="modify_email_of_sgroup">
 		<input type="hidden" name="target_id" value="{$target_id}">
 
-		<div class="control-group">
+		<div class="form-group">
 		    <label class="control-label"></label>
 		    <div class="controls">
 			<button type="submit" class="btn btn-primary" >Update</button>
@@ -159,7 +159,7 @@
 			{$modify_mail_of_group_success}
 		</div>
 		{else if isset($RESULT_OF_MODIFYING) and $RESULT_OF_MODIFYING eq "EMAIL_NOT_VALID"}
-		<div class="alert alert-error">
+		<div class="alert alert-danger">
 			{$email_not_valid}
 		</div>
 		{else if isset($RESULT_OF_MODIFYING) and $RESULT_OF_MODIFYING eq "NO_PASSWORD"}

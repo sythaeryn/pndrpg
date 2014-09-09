@@ -1,27 +1,27 @@
 {block name=content}
 
 
-	<div class="sortable row-fluid ui-sortable">
-		<a data-original-title="{$nrAssignedWaiting} Assigned to you and waiting for support!" data-rel="tooltip" class="well span3 top-block"
+	<div class="sortable row ui-sortable">
+		<a data-original-title="{$nrAssignedWaiting} Assigned to you and waiting for support!" data-rel="tooltip" class="well col-md-3 top-block"
 		   href="index.php?page=show_queue&get=create&userid={$user_id}&groupid=1&what=waiting_for_support&how=assigned&who=user">
 			<span class="glyphicon glyphicon-exclamation-sign lg-icon red"></span>
 			<div>Tickets Waiting for Direct Action</div>
 			<span class="notification red">{$nrAssignedWaiting}</span>
 		</a>
 
-		<a data-original-title="{$nrToDo} Tickets Todo." data-rel="tooltip" class="well span3 top-block" href="index.php?page=show_queue&get=todo">
+		<a data-original-title="{$nrToDo} Tickets Todo." data-rel="tooltip" class="well col-md-3 top-block" href="index.php?page=show_queue&get=todo">
 			<span class="glyphicon glyphicon-edit lg-icon yellow"></span>
 			<div>Tickets Todo</div>
 			<span class="notification red">{$nrToDo}</span>
 		</a>
 
-		<a data-original-title="By {$newestTicketAuthor}" data-rel="tooltip" class="well span3 top-block" {if $newestTicketId != null}href="index.php?page=show_ticket&id={$newestTicketId}"{/if}>
+		<a data-original-title="By {$newestTicketAuthor}" data-rel="tooltip" class="well col-md-3 top-block" {if $newestTicketId != null}href="index.php?page=show_ticket&id={$newestTicketId}"{/if}>
 			<span class="glyphicon glyphicon-flag lg-icon green"></span>
 			<div>Newest Ticket</div>
 			<span class="notification blue">{if $newestTicketId != null}{$newestTicketTitle}{else}No Tickets!{/if}</span>
 		</a>
 
-		<a data-original-title="{$nrTotalTickets} tickets in total" data-rel="tooltip" class="well span3 top-block" href="index.php?page=show_queue&get=all">
+		<a data-original-title="{$nrTotalTickets} tickets in total" data-rel="tooltip" class="well col-md-3 top-block" href="index.php?page=show_queue&get=all">
 			<span class="glyphicon glyphicon-briefcase lg-icon blue"></span>
 			<div>Total amount of Tickets</div>
 			<span class="notification blue">{$nrTotalTickets}</span>
@@ -30,11 +30,11 @@
 
 	</div>
 
-	<div class="row-fluid">
+	<div class="row">
 		<div class="box col-md-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<span class="icon-info-sign"></span> {$home_title}
+				<span class="glyphicon glyphicon-info-sign"></span> {$home_title}
 			</div>
 			<div class="panel-body">
 				<p><strong>{$home_info}</strong></p>

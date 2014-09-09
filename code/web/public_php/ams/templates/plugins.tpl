@@ -1,24 +1,24 @@
 {block name=content}
-<div class="row-fluid">
+<div class="row">
 				<div class="box col-md-12">
 				<div class="panel panel-default">
 					<div class="panel-heading" data-original-title>
-						<span class="icon-user"></span> {$plugin_title}
+						<span class="glyphicon glyphicon-user"></span> {$plugin_title}
 					</div>
-					{if isset($smarty.get.result) and $smarty.get.result eq "1"}<div class="alert alert-error"><p>{$ip_success}</p></div>{/if}
-					{if isset($smarty.get.result) and $smarty.get.result eq "0"}<div class="alert alert-error"><p>{$dp_error}</p></div>{/if}
-					{if isset($smarty.get.result) and $smarty.get.result eq "2"}<div class="alert alert-error"><p>{$dp_success}</p></div>{/if}
-					{if isset($smarty.get.result) and $smarty.get.result eq "3"}<div class="alert alert-error"><p>{$ac_success}</p></div>{/if}
-					{if isset($smarty.get.result) and $smarty.get.result eq "4"}<div class="alert alert-error"><p>{$ac_error}</p></div>{/if}
-					{if isset($smarty.get.result) and $smarty.get.result eq "5"}<div class="alert alert-error"><p>{$dc_success}</p></div>{/if}
-					{if isset($smarty.get.result) and $smarty.get.result eq "6"}<div class="alert alert-error"><p>{$dc_error}</p></div>{/if}
-					{if isset($smarty.get.result) and $smarty.get.result eq "7"}<div class="alert alert-error"><p>{$up_success}</p></div>{/if}
-					{if isset($smarty.get.result) and $smarty.get.result eq "8"}<div class="alert alert-error"><p>{$up_install_success}</p></div>{/if}
+					{if isset($smarty.get.result) and $smarty.get.result eq "1"}<div class="alert alert-danger"><p>{$ip_success}</p></div>{/if}
+					{if isset($smarty.get.result) and $smarty.get.result eq "0"}<div class="alert alert-danger"><p>{$dp_error}</p></div>{/if}
+					{if isset($smarty.get.result) and $smarty.get.result eq "2"}<div class="alert alert-danger"><p>{$dp_success}</p></div>{/if}
+					{if isset($smarty.get.result) and $smarty.get.result eq "3"}<div class="alert alert-danger"><p>{$ac_success}</p></div>{/if}
+					{if isset($smarty.get.result) and $smarty.get.result eq "4"}<div class="alert alert-danger"><p>{$ac_error}</p></div>{/if}
+					{if isset($smarty.get.result) and $smarty.get.result eq "5"}<div class="alert alert-danger"><p>{$dc_success}</p></div>{/if}
+					{if isset($smarty.get.result) and $smarty.get.result eq "6"}<div class="alert alert-danger"><p>{$dc_error}</p></div>{/if}
+					{if isset($smarty.get.result) and $smarty.get.result eq "7"}<div class="alert alert-danger"><p>{$up_success}</p></div>{/if}
+					{if isset($smarty.get.result) and $smarty.get.result eq "8"}<div class="alert alert-danger"><p>{$up_install_success}</p></div>{/if}
 					<div class="panel-body">
 						<center><p>{$plugin_info}</p></center>
 						<center>
-						<a href="index.php?page=install_plugin"><button class="btn btn-primary btn-large dropdown-toggle">Install New Plugin</button></a>
-						<a href="index.php?page=plugins_update"><button class="btn btn-primary btn-large dropdown-toggle">Check for updates</button></a>
+						<a href="index.php?page=install_plugin"><button class="btn btn-primary btn-lg dropdown-toggle">Install New Plugin</button></a>
+						<a href="index.php?page=plugins_update"><button class="btn btn-primary btn-lg dropdown-toggle">Check for updates</button></a>
 						</center>
 						<table class="table table-striped table-bordered">
 						  <thead>
@@ -43,9 +43,9 @@
 								<td class="center">{$element.plugin_permission}</td>
 								<td>
                 {if ($element.plugin_status) eq "0"}
-                <a href="index.php?page=plugins&action=delete_plugin&id={$element.id}"><button class="btn btn-primary btn-large">Delete</button></a>
-                <a href="index.php?page=plugins&action=activate_plugin&id={$element.id}"><button class="btn btn-primary btn-large dropdown-toggle">Activate</button></a>{/if}
-                {if ($element.plugin_status) eq "1"}<a href="index.php?page=plugins&action=deactivate_plugin&id={$element.id}"><button class="btn btn-primary btn-large dropdown-toggle">Deactivate</button></a>{/if}</td>
+                <a href="index.php?page=plugins&action=delete_plugin&id={$element.id}"><button class="btn btn-primary btn-lg">Delete</button></a>
+                <a href="index.php?page=plugins&action=activate_plugin&id={$element.id}"><button class="btn btn-primary btn-lg dropdown-toggle">Activate</button></a>{/if}
+                {if ($element.plugin_status) eq "1"}<a href="index.php?page=plugins&action=deactivate_plugin&id={$element.id}"><button class="btn btn-primary btn-lg dropdown-toggle">Deactivate</button></a>{/if}</td>
 							</tr>
 							{/foreach}
 
