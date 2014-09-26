@@ -18,7 +18,6 @@
 #include "widget_hierarchy.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
-#include "nel/gui/widget_addition_watcher.h"
 
 namespace
 {
@@ -76,18 +75,24 @@ namespace
 		GUIEditor::WidgetHierarchy *h;
 	};
 
-	class CWidgetAdditionWatcher : public IWidgetAdditionWatcher
+	class CWidgetWatcher : public CWidgetManager::IWidgetWatcher
 	{
 	public:
-		CWidgetAdditionWatcher(){ h = NULL; }
-		~CWidgetAdditionWatcher(){}
+		CWidgetWatcher(){ h = NULL; }
+		~CWidgetWatcher(){}
 
-		void widgetAdded( const std::string &name )
+		void onWidgetAdded( const std::string &name )
 		{
 			if( h != NULL )
 				h->onWidgetAdded( name );
 		}
-		
+
+		void onWidgetMoved( const std::string &oldid, const std::string &newid )
+		{
+			if( h != NULL )
+				h->onWidgetMoved( oldid, newid );
+		}
+
 		void setWidgetHierarchy( GUIEditor::WidgetHierarchy *h ){ this->h = h; }
 
 	private:
@@ -95,7 +100,7 @@ namespace
 	};
 
 	CWidgetDeletionWatcher deletionWatcher;
-	CWidgetAdditionWatcher additionWatcher;
+	CWidgetWatcher widgetwatcher;
 }
 
 namespace GUIEditor
@@ -107,7 +112,7 @@ namespace GUIEditor
 		connect( widgetHT, SIGNAL( itemDoubleClicked( QTreeWidgetItem*, int ) ),
 			this, SLOT( onItemDblClicked( QTreeWidgetItem* ) ) );
 		deletionWatcher.setWidgetHierarchy( this );
-		additionWatcher.setWidgetHierarchy( this );
+		widgetwatcher.setWidgetHierarchy( this );
 	}
 
 	WidgetHierarchy::~WidgetHierarchy()
@@ -117,7 +122,7 @@ namespace GUIEditor
 	void WidgetHierarchy::clearHierarchy()
 	{
 		CInterfaceElement::unregisterDeletionWatcher( &deletionWatcher );
-		CWidgetManager::getInstance()->unregisterAdditionWatcher( &additionWatcher );
+		CWidgetManager::getInstance()->unregisterWidgetWatcher( &widgetwatcher );
 		widgetHT->clear();
 		widgetHierarchyMap.clear();
 	}
@@ -126,7 +131,7 @@ namespace GUIEditor
 	{
 		clearHierarchy();
 		CInterfaceElement::registerDeletionWatcher( &deletionWatcher );
-		CWidgetManager::getInstance()->registerAdditionWatcher( &additionWatcher );
+		CWidgetManager::getInstance()->registerWidgetWatcher( &widgetwatcher );
 
 		CInterfaceGroup *mg = CWidgetManager::getInstance()->getMasterGroupFromId( masterGroup );
 		if( mg != NULL )
@@ -175,6 +180,27 @@ namespace GUIEditor
 			subItem->setText( 0, makeNodeName( (*vitr)->getId() ).c_str() );
 			widgetHierarchyMap[ (*vitr)->getId() ] = subItem;
 		}
+	}
+
+	QTreeWidgetItem* WidgetHierarchy::findItem( const std::string &id )
+	{
+		std::map< std::string, QTreeWidgetItem* >::iterator itr
+			= widgetHierarchyMap.find( id );
+		if( itr == widgetHierarchyMap.end() )
+			return NULL;
+		else
+			return itr->second;
+	}
+
+	QTreeWidgetItem* WidgetHierarchy::findParent( const std::string &id )
+	{
+		// Get the parent's name
+		std::string::size_type p = id.find_last_of( ':' );
+		if( p == std::string::npos )
+			return NULL;
+		std::string parentId = id.substr( 0, p );
+
+		return findItem( parentId );
 	}
 
 	void WidgetHierarchy::onWidgetDeleted( const std::string &id )
@@ -229,6 +255,54 @@ namespace GUIEditor
 		QTreeWidgetItem *item = new QTreeWidgetItem( parent );
 		item->setText( 0, makeNodeName( id ).c_str() );
 		widgetHierarchyMap[ id ] = item;
+	}
+
+	void WidgetHierarchy::onWidgetMoved( const std::string &oldid, const std::string &newid )
+	{
+		QTreeWidgetItem *newParent = NULL;
+		QTreeWidgetItem *item = NULL;
+		QString id;
+
+		newParent = findParent( newid );
+		item = findItem( oldid );
+
+		if( ( newParent == NULL ) || ( item == NULL ) )
+			return;
+
+		// Remove old item
+		QTreeWidgetItem *p = item->parent();
+		if( p != NULL )
+			p->setExpanded( false );
+		id = item->data( 0, Qt::DisplayRole ).toString();
+		delete item;
+		item = NULL;
+
+		// Remove reference to old item
+		widgetHierarchyMap.erase( oldid );
+
+		// Add new item
+		item = new QTreeWidgetItem();
+		item->setData( 0, Qt::DisplayRole, id );
+		item->setSelected( true );
+		newParent->addChild( item );
+		
+
+		selectItem( item );
+	}
+
+	void WidgetHierarchy::selectItem( QTreeWidgetItem *item )
+	{
+		widgetHT->collapseAll();
+
+		QTreeWidgetItem *currItem = item;
+		while( currItem != NULL )
+		{
+			currItem->setExpanded( true );
+			currItem = currItem->parent();
+		}
+
+		widgetHT->setCurrentItem( item );
+		item->setSelected( true );
 	}
 
 	void WidgetHierarchy::getCurrentGroup( QString &g )
@@ -288,18 +362,11 @@ namespace GUIEditor
 		if( widgetHT->currentItem() != NULL )
 			widgetHT->currentItem()->setSelected( false );
 
-		// expand the tree items, so that we can see the selected item
-		QTreeWidgetItem *item = itr->second;
-		QTreeWidgetItem *currItem = item;
-		while( currItem != NULL )
-		{
-			currItem->setExpanded( true );
-			currItem = currItem->parent();
-		}
+		widgetHT->collapseAll();
 
 		// select the current item
-		item->setSelected( true );
-		widgetHT->setCurrentItem( item );
+		QTreeWidgetItem *item = itr->second;
+		selectItem( item );
 		currentSelection = newSelection;
 	}
 
@@ -307,6 +374,8 @@ namespace GUIEditor
 	{
 		if( item->parent() == NULL )
 			return;
+
+		selectItem( item );
 		
 		std::string n = item->text( 0 ).toUtf8().constData();
 		currentSelection = makeFullName( item, n );

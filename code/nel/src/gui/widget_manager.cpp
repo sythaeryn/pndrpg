@@ -34,7 +34,6 @@
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/reflect_register.h"
 #include "nel/gui/editor_selection_watcher.h"
-#include "nel/gui/widget_addition_watcher.h"
 #include "nel/misc/events.h"
 
 namespace NLGUI
@@ -1036,7 +1035,7 @@ namespace NLGUI
 		setCapturePointerLeft(NULL);
 		setCapturePointerRight(NULL);
 		_CapturedView = NULL;
-		
+
 		resetColorProps();
 		resetAlphaRolloverSpeedProps();
 		resetGlobalAlphasProps();
@@ -2401,6 +2400,7 @@ namespace NLGUI
 				// This may happen when alt-tab has been used => the sheet is dragged but the left button is up
 				if (!CCtrlDraggable::getDraggedSheet())
 				{
+
 					// Take the top most control.
 					uint nMaxDepth = 0;
 					const std::vector< CCtrlBase* >& _CtrlsUnderPointer = getCtrlsUnderPointer();
@@ -2630,8 +2630,11 @@ namespace NLGUI
 			else
 			if( draggedElement != NULL )
 			{
-				draggedElement->setXReal( newX );
-				draggedElement->setYReal( newY );
+				sint32 dx = newX - oldX;
+				sint32 dy = newY - oldY;
+
+				draggedElement->setXReal( draggedElement->getXReal() + dx );
+				draggedElement->setYReal( draggedElement->getYReal() + dy );
 				draggedElement->invalidateCoords();
 			}
 		}
@@ -2659,13 +2662,33 @@ namespace NLGUI
 
 		e->setParent( NULL );
 		draggedElement = e;
-
+				
 		return true;
 	}
 
 	void CWidgetManager::stopDragging()
 	{
-		draggedElement = NULL;
+		if( draggedElement != NULL )
+		{
+			CInterfaceGroup *g = getGroupUnder( draggedElement->getXReal(), draggedElement->getYReal() );
+			CInterfaceElement *e = draggedElement;
+			CInterfaceGroup *tw = getTopWindow();
+
+			if( g == NULL )
+				g = tw;
+
+			std::string oldid = e->getId();
+			
+			e->setParent( g );
+			e->setIdRecurse( e->getShortId() );
+			e->setParentPos( g );
+			e->setParentSize( g );
+			g->addElement( e );
+
+			draggedElement = NULL;
+
+			onWidgetMoved( oldid, e->getId() );
+		}
 	}
 	
 	// ------------------------------------------------------------------------------------------------
@@ -3352,36 +3375,46 @@ namespace NLGUI
 		selectionWatchers.erase( itr );
 	}
 
-	void CWidgetManager::notifyAdditionWatchers( const std::string &widgetName )
+	void CWidgetManager::onWidgetAdded( const std::string &id )
 	{
-		std::vector< IWidgetAdditionWatcher* >::const_iterator itr = additionWatchers.begin();
-		while( itr != additionWatchers.end() )
+		std::vector< IWidgetWatcher* >::const_iterator itr = widgetWatchers.begin();
+		while( itr != widgetWatchers.end() )
 		{
-			(*itr)->widgetAdded( widgetName );
+			(*itr)->onWidgetAdded( id );
 			++itr;
 		}
 	}
 
-	void CWidgetManager::registerAdditionWatcher( IWidgetAdditionWatcher *watcher )
+	void CWidgetManager::onWidgetMoved( const std::string &oldid, const std::string &newid )
 	{
-		std::vector< IWidgetAdditionWatcher* >::const_iterator itr 
-			= std::find( additionWatchers.begin(), additionWatchers.end(), watcher );
-		// already exists
-		if( itr != additionWatchers.end() )
-			return;
-
-		additionWatchers.push_back( watcher );
+		std::vector< IWidgetWatcher* >::const_iterator itr = widgetWatchers.begin();
+		while( itr != widgetWatchers.end() )
+		{
+			(*itr)->onWidgetMoved( oldid, newid );
+			++itr;
+		}
 	}
 
-	void CWidgetManager::unregisterAdditionWatcher( IWidgetAdditionWatcher *watcher )
+	void CWidgetManager::registerWidgetWatcher( IWidgetWatcher *watcher )
 	{
-		std::vector< IWidgetAdditionWatcher* >::iterator itr
-			= std::find( additionWatchers.begin(), additionWatchers.end(), watcher );
-		// doesn't exist
-		if( itr == additionWatchers.end() )
+		std::vector< IWidgetWatcher* >::const_iterator itr 
+			= std::find( widgetWatchers.begin(), widgetWatchers.end(), watcher );
+		// already exists
+		if( itr != widgetWatchers.end() )
 			return;
 
-		additionWatchers.erase( itr );
+		widgetWatchers.push_back( watcher );
+	}
+
+	void CWidgetManager::unregisterWidgetWatcher( IWidgetWatcher *watcher )
+	{
+		std::vector< IWidgetWatcher* >::iterator itr
+			= std::find( widgetWatchers.begin(), widgetWatchers.end(), watcher );
+		// doesn't exist
+		if( itr == widgetWatchers.end() )
+			return;
+
+		widgetWatchers.erase( itr );
 	}
 
 	CInterfaceElement* CWidgetManager::addWidgetToGroup( std::string &group, std::string &widgetClass, std::string &widgetName )
@@ -3414,7 +3447,7 @@ namespace NLGUI
 		else
 			g->addView( v );
 
-		notifyAdditionWatchers( v->getId() );
+		onWidgetAdded( v->getId() );
 		
 		return v;
 	}

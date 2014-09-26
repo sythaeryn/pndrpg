@@ -44,11 +44,15 @@ namespace GUIEditor
 
 		void onWidgetDeleted( const std::string &id );
 		void onWidgetAdded( const std::string &id );
+		void onWidgetMoved( const std::string &oldid, const std::string &newid );
 
 		void getCurrentGroup( QString &g );
 
 	private:
 		void buildHierarchy( QTreeWidgetItem *parent, NLGUI::CInterfaceGroup *group );
+		QTreeWidgetItem* findItem( const std::string &id );
+		QTreeWidgetItem* findParent( const std::string &id );
+		void selectItem( QTreeWidgetItem *item );
 
 	public Q_SLOTS:
 		void onGUILoaded();
