@@ -66,8 +66,6 @@ struct CChatGroup
 		region,
 		dyn_chat,
 		nbChatMode,
-		// Following mode are client side only. Thus, after 'nbChatMode'
-		yubo_chat	// (special telnet chat for Game Masters, same channel as the Yubo Klient)
 	};
 
 	/// group type
