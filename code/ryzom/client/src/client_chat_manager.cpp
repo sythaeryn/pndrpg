@@ -1304,7 +1304,6 @@ void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChanne
 							pUserBut->setHardText(title.toUtf8());
 						}
 						break;
-					// NB: user chat cannot have yubo_chat target
 				}
 
 				pUserBut->setActive(true);

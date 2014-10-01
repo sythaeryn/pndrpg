@@ -47,7 +47,6 @@
 
 // CLIENT
 #include "../string_manager_client.h"
-#include "yubo_chat.h"
 
 #include "../ingame_database_manager.h"
 
@@ -349,13 +348,6 @@ public:
 	// test if the config has been loaded in initInGame()
 	bool	isConfigLoaded() const {return _ConfigLoaded;}
 
-	/** connect or reconnect to the yubo chat (if was kicked for instance).
-	 *	The YuboChat is a special telnet chat for Game Masters, same channel as the Yubo Klient
-	 */
-	void	connectYuboChat();
-	/// send a string to the yubo chat
-	void	sendStringToYuboChat(const ucstring &str);
-
 
 	/// Manager for flying text. use it to add
 	CFlyingTextManager		FlyingTextManager;
@@ -554,12 +546,6 @@ private:
 	NLMISC::CCDBNodeLeaf *_CheckForumNode;
 	sint64 _UpdateWeatherTime;
 
-	// @}
-
-	/// \name Check Yubo Chat (special telnet chat for Game Masters, same channel as the Yubo Klient)
-	// @{
-	CYuboChat	_YuboChat;
-	void		checkYuboChat();
 	// @}
 
 
