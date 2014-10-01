@@ -48,12 +48,6 @@ std::map<std::string, uint32> CSheetId::_DevTypeNameToId;
 std::vector<std::vector<std::string> > CSheetId::_DevSheetIdToName;
 std::map<std::string, uint32> CSheetId::_DevSheetNameToId;
 
-#define NL_TEMP_YUBO_NO_SOUND_SHEET_ID
-
-#ifdef NL_TEMP_YUBO_NO_SOUND_SHEET_ID
-namespace { bool a_NoSoundSheetId = false; const uint32 a_NoSoundSheetType = 80; }
-#endif
-
 const CSheetId CSheetId::Unknown(0);
 
 void CSheetId::cbFileChange (const std::string &filename)
@@ -218,25 +212,6 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 		}
 	}
 	
-#ifdef NL_TEMP_YUBO_NO_SOUND_SHEET_ID
-	if (a_NoSoundSheetId && sheetName.find(".sound") != std::string::npos)
-	{
-		std::string sheetNameLc = toLower(sheetName);
-		std::map<std::string, uint32>::iterator it = _DevSheetNameToId.find(sheetNameLc);
-		if (it == _DevSheetNameToId.end())
-		{
-			// nldebug("SHEETID: Creating a temporary sheet id for '%s'", sheetName.c_str());
-			_DevSheetIdToName[0].push_back(sheetName);
-			_Id.IdInfos.Type = a_NoSoundSheetType;
-			_Id.IdInfos.Id = _DevSheetIdToName[0].size() - 1;
-			_DevSheetNameToId[sheetNameLc] = _Id.Id;
-			return true;
-		}
-		_Id.Id = it->second;
-		return true;
-	}
-#endif
-	
 	return false;
 }
 
@@ -390,24 +365,6 @@ void CSheetId::init(bool removeUnknownSheet)
 	loadSheetId ();
 	_Initialised=true;
 
-#ifdef NL_TEMP_YUBO_NO_SOUND_SHEET_ID
-	if (typeFromFileExtension("sound") == std::numeric_limits<uint32>::max())
-	{
-		nlwarning("SHEETID: Loading without known sound sheet id, please update sheet_id.bin with .sound sheets");
-		nlassert(_FileExtensions.size() == 1 << (NL_SHEET_ID_TYPE_BITS));
-		nlassert(_FileExtensions[a_NoSoundSheetType].empty());
-		_FileExtensions[a_NoSoundSheetType] = "sound";
-		_DevSheetIdToName.push_back(std::vector<std::string>());
-		_DevSheetIdToName[0].push_back("unknown.sound");
-		TSheetId id;
-		id.IdInfos.Type = a_NoSoundSheetType;
-		id.IdInfos.Id = _DevSheetIdToName[0].size() - 1;
-		nlassert(id.IdInfos.Id == 0);
-		_DevSheetNameToId["unknown.sound"] = id.Id;
-		a_NoSoundSheetId = true;
-	}
-#endif
-
 } // init //
 
 void CSheetId::initWithoutSheet()
@@ -540,12 +497,6 @@ string CSheetId::toString(bool ifNotFoundUseNumericId) const
 	}
 	else
 	{
-#ifdef NL_TEMP_YUBO_NO_SOUND_SHEET_ID
-		if (a_NoSoundSheetId && _Id.IdInfos.Type == a_NoSoundSheetType)
-		{
-			return _DevSheetIdToName[0][_Id.IdInfos.Id];
-		}
-#endif
 		// This nlwarning is commented out because the loggers are mutexed, therefore
 		// you couldn't use toString() within a nlwarning().
 		//nlwarning("<CSheetId::toString> The sheet %08x is not in sheet_id.bin",_Id.Id);
