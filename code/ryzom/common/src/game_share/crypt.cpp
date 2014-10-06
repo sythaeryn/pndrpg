@@ -19,7 +19,7 @@
 #include "crypt.h"
 
 char * rz_crypt(register const char *key, register const char *setting);
-
+char *__crypt_sha512(const char *key, const char *setting, char *output);
 
 
 // Crypts password using salt
@@ -520,6 +520,11 @@ char * rz_crypt(register const char *key, register const char *setting) {
 	buff[1023] = 0;
 	return buff;
 #endif
+
+    static char buf[128];
+    if (key[0] == '$' && key[1] == '6') {
+      return __crypt_sha512(key, setting, buf);
+    }
 
 	for (i = 0; i < 8; i++) {
 		if ((t = 2*(unsigned char)(*key)) != 0)
