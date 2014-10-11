@@ -1,0 +1,4 @@
+LIBRARY nel_drv_direct3d_win_r
+EXPORTS
+	NL3D_createIDriverInstance
+	NL3D_interfaceVersion
