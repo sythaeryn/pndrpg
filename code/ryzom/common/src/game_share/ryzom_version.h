@@ -20,7 +20,7 @@
 #define RYZOM_VERSION	"ryzomcore" \
 	"/" \
 	"v0.11.2" \
-	""
+	"-dev"
 
 #endif // RYZOM_VERSION_H
 
