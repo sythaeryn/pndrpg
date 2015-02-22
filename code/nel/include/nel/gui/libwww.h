@@ -25,6 +25,8 @@ extern "C"
 #include "WWWInit.h"
 }
 
+#include "nel/misc/rgba.h"
+
 namespace NLGUI
 {
 	class CCtrlBaseButton;
@@ -79,6 +81,7 @@ namespace NLGUI
 		HTML_ATTR(TABLE,ALIGN) = 0,
 			HTML_ATTR(TABLE,BGCOLOR),
 			HTML_ATTR(TABLE,BORDER),
+			HTML_ATTR(TABLE,BORDERCOLOR),
 			HTML_ATTR(TABLE,CELLPADDING),
 			HTML_ATTR(TABLE,CELLSPACING),
 			HTML_ATTR(TABLE,CLASS),
