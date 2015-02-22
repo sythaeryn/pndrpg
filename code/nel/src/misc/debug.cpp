@@ -17,28 +17,8 @@
 #include "stdmisc.h"
 
 #include "nel/misc/types_nl.h"
-#include "nel/misc/debug.h"
-
-#ifdef HAVE_NELCONFIG_H
-#  include "nelconfig.h"
-#endif // HAVE_NELCONFIG_H
-
-#include "nel/misc/log.h"
-#include "nel/misc/displayer.h"
-#include "nel/misc/mem_displayer.h"
-#include "nel/misc/command.h"
-#include "nel/misc/report.h"
-#include "nel/misc/path.h"
-#include "nel/misc/variable.h"
-#include "nel/misc/system_info.h"
 
 #ifdef NL_OS_WINDOWS
-#	define _WIN32_WINDOWS	0x0410
-#	ifndef NL_COMP_MINGW
-#	define WINVER			0x0400
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
 #	include <direct.h>
 #	include <tchar.h>
 #	include <imagehlp.h>
@@ -58,6 +38,21 @@
 //#	include <malloc.h>
 #	include <errno.h>
 #endif
+
+#include "nel/misc/debug.h"
+
+#ifdef HAVE_NELCONFIG_H
+#  include "nelconfig.h"
+#endif // HAVE_NELCONFIG_H
+
+#include "nel/misc/log.h"
+#include "nel/misc/displayer.h"
+#include "nel/misc/mem_displayer.h"
+#include "nel/misc/command.h"
+#include "nel/misc/report.h"
+#include "nel/misc/path.h"
+#include "nel/misc/variable.h"
+#include "nel/misc/system_info.h"
 
 #define NL_NO_DEBUG_FILES 1
 
