@@ -17,7 +17,6 @@
 #ifndef CL_GROUP_HTML_H
 #define CL_GROUP_HTML_H
 
-#define CURL_STATICLIB 1
 #include <curl/curl.h>
 
 #include "nel/misc/types_nl.h"
@@ -107,7 +106,7 @@ namespace NLGUI
 		void refresh();
 
 		// submit form
-		void submitForm (uint formId, const char *submitButtonName);
+		void submitForm (uint formId, const char *submitButtonType, const char *submitButtonName, const char *submitButtonValue, sint32 x, sint32 y);
 
 		// Browse error
 		void browseError (const char *msg);
@@ -328,7 +327,11 @@ namespace NLGUI
 		bool			_BrowseNextTime;
 		bool			_PostNextTime;
 		uint			_PostFormId;
+		std::string		_PostFormSubmitType;
 		std::string		_PostFormSubmitButton;
+		std::string		_PostFormSubmitValue;
+		sint32			_PostFormSubmitX;
+		sint32			_PostFormSubmitY;
 
 		// Browsing..
 		bool			_Browsing;
