@@ -2547,8 +2547,8 @@ namespace NLGUI
 
 		// Letter size
 		UTextContext::CStringInfo si = TextContext->getStringInfo(ucstring("|")); // for now we can't now that directly from UTextContext
-		_FontHeight = (uint) si.StringHeight + (_Shadow?(_ShadowOutline?2:1):0);
-		_FontLegHeight = (uint) si.StringLine + (_Shadow?(_ShadowOutline?2:1):0);
+		_FontHeight = (uint) si.StringHeight; // + (_Shadow?(_ShadowOutline?2:1):0);
+		_FontLegHeight = (uint) si.StringLine; // + (_Shadow?(_ShadowOutline?2:1):0);
 
 		// Space width
 		si = TextContext->getStringInfo(ucstring(" "));
@@ -2834,7 +2834,8 @@ namespace NLGUI
 				pTooltip->setId(_Id+"_tt"+toString(i));
 				pTooltip->setAvoidResizeParent(avoidResizeParent());
 				pTooltip->setRenderLayer(getRenderLayer());
-				pTooltip->setDefaultContextHelp(CI18N::get(tempTooltips[i].toString()));
+				bool isI18N = tempTooltips[i].size() >= 2 && tempTooltips[i][0] == 'u' && tempTooltips[i][1] == 'i';
+				pTooltip->setDefaultContextHelp(isI18N ? CI18N::get(tempTooltips[i].toString()) : tempTooltips[i]);
 				pTooltip->setParentPos(this);
 				pTooltip->setParentPosRef(Hotspot_BR);
 				pTooltip->setPosRef(Hotspot_BR);
