@@ -18,6 +18,10 @@
 
 #include "nel/misc/types_nl.h"
 
+#ifndef NL_OS_WINDOWS
+#	define IsDebuggerPresent() false
+#endif
+
 #ifdef NL_OS_WINDOWS
 #	include <io.h>
 #	include <fcntl.h>
@@ -34,19 +38,6 @@
 #include "nel/misc/variable.h"
 
 #include "nel/misc/debug.h"
-
-#ifdef NL_OS_WINDOWS
-// these defines is for IsDebuggerPresent(). it'll not compile on windows 95
-// just comment this and the IsDebuggerPresent to compile on windows 95
-#	define _WIN32_WINDOWS	0x0410
-#	ifndef NL_COMP_MINGW
-#		define WINVER			0x0400
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
-#else
-#	define IsDebuggerPresent() false
-#endif
 
 #include "nel/misc/displayer.h"
 
@@ -529,7 +520,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 //                           in release "<Msg>"
 void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *message)
 {
-#ifdef NL_OS_WINDOWS
+//#ifdef NL_OS_WINDOWS
 
 	bool needSpace = false;
 //	stringstream ss;
@@ -720,7 +711,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		}
 */	}
 
-#endif
+//#endif
 }
 
 
