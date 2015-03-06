@@ -2015,6 +2015,7 @@ void CExportNel::deleteLM(INode& ZeNode)
 			if (!CFile::deleteFile(sSaveName))
 			{
 				nlwarning("Failed to delete file %s.", sSaveName.c_str());
+				ToolLogger.writeError(PIPELINE::ERROR, sSaveName.c_str(), "Failed to delete previously built lightmap");
 			}
 		}
 	}
@@ -2278,6 +2279,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 			thetext = "Warning ";
 			thetext += ZeNode.GetName();
 			thetext = "have all faces NOT mapped (UV2)";
+			ToolLogger.writeError(PIPELINE::ERROR, "*", thetext);
 			if (gOptions.FeedBack != NULL)
 			{
 				gOptions.FeedBack->setLine (11, thetext);
@@ -2327,6 +2329,8 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 					string sTmp = "Warning : ";
 					sTmp += ZeNode.GetName();
 					sTmp += " has mapping problem";
+
+					ToolLogger.writeError(PIPELINE::ERROR, "*", sTmp);
 
 					// Script trace
 					mprintf ((sTmp+"\n").c_str());
@@ -2596,6 +2600,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 							nlinfo("DELETE %s",  sLMName.c_str());
 							if (!CFile::deleteFile(sLMName))
 							{
+								ToolLogger.writeError(PIPELINE::ERROR, sLMName, "Failed to delete previously built lightmap");
 								nlwarning("Failed to delete file %s", sLMName.c_str());
 							}
 						}
@@ -2611,6 +2616,8 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 				else
 					// cust copy to 32 bits
 					LightMap.copyColToBitmap32 (pLightMap, j);
+
+				ToolLogger.writeDepend(PIPELINE::BUILD, sSaveName, "*");
 
 				COFile f( sSaveName );
 				try
@@ -2630,6 +2637,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 				}
 				catch(Exception &e)
 				{
+					ToolLogger.writeError(PIPELINE::ERROR, sSaveName, "Cannot write the lightmap file");
 					if (gOptions.FeedBack != NULL)
 					{
 						char message[512];
