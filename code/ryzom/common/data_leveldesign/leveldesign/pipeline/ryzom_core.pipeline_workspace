@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <ATOM Name="Description" Value="Ryzom Core"/>
+    <ARRAY Name="Projects">
+      <ATOM Value="common_interface.pipeline_project"/>
+    </ARRAY>
+    <ARRAY Name="Plugins">
+      <ATOM Value="plugin_nel.pipeline_plugin"/>
+      <ATOM Value="plugin_max.pipeline_plugin"/>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <COMMENTS>      &lt;ATOM Value="gamedev.pipeline_package"/&gt;
+      &lt;ATOM Value="data_common.pipeline_package"/&gt;
+      &lt;ATOM Value="common_interface.pipeline_project"/&gt;
+      &lt;ATOM Value="interfaces.pipeline_package"/&gt;
+      &lt;ATOM Value="common_objects_generique.pipeline_project"/&gt;
+      &lt;ATOM Value="common_objects_fyros.pipeline_project"/&gt;
+      &lt;ATOM Value="common_objects_tryker.pipeline_project"/&gt;
+      &lt;ATOM Value="common_objects_matis.pipeline_project"/&gt;
+      &lt;ATOM Value="common_objects_zorai.pipeline_project"/&gt;
+      &lt;ATOM Value="common_objects_caravan.pipeline_project"/&gt;
+      &lt;ATOM Value="objects.pipeline_package"/&gt;</COMMENTS>
+  <LOG></LOG>
+</FORM>
