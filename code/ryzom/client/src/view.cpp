@@ -148,10 +148,14 @@ void CView::update()
 //-----------------------------------------------
 CVector CView::currentViewPos() const
 {
+	// If we are in camanimmode we just return the viewpos
+	if (UserControls.mode() == CUserControls::CamAnimMode)
+		return _ViewPos;
+
 	// clamp to the collisioned camera distance
 	float	minCamDist= min(_CurrentCameraDist, _CollisionCameraDist);
 
-	if(_RearView)
+	if (_RearView && UserControls.mode() != CUserControls::DeathMode)
 	{
 		CVector v;
 		if(UserEntity->viewMode() == CUserEntity::FirstPV || _ForceFirstPersonView)
@@ -186,7 +190,11 @@ CVector CView::currentViewPos() const
 //-----------------------------------------------
 CVector CView::currentView() const
 {
-	if(_RearView)
+	// If we are in camanimmode we just return the view
+	if (UserControls.mode() == CUserControls::CamAnimMode)
+		return _View;
+
+	if (_RearView && UserControls.mode() != CUserControls::DeathMode)
 	{
 		CVector v;
 		v.x = -UserEntity->front().x;
@@ -212,11 +220,15 @@ NLMISC::CQuat CView::currentViewQuat() const
 //-----------------------------------------------
 CVector CView::currentCameraTarget() const
 {
+	// If we are in camanimmode we just return the viewpos
+	if (UserControls.mode() == CUserControls::CamAnimMode)
+		return _ViewPos;
+
 	if(UserEntity->viewMode() == CUserEntity::FirstPV || _ForceFirstPersonView)
 		return currentViewPos();
 	else
 	{
-		if(_RearView)
+		if (_RearView && UserControls.mode() != CUserControls::DeathMode)
 		{
 			return UserEntity->pos() + CVector(0.0f, 0.0f, 2.0f);
 		}

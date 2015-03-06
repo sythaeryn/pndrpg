@@ -242,6 +242,11 @@ void CUserControls::update()
 			deathMode();
 			break;
 
+		// Camera animation mode
+		case CamAnimMode:
+			camAnimMode();
+			break;
+
 		// Mount Mode
 		case MountMode:
 			mountMode();
@@ -1085,6 +1090,11 @@ void CUserControls::mode(const TMoveMode mode)
 		deathModeStop();
 		break;
 
+	// Camera animation Mode
+	case CamAnimMode:
+		camAnimModeStop();
+		break;
+
 	// Mount Mode
 	case MountMode:
 		mountModeStop();
@@ -1121,6 +1131,11 @@ void CUserControls::mode(const TMoveMode mode)
 		deathModeStart();
 		break;
 
+	// Camera animation Mode
+	case CamAnimMode:
+		camAnimModeStart();
+		break;
+
 	// Mount Mode
 	case MountMode:
 		mountModeStart();
@@ -1155,6 +1170,10 @@ string CUserControls::modeStr() const
 	// Death Mode
 	case CUserControls::DeathMode:
 		return "DeathMode";
+
+	// Camera animation Mode
+	case CUserControls::CamAnimMode:
+		return "CamAnimMode";
 
 	// Mount Mode
 	case CUserControls::MountMode:
