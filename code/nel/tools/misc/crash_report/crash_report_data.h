@@ -1,5 +1,7 @@
-// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Ryzom Core MMORPG framework - Error Reporter
+//
+// Copyright (C) 2015 Laszlo Kis-Adam
+// Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,27 +16,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef	_READPIC_H_
-#define	_READPIC_H_
 
-#ifdef _MSC_VER
-#pragma warning(disable:4786)
-#endif
+#ifndef RCERROR_DATA
+#define RCERROR_DATA
 
-
-#include <string>
-#include <vector>
-
-#include <nel/misc/types_nl.h>
-#include <nel/misc/rgba.h>
-
-//============================================================
-// API.
-//============================================================
+#include <QString>
 
 
-bool	PIC_LoadPic(std::string Path, std::vector<NLMISC::CBGRA> &Tampon, uint &Width, uint &Height);
-
-
+struct SCrashReportData
+{
+	QString description;
+	QString report;
+	QString email;
+};
 
 #endif
