@@ -1942,7 +1942,7 @@ bool CDriverD3D::clearZBuffer(float zval)
 
 // ***************************************************************************
 
-bool CDriverD3D::clearStencilBuffer(float stencilval)
+bool CDriverD3D::clearStencilBuffer(sint stencilval)
 {
 	H_AUTO_D3D(CDriverD3D_clearStencilBuffer);
 	nlassert (_DeviceInterface);
