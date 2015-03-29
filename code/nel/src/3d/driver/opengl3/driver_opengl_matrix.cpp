@@ -18,10 +18,7 @@
 #include "driver_opengl.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 // ***************************************************************************
 void CDriverGL3::setFrustum(float left, float right, float bottom, float top, float znear, float zfar, bool perspective)
@@ -62,14 +59,7 @@ void CDriverGL3::setupViewMatrixEx(const CMatrix& mtx, const CVector &cameraPos)
 	_UserViewMtx= mtx;
 
 	// Setup the matrix to transform the CScene basis in openGL basis.
-	CMatrix		changeBasis;
-	CVector		I(1,0,0);
-	CVector		J(0,0,-1);
-	CVector		K(0,1,0);
-
-	changeBasis.identity();
-	changeBasis.setRot(I,J,K, true);
-	_ViewMtx=changeBasis*mtx;
+	_ViewMtx = mtx;
 	// Reset the viewMtx position.
 	_ViewMtx.setPos(CVector::Null);
 	_PZBCameraPos= cameraPos;
@@ -77,7 +67,6 @@ void CDriverGL3::setupViewMatrixEx(const CMatrix& mtx, const CVector &cameraPos)
 	_SpecularTexMtx = _ViewMtx;
 	_SpecularTexMtx.setPos(CVector(0.0f,0.0f,0.0f));
 	_SpecularTexMtx.invert();
-	_SpecularTexMtx = changeBasis *	_SpecularTexMtx;
 }
 
 
@@ -87,23 +76,13 @@ void CDriverGL3::setupViewMatrix(const CMatrix& mtx)
 	H_AUTO_OGL(CDriverGL3_setupViewMatrix)
 	_UserViewMtx= mtx;
 
-	// Setup the matrix to transform the CScene basis in openGL basis.
-	CMatrix		changeBasis;
-	CVector		I(1,0,0);
-	CVector		J(0,0,-1);
-	CVector		K(0,1,0);
-
-	changeBasis.identity();
-	changeBasis.setRot(I,J,K, true);
-	_ViewMtx=changeBasis*mtx;
+	_ViewMtx = mtx;
 	// Just set the PZBCameraPos to 0.
 	_PZBCameraPos= CVector::Null;
 
 	_SpecularTexMtx = _ViewMtx;
 	_SpecularTexMtx.setPos(CVector(0.0f,0.0f,0.0f));
 	_SpecularTexMtx.invert();
-	_SpecularTexMtx = changeBasis *	_SpecularTexMtx;
-
 }
 
 // ***************************************************************************
@@ -127,8 +106,5 @@ void CDriverGL3::setupModelMatrix(const CMatrix& mtx)
 	_ModelViewMatrix= _ViewMtx*mat;
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D

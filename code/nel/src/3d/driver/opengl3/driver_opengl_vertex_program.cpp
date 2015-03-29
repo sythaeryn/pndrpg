@@ -28,10 +28,7 @@
 #include "driver_opengl_vertex_buffer.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 bool operator<(const CVPBuiltin &left, const CVPBuiltin &right)
 {
@@ -79,17 +76,14 @@ bool operator==(const CVPBuiltin &left, const CVPBuiltin &right)
 	return true;
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
 namespace std {
 
-size_t hash<NL3D::CVPBuiltin>::operator()(const NL3D::CVPBuiltin & v) const
+size_t hash<NL3D::NLDRIVERGL3::CVPBuiltin>::operator()(const NL3D::NLDRIVERGL3::CVPBuiltin & v) const
 {
-	uint32_t h;
+	uint32 h;
 
 	h = NLMISC::wangHash(((uint32)v.VertexFormat) | (v.Lighting ? (1 << 16) : 0) | (v.Specular ? (1 << 17) : 0) | (v.Fog ? (1 << 18) : 0));
 	if (v.Lighting)
@@ -98,17 +92,14 @@ size_t hash<NL3D::CVPBuiltin>::operator()(const NL3D::CVPBuiltin & v) const
 	for (sint i = 0; i < NL3D::IDRV_MAT_MAXTEXTURES; ++i)
 		h = NLMISC::wangHash(h ^ v.TexGenMode[i]);
 
-	nlctassert(sizeof(size_t) > sizeof(uint32));
+	nlctassert(sizeof(size_t) >= sizeof(uint32));
 	return (size_t)h;
 }
 
 }
 
 namespace NL3D {
-
-#ifdef NL_STATIC
-	namespace NLDRIVERGL3 {
-#endif
+namespace NLDRIVERGL3 {
 
 namespace /* anonymous */ {
 
@@ -455,9 +446,6 @@ void CDriverGL3::setTexGenModeVP(uint stage, sint mode)
 	}
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
