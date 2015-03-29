@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <nel/3d/uniform_buffer_format.h>
 
 #include <nel/misc/debug.h>
+#include <nel/misc/wang_hash.h>
 
 namespace NL3D {
 
@@ -107,6 +108,12 @@ sint CUniformBufferFormat::push(const std::string &name, TType type, sint count)
 	entry.Type = type;
 	entry.Offset = alignOffset;
 	entry.Count = count;
+#if (HAVE_X86_64)
+	m_Hash = NLMISC::wangHash64(m_Hash ^ ((uint64)type | ((uint64)count << 32)));
+#else
+	m_Hash = NLMISC::wangHash(m_Hash ^ (uint32)type);
+	m_Hash = NLMISC::wangHash(m_Hash ^ (uint32)count);
+#endif
 	return alignOffset;
 }
 
@@ -128,7 +135,6 @@ void testUniformBufferFormat(CUniformBufferFormat &ubf)
 	offset = ubf.push("h", CUniformBufferFormat::Float, 2);
 	nlassert(offset == 64);
 	offset = ubf.push("i", CUniformBufferFormat::FloatMat2x3);
-	nlinfo("offset: %i", offset);
 	nlassert(offset == 96);
 	offset = ubf.push("j", CUniformBufferFormat::FloatVec3);
 	nlassert(offset == 128);
