@@ -92,7 +92,7 @@ extern "C"
 
 __declspec(dllexport) IDriver* NL3D_createIDriverInstance ()
 {
-	return new CDriverGL3;
+	return new NLDRIVERGL3::CDriverGL3;
 }
 
 __declspec(dllexport) uint32 NL3D_interfaceVersion ()
@@ -123,9 +123,7 @@ extern "C"
 
 #endif // NL_STATIC
 
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 CMaterial::CTexEnv CDriverGL3::_TexEnvReplace;
 
@@ -193,6 +191,15 @@ CDriverGL3::CDriverGL3()
 
 	_DefaultCursor = EmptyCursor;
 	_BlankCursor = EmptyCursor;
+
+	// Create change basis matrix matrix
+	{
+		CVector I(1, 0, 0);
+		CVector J(0, 0, -1);
+		CVector K(0, 1, 0);
+		_ChangeBasis.identity();
+		_ChangeBasis.setRot(I, J, K, true);
+	}
 
 	_AlphaBlendedCursorSupported = false;
 	_AlphaBlendedCursorSupportRetrieved = false;
@@ -1854,8 +1861,6 @@ void displayGLError(GLenum error)
 	}
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
 
 } // NL3D

@@ -28,10 +28,7 @@
 #include "driver_opengl_vertex_buffer.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 namespace /* anonymous */ {
 
@@ -123,43 +120,58 @@ bool operator==(const CPPBuiltin &left, const CPPBuiltin &right)
 	return true;
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
 namespace std {
 
-size_t hash<NL3D::CPPBuiltin>::operator()(const NL3D::CPPBuiltin & v) const
+size_t hash<NL3D::NLDRIVERGL3::CPPBuiltin>::operator()(const NL3D::NLDRIVERGL3::CPPBuiltin & v) const
 {
-	uint32_t h;
+#if (HAVE_X86_64)
+	uint32 h32;
+	uint64 h64;
+
+	// Material state
+	h32 = NLMISC::wangHash((uint32)v.Shader);
+	h64 = NLMISC::wangHash64(((uint64)v.Flags) | ((uint64)v.TextureActive << 32));
+	h64 = NLMISC::wangHash64(h64 ^ (uint64)v.TexSamplerMode);
+	uint maxTex = NL3D::NLDRIVERGL3::maxTextures(v.Shader);
+	if (NL3D::NLDRIVERGL3::useTexEnv(v.Shader))
+		for (uint stage = 0; stage < maxTex; ++stage)
+			h32 = NLMISC::wangHash(h32 ^ (uint32)v.TexEnvMode[stage]);
+
+	// Driver state
+	h32 = NLMISC::wangHash(h32 ^ (((uint32)v.VertexFormat) | (v.Fog ? 1 << 16 : 0)));
+
+	h64 = h64 ^ h32; // NLMISC::wangHash64(h64 ^ h32);
+	nlctassert(sizeof(size_t) >= sizeof(uint64));
+	return (size_t)h64;
+#else
+	uint32 h;
 
 	// Material state
 	h = NLMISC::wangHash((uint32)v.Shader);
 	h = NLMISC::wangHash(h ^ (uint32)v.Flags);
 	h = NLMISC::wangHash(h ^ (uint32)v.TextureActive);
-	h = NLMISC::wangHash(h ^ (uint32)v.TexSamplerMode);
+	h = NLMISC::wangHash(h ^ (uint32)(v.TexSamplerMode & 0xFFFFFFFF));
+	h = NLMISC::wangHash(h ^ (uint32)(v.TexSamplerMode >> 32));
 	uint maxTex = NL3D::maxTextures(v.Shader);
 	if (NL3D::useTexEnv(v.Shader))
 		for (uint stage = 0; stage < maxTex; ++stage)
 			h = NLMISC::wangHash(h ^ (uint32)v.TexEnvMode[stage]);
 
 	// Driver state
-	h = NLMISC::wangHash(h ^ (uint32)v.VertexFormat);
-	h = NLMISC::wangHash(h ^ (uint32)v.Fog);
+	h = NLMISC::wangHash(h ^ (((uint32)v.VertexFormat) | (v.Fog ? 1 << 16 : 0)));
 
-	nlctassert(sizeof(size_t) > sizeof(uint32));
+	nlctassert(sizeof(size_t) >= sizeof(uint32));
 	return (size_t)h;
+#endif
 }
 
 }
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 namespace /* anonymous */ {
 
@@ -535,11 +547,12 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc, CGlExtensions &glex
 		//case CShaderDesc::Linear:
 			ss << "vec4 applyFog(vec4 col)" << std::endl;
 			ss << "{" << std::endl;
-			ss << "float z = ecPos.z / ecPos.w;" << std::endl;
+			ss << "float z = ecPos.y / ecPos.w;" << std::endl;
 			ss << "z = abs(z);" << std::endl;
 			ss << "float fogFactor = (fogParams.t - z) / (fogParams.t - fogParams.s);" << std::endl;
 			ss << "fogFactor = clamp(fogFactor, 0.0, 1.0);" << std::endl;
 			ss << "vec4 fColor = mix(fogColor, col, fogFactor);" << std::endl;
+			ss << "fColor.a = col.a;" << std::endl;
 			ss << "return fColor;" << std::endl;
 			ss << "}" << std::endl;
 			ss << std::endl;
@@ -789,9 +802,6 @@ void CPPBuiltin::checkMaterialStateTouched(CMaterial &mat) // MUST NOT depend on
 	mat.clearTouched(0xFFFFFFFF);
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 

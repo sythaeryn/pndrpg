@@ -74,7 +74,6 @@
 #include "unix_event_emitter.h"
 #endif // NL_OS_UNIX
 
-
 // For optimisation consideration, allow 256 lightmaps at max.
 #define	NL3D_DRV_MAX_LIGHTMAP		256
 #define UNSUPPORTED_INDEX_OFFSET_MSG "Unsupported by driver, check IDriver::supportIndexOffset."
@@ -83,10 +82,7 @@ using NLMISC::CMatrix;
 using NLMISC::CVector;
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 class	CDriverGL3;
 class	IVertexBufferGL3;
@@ -384,7 +380,7 @@ public:
 	static inline void		setupCausticsSecondTex(uint stage);*/
 
 	virtual bool			setupMaterial(CMaterial& mat);
-	void					generateShaderDesc(CShaderDesc &desc, CMaterial &mat);
+	// void					generateShaderDesc(CShaderDesc &desc, CMaterial &mat);
 	bool					setupBuiltinPrograms();
 	bool					setupBuiltinVertexProgram();
 	bool					setupBuiltinPixelProgram();
@@ -865,6 +861,8 @@ private:
 	// Precision ZBuffer: The Current cameraPosition, to remove from each model Position.
 	CVector					_PZBCameraPos;
 
+	// Change to OpenGL matrix basis for render output. Transparently applied to projection matrix.
+	CMatrix					_ChangeBasis;
 
 	// Current computed (OpenGL basis) ModelView matrix.
 	// NB: This matrix have already substracted the _PZBCameraPos
@@ -1410,10 +1408,7 @@ private:
 };
 */
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
 #endif // NL_DRIVER_OPENGL_H
