@@ -22,6 +22,8 @@
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
+#define NL3D_GL3_VERTEX_BUFFER_INFLIGHT_DEBUG 0
+
 class CDriverGL3;
 class IVertexBufferGL3;
 class CVertexBufferInfo;
@@ -41,7 +43,8 @@ public:
 	virtual void *getPointer() = 0;
 	virtual	void enable() = 0;
 	virtual	void disable() = 0;
-	virtual void setupVBInfos(CVertexBufferInfo &vb) = 0;
+	virtual GLuint getGLuint() = 0;
+	virtual void setFrameInFlight(uint64 swapBufferCounter) = 0;
 
 	// test if buffer content is invalid. If so, no rendering should occurs (rendering should silently fail)
 	inline bool isInvalid() { return m_Invalid; }
@@ -70,7 +73,8 @@ public:
 	virtual void *getPointer();
 	virtual	void enable();
 	virtual	void disable();
-	virtual void setupVBInfos(CVertexBufferInfo &vb);
+	virtual GLuint getGLuint();
+	virtual void setFrameInFlight(uint64 swapBufferCounter);
 	// @}
 
 	/// Invalidate the buffer (when it is lost, or when a lock fails)
@@ -87,7 +91,15 @@ private:
 	// for use by CVertexArrayRange
 	std::list<CVertexBufferGL3*>::iterator m_IteratorInLostVBList;
 
-	uint m_VertexObjectId;
+	GLuint m_VertexObjectId[NL3D_GL3_BUFFER_QUEUE_MAX];
+	uint64 m_FrameInFlight[NL3D_GL3_BUFFER_QUEUE_MAX];
+	GLsizei m_CurrentIndex;
+	bool m_CurrentInFlight;
+
+#if NL3D_GL3_VERTEX_BUFFER_INFLIGHT_DEBUG
+	uint32 m_ReuseCount;
+	uint32 m_InvalidateCount;
+#endif
 };
 
 class CVertexBufferAMDPinned : public IVertexBufferGL3
@@ -104,7 +116,8 @@ public:
 	virtual void *getPointer();
 	virtual	void enable();
 	virtual	void disable();
-	virtual void setupVBInfos(CVertexBufferInfo &vb);
+	virtual GLuint getGLuint();
+	virtual void setFrameInFlight(uint64 swapBufferCounter);
 	// @}
 
 private:
@@ -113,6 +126,8 @@ private:
 	void *m_VertexPtrAligned;
 	void *m_VertexPtr;
 	uint m_VertexObjectId;
+
+	uint64 m_FrameInFlight;
 };
 
 } // NLDRIVERGL3
