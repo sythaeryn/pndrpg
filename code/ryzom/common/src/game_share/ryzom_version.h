@@ -21,7 +21,7 @@
 #define RYZOM_VERSION	RYZOM_COMPATIBILITY_VERSION" (ryzom" \
 	"/" \
 	"v0.12.0" \
-	"-dev)"
+	")"
 
 #endif // RYZOM_VERSION_H
 
